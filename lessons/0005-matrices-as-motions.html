@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 5: Matrices as Motions</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0005">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/rope-reference.html">Formula sheet</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 5 of 9 · Linear algebra foundation</p>
+      <h1>A matrix is a recipe for moving vectors.</h1>
+      <p class="lede">Your win: multiply a 2D vector by the rotation matrix and recognize the same coordinate rules from complex multiplication.</p>
+      <div class="lesson-meta"><span>14 minutes</span><span>Needs: Lesson 4 expansion</span><span>Outcome: apply \(R_\theta\)</span></div>
+    </section>
+
+    <div class="goal"><strong>Mission link:</strong> RoPE implementations use real-valued tensors. The matrix view expresses the same complex rotation using ordinary real arithmetic.</div>
+
+    <h2>Rows produce output coordinates</h2>
+    <p>Multiplying a \(2\times2\) matrix by a two-component column vector forms one dot product per row:</p>
+    <div class="equation">
+      \[
+      \begin{bmatrix}a&amp;b\\c&amp;d\end{bmatrix}
+      \begin{bmatrix}x\\y\end{bmatrix}
+      =
+      \begin{bmatrix}ax+by\\cx+dy\end{bmatrix}.
+      \]
+    </div>
+
+    <h2>The rotation recipe</h2>
+    <div class="equation">
+      \[
+      \underbrace{\begin{bmatrix}
+      \cos\theta&amp;-\sin\theta\\
+      \sin\theta&amp; \cos\theta
+      \end{bmatrix}}_{R_\theta}
+      \begin{bmatrix}x\\y\end{bmatrix}
+      =
+      \begin{bmatrix}
+      x\cos\theta-y\sin\theta\\
+      x\sin\theta+y\cos\theta
+      \end{bmatrix}.
+      \]
+    </div>
+    <p>The output is exactly the pair obtained from \((x+iy)e^{i\theta}\). Complex multiplication and matrix multiplication are two notations for the same motion.</p>
+
+    <section class="worked-example">
+      <h3>A quarter turn</h3>
+      <p>At \(\theta=\pi/2\), \(\cos\theta=0\) and \(\sin\theta=1\):</p>
+      <div class="equation">
+        \[
+        R_{\pi/2}
+        =\begin{bmatrix}0&amp;-1\\1&amp;0\end{bmatrix},
+        \qquad
+        R_{\pi/2}\begin{bmatrix}x\\y\end{bmatrix}
+        =\begin{bmatrix}-y\\x\end{bmatrix}.
+        \]
+      </div>
+      <p>A 90° counterclockwise turn maps \((x,y)\) to \((-y,x)\).</p>
+    </section>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: \(R_{\pi/2}(3,2)\)</h3>
+      <div class="equation">
+        \[
+        \begin{aligned}
+        R_{\pi/2}\begin{bmatrix}3\\2\end{bmatrix}
+        &amp;=
+        \begin{bmatrix}0&amp;-1\\1&amp;0\end{bmatrix}
+        \begin{bmatrix}3\\2\end{bmatrix}\\
+        &amp;=
+        \begin{bmatrix}0(3)+(-1)(2)\\1(3)+0(2)\end{bmatrix}
+        =
+        \begin{bmatrix}-2\\3\end{bmatrix}.
+        \end{aligned}
+        \]
+      </div>
+    </section>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: \(R_{\pi/6}(2,0)\)</h3>
+      <div class="equation">
+        \[
+        \begin{aligned}
+        R_{\pi/6}\begin{bmatrix}2\\0\end{bmatrix}
+        &amp;=
+        \begin{bmatrix}\sqrt3/2&amp;-1/2\\1/2&amp;\sqrt3/2\end{bmatrix}
+        \begin{bmatrix}2\\0\end{bmatrix}\\
+        &amp;=\begin{bmatrix}\sqrt3\\1\end{bmatrix}.
+        \end{aligned}
+        \]
+      </div>
+      <p>This matches the complex-number calculation in Lesson 4.</p>
+    </section>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: \(R_{\pi}(-1,4)\)</h3>
+      <div class="equation">
+        \[
+        \begin{bmatrix}-1&amp;0\\0&amp;-1\end{bmatrix}
+        \begin{bmatrix}-1\\4\end{bmatrix}
+        =
+        \begin{bmatrix}1\\-4\end{bmatrix}.
+        \]
+      </div>
+      <p>A half turn negates both coordinates.</p>
+    </section>
+
+    <h2>Columns show where the basis goes</h2>
+    <div class="two-col">
+      <article class="panel teal"><h3>First basis vector</h3><p>\(R_\theta\begin{bmatrix}1\\0\end{bmatrix}=\begin{bmatrix}\cos\theta\\\sin\theta\end{bmatrix}\)</p><p>The first column is the rotated x-axis.</p></article>
+      <article class="panel coral"><h3>Second basis vector</h3><p>\(R_\theta\begin{bmatrix}0\\1\end{bmatrix}=\begin{bmatrix}-\sin\theta\\\cos\theta\end{bmatrix}\)</p><p>The second column is the rotated y-axis.</p></article>
+    </div>
+
+    <section class="quiz" data-quiz data-success="Correct. A counterclockwise quarter turn maps (x,y) to (−y,x)." data-retry="Substitute cos(π/2)=0 and sin(π/2)=1 into the matrix.">
+      <h3>Retrieval check</h3>
+      <p>Which output is \(R_{\pi/2}(x,y)\)?</p>
+      <div class="choices">
+        <button type="button" data-correct="true" aria-pressed="false">A · (−y, x)</button>
+        <button type="button" data-correct="false" aria-pressed="false">B · (y, −x)</button>
+      </div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Compute \(R_{\pi/2}\begin{bmatrix}4\\-1\end{bmatrix}\).</li>
+        <li>Compute \(R_{\pi}\begin{bmatrix}2\\5\end{bmatrix}\).</li>
+        <li>Compute \(R_{0}\begin{bmatrix}-3\\7\end{bmatrix}\).</li>
+        <li>Use \(R_{\pi/4}\) to rotate \((\sqrt2,0)\).</li>
+        <li>Verify by lengths that \((3,2)\) and its quarter-turn output \((-2,3)\) have equal magnitude.</li>
+        <li>Explain what the two columns of \(R_{\pi/2}\) say geometrically.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\(\begin{bmatrix}1\\4\end{bmatrix}\).</li><li>\(\begin{bmatrix}-2\\-5\end{bmatrix}\).</li><li>\(\begin{bmatrix}-3\\7\end{bmatrix}\).</li><li>\(\begin{bmatrix}1\\1\end{bmatrix}\).</li><li>Both squared magnitudes are \(13\).</li><li>The x-axis basis goes to \((0,1)\), and the y-axis basis goes to \((-1,0)\).</li></ol></details>
+    </section>
+
+    <div class="callout"><strong>Pairwise form:</strong> a full RoPE matrix is block diagonal: one \(2\times2\) rotation block per adjacent pair, with zeros between different pairs.</div>
+    <p class="source"><strong>Primary source:</strong> <a href="https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/positive-definite-matrices-and-applications/linear-transformations-and-their-matrices/">MIT OCW: Linear Transformations and Their Matrices</a>. Watch for the idea that a matrix is determined by where it sends the basis vectors.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can multiply \(R_\theta\) by a two-component vector.</label>
+    <p class="small">Ask the teaching agent to give you a rotation at \(0\), \(\pi/2\), or \(\pi\) to calculate by hand.</p>
+    <nav class="lesson-nav"><a href="0004-complex-multiplication-rotates.html">← Complex rotation</a><a href="0006-dot-products-and-transposes.html">Next: Dot products →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 5 · Matrices as motions</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+</body>
+</html>

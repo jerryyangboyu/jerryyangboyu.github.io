@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 2: Radians and the Unit Circle</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0002">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 2 of 9 · Trigonometry foundation</p>
+      <h1>An angle is a distance around a circle.</h1>
+      <p class="lede">Your win: turn any angle into the coordinates \((\cos\theta,\sin\theta)\) and recognize one full cycle as \(2\pi\) radians.</p>
+      <div class="lesson-meta"><span>12 minutes</span><span>Needs: coordinates</span><span>Outcome: read sine and cosine geometrically</span></div>
+    </section>
+
+    <div class="goal"><strong>Mission link:</strong> RoPE gives pair \(i\) at token position \(m\) the angle \(m\theta_i\). Trigonometric functions convert that angle into usable coordinates.</div>
+
+    <h2>Why radians?</h2>
+    <p>Radians measure an angle by <strong>arc length ÷ radius</strong>. On a circle of radius 1, the angle simply equals the distance traveled around its edge. The circumference is \(2\pi\), so one complete turn is \(2\pi\) radians.</p>
+    <table>
+      <thead><tr><th>Turn</th><th>Radians</th><th>Degrees</th></tr></thead>
+      <tbody><tr><td>Quarter</td><td>\(\pi/2\)</td><td>\(90^\circ\)</td></tr><tr><td>Half</td><td>\(\pi\)</td><td>\(180^\circ\)</td></tr><tr><td>Full</td><td>\(2\pi\)</td><td>\(360^\circ\)</td></tr></tbody>
+    </table>
+
+    <h2>Cosine and sine are coordinates</h2>
+    <p>Begin at \((1,0)\) on the unit circle. Turn counterclockwise by \(\theta\). The endpoint is:</p>
+    <div class="equation">\[(x,y)=(\cos\theta,\sin\theta)\]</div>
+    <p>This is the entire trigonometric picture RoPE needs. Cosine is the horizontal coordinate; sine is the vertical coordinate.</p>
+
+    <section class="diagram" data-rotation-lab data-x="1" data-y="0">
+      <canvas aria-label="Interactive unit circle showing a vector rotated by an angle"></canvas>
+      <div class="controls">
+        <label>Rotate from \((1,0)\)<input type="range" min="0" max="360" step="15" value="90"></label>
+        <output class="readout" data-angle-readout>90° · 1.57 rad</output>
+      </div>
+    </section>
+
+    <h2>The identity that protects length</h2>
+    <p>Every endpoint on the unit circle is exactly one unit from the origin. Substitute \((\cos\theta,\sin\theta)\) into the distance formula:</p>
+    <div class="equation">\[\cos^2\theta+\sin^2\theta=1\]<span class="label">the Pythagorean identity</span></div>
+    <p>This identity is the engine behind length-preserving rotation matrices.</p>
+
+    <section class="quiz" data-quiz data-success="Correct. At π radians the point is halfway around the circle at (−1, 0)." data-retry="Start at (1, 0) and make half of a full turn.">
+      <h3>Predict before checking the diagram</h3>
+      <p>What point corresponds to \(\theta=\pi\)?</p>
+      <div class="choices">
+        <button type="button" data-correct="true" aria-pressed="false">A · (−1, 0)</button>
+        <button type="button" data-correct="false" aria-pressed="false">B · (0, −1)</button>
+      </div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Convert a quarter, half, and three-quarter turn to radians.</li>
+        <li>Give \((\cos\theta,\sin\theta)\) for \(\theta=0,\pi/2,\pi,3\pi/2\).</li>
+        <li>If \(\cos\theta=3/5\) in quadrant I, calculate \(\sin\theta\).</li>
+        <li>A pair advances \(0.2\) radians per token. What angle has it reached at position \(m=7\)?</li>
+        <li>Estimate its period in tokens using \(2\pi/\theta\).</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\(\pi/2,\pi,3\pi/2\).</li><li>\((1,0),(0,1),(-1,0),(0,-1)\).</li><li>\(\sin\theta=\sqrt{1-9/25}=4/5\).</li><li>\(7(0.2)=1.4\) radians.</li><li>\(2\pi/0.2=10\pi\approx31.4\) tokens.</li></ol></details>
+    </section>
+
+    <div class="callout"><strong>Token-period connection:</strong> if a pair advances by \(\theta\) radians per token, it completes a full turn after approximately \(2\pi/\theta\) tokens.</div>
+    <p class="source"><strong>Primary source:</strong> <a href="https://openstax.org/books/precalculus-2e/pages/5-2-unit-circle-sine-and-cosine-functions">OpenStax 5.2: Unit Circle, Sine, and Cosine</a>. Focus on the definitions and the Pythagorean identity.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can read \((\cos\theta,\sin\theta)\) as a location on the unit circle.</label>
+    <p class="small">Ask the teaching agent to draw a particular angle or explain radians using a different analogy if the arc-length definition is not yet intuitive.</p>
+    <nav class="lesson-nav"><a href="0001-vectors-and-pairs.html">← Vectors</a><a href="0003-complex-numbers-as-vectors.html">Next: Complex numbers →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 2 · Radians and the unit circle</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+  <script src="../assets/rotation-lab.js"></script>
+</body>
+</html>

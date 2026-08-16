@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 12: Project Q, K, V and Split Heads</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0012">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/rope-reference.html">RoPE reference</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 12 of 18 · Transformer block</p>
+      <h1>One token becomes three views.</h1>
+      <p class="lede">Your win: multiply one normalized token by explicit \(W_Q,W_K,W_V\) matrices, then reshape features into attention heads.</p>
+      <div class="lesson-meta"><span>15 minutes</span><span>Needs: matrix multiplication</span><span>Outcome: track Q/K/V shapes</span></div>
+    </section>
+
+    <div class="goal"><strong>Mission link:</strong> RoPE is applied after the Q/K projections and after head structure is known, but before query-key scores are formed.</div>
+
+    <h2>Three learned linear projections</h2>
+    <div class="equation">
+      \[
+      Q=\bar XW_Q,\qquad K=\bar XW_K,\qquad V=\bar XW_V.
+      \]
+    </div>
+    <p>In ordinary multi-head attention, each projection has total output width \(h\,d_h=d_{\text{model}}\). Before reshaping:</p>
+    <div class="shape-line"><span class="shape-chip">\(B\times T\times d_{\text{model}}\)</span><span class="shape-arrow">→</span><span class="shape-chip">linear projection</span><span class="shape-arrow">→</span><span class="shape-chip">\(B\times T\times(hd_h)\)</span><span class="shape-arrow">→</span><span class="shape-chip">\(B\times h\times T\times d_h\)</span></div>
+
+    <section class="diagram nn-viz" data-projection-viz>
+      <div class="viz-header">
+        <h3>Watch one token branch into Q, K, and V</h3>
+        <div class="viz-actions" aria-label="Choose feature view"><button type="button" data-projection-mode="flat" aria-pressed="true">Projected features</button><button type="button" data-projection-mode="split" aria-pressed="false">Split into heads</button></div>
+      </div>
+      <div class="viz-body projection-flow">
+        <div class="projection-input"><span class="projection-label">\(\bar x\)</span><div class="feature-strip"><span class="feature-cell">1</span><span class="feature-cell">2</span><span class="feature-cell">0</span><span class="feature-cell">−1</span></div></div>
+        <div data-projection-rows></div>
+      </div>
+      <p class="viz-caption" data-projection-readout></p>
+    </section>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: \(d_{\text{model}}=4,h=2,d_h=2\)</h3>
+      <p>Take one normalized token \(\bar{\mathbf x}=\begin{bmatrix}1&amp;2&amp;0&amp;-1\end{bmatrix}\) and choose simple projection matrices:</p>
+      <div class="equation">
+        \[
+        W_Q=I,\quad
+        W_K=\begin{bmatrix}
+        1&amp;0&amp;0&amp;0\\
+        0&amp;1&amp;0&amp;0\\
+        0&amp;0&amp;0&amp;1\\
+        0&amp;0&amp;1&amp;0
+        \end{bmatrix},\quad
+        W_V=\begin{bmatrix}
+        2&amp;0&amp;0&amp;0\\
+        0&amp;1&amp;0&amp;0\\
+        0&amp;0&amp;1/2&amp;0\\
+        0&amp;0&amp;0&amp;-1
+        \end{bmatrix}.
+        \]
+      </div>
+      <div class="equation">
+        \[
+        \mathbf q=\begin{bmatrix}1&amp;2&amp;0&amp;-1\end{bmatrix},\quad
+        \mathbf k=\begin{bmatrix}1&amp;2&amp;-1&amp;0\end{bmatrix},\quad
+        \mathbf v=\begin{bmatrix}2&amp;2&amp;0&amp;1\end{bmatrix}.
+        \]
+      </div>
+      <p>Reshape by feature chunks:</p>
+      <table><thead><tr><th>Head</th><th>\(\mathbf q\)</th><th>\(\mathbf k\)</th><th>\(\mathbf v\)</th></tr></thead><tbody><tr><td>1</td><td>\((1,2)\)</td><td>\((1,2)\)</td><td>\((2,2)\)</td></tr><tr><td>2</td><td>\((0,-1)\)</td><td>\((-1,0)\)</td><td>\((0,1)\)</td></tr></tbody></table>
+    </section>
+
+    <h2>Where RoPE enters</h2>
+    <div class="equation">\[Q'=\operatorname{RoPE}(Q),\qquad K'=\operatorname{RoPE}(K),\qquad V'=V.\]</div>
+    <p>RoPE rotates adjacent pairs inside each head. With \(d_h=2\), each head above contains exactly one rotation plane. Every head still receives all \(T\) token positions.</p>
+
+    <section class="quiz" data-quiz data-success="Correct. Heads partition feature width; every head keeps the token axis." data-retry="The reshape replaces one feature axis by head and head-feature axes.">
+      <h3>Retrieval check</h3>
+      <p>What does \(d_{\text{model}}=8,h=2\) imply for \(d_h\)?</p>
+      <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(d_h=4\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(d_h=2\)</button></div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>For \(d_{\text{model}}=12,h=3\), calculate \(d_h\).</li>
+        <li>Reshape \((1,2,3,4,5,6)\) into \(h=3\) feature chunks.</li>
+        <li>If \(X\) has shape \(2\times5\times12\), state the Q shape before and after splitting into three heads.</li>
+        <li>Using the matrices above, recompute \(\mathbf k\) from \(\bar{\mathbf x}\).</li>
+        <li>Which tensors receive RoPE, and which does not?</li>
+        <li>Explain why the projection weights mix features but do not mix token positions.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\(d_h=4\).</li><li>\((1,2),(3,4),(5,6)\).</li><li>Before: \(2\times5\times12\). After: \(2\times3\times5\times4\).</li><li>\((1,2,-1,0)\).</li><li>Q and K receive RoPE; V does not.</li><li>The same matrix multiplies each token row independently along the feature axis.</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., Sections 3.2.1–3.2.2</a>; RoPE placement follows <a href="https://arxiv.org/html/2104.09864#S3.SS2">Su et al., Section 3.2</a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can project one token into Q/K/V and reshape features into heads.</label>
+    <p class="small">Ask the teaching agent to give you a fresh \(d_{\text{model}},h\) shape exercise.</p>
+    <nav class="lesson-nav"><a href="0011-normalize-each-token.html">← Normalization</a><a href="0013-causal-mask-before-softmax.html">Next: Causal mask →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 12 · Project Q, K, V and split heads</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
+</body>
+</html>

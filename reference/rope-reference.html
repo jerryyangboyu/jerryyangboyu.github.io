@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RoPE Derivation Reference</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="../lessons/index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero"><p class="eyebrow">Printable reference</p><h1>RoPE on one page</h1><p class="lede">Three equivalent views of one operation, followed by the relative-position derivation.</p></section>
+
+    <h2>One pair, three views</h2>
+    <div class="three-col">
+      <article class="panel teal"><h3>Vector</h3><p>\(\mathbf v=(x,y)\)</p><p>A point or arrow in a 2D plane.</p></article>
+      <article class="panel coral"><h3>Complex</h3><p>\(z=x+iy\)</p><p>Rotate by multiplying \(ze^{i\phi}\).</p></article>
+      <article class="panel gold"><h3>Matrix</h3><p>\(R_\phi\mathbf v\)</p><p>Apply the rotation matrix below.</p></article>
+    </div>
+
+    <div class="equation">\[R_\phi=\begin{bmatrix}\cos\phi&amp;-\sin\phi\\[2pt]\sin\phi&amp;\cos\phi\end{bmatrix}\]</div>
+
+    <h2>Identities worth retrieving</h2>
+    <table>
+      <tbody>
+        <tr><td>Unit circle</td><td>\(\cos^2\phi+\sin^2\phi=1\)</td><td>Explains length preservation.</td></tr>
+        <tr><td>Composition</td><td>\(R_\alpha R_\beta=R_{\alpha+\beta}\)</td><td>Successive rotations add angles.</td></tr>
+        <tr><td>Inverse</td><td>\(R_\phi^{-1}=R_\phi^{\mathsf T}=R_{-\phi}\)</td><td>Transpose reverses the turn.</td></tr>
+        <tr><td>Pair frequency</td><td>\(\theta_i=10000^{-2i/d}\)</td><td>Different pairs rotate at different rates.</td></tr>
+        <tr><td>Position angle</td><td>\(\phi_i(m)=m\theta_i\)</td><td>Absolute position becomes phase.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>The entire derivation</h2>
+    <ol class="steps">
+      <li>Rotate a query at position \(m\): <strong>\(\mathbf q'_m=R_m\mathbf q_m\)</strong>.</li>
+      <li>Rotate a key at position \(n\): <strong>\(\mathbf k'_n=R_n\mathbf k_n\)</strong>.</li>
+      <li>Form their dot product: <strong>\((\mathbf q'_m)^{\mathsf T}\mathbf k'_n=(R_m\mathbf q_m)^{\mathsf T}(R_n\mathbf k_n)\)</strong>.</li>
+      <li>Reverse multiplication through the transpose: <strong>\(=\mathbf q_m^{\mathsf T}R_m^{\mathsf T}R_n\mathbf k_n\)</strong>.</li>
+      <li>Reverse \(m\), then add \(n\): <strong>\(R_m^{\mathsf T}R_n=R_{-m}R_n=R_{n-m}\)</strong>.</li>
+      <li>Therefore: <strong>\((\mathbf q'_m)^{\mathsf T}\mathbf k'_n=\mathbf q_m^{\mathsf T}R_{n-m}\mathbf k_n\)</strong>.</li>
+    </ol>
+
+    <div class="callout"><strong>Interpretation:</strong> the query and key each receive an absolute-position rotation, but their comparison contains only the relative displacement \(n-m\). RoPE rotates \(Q\) and \(K\); \(V\) is not rotated in the original formulation.</div>
+
+    <h2>Common failure modes</h2>
+    <table>
+      <thead><tr><th>Symptom</th><th>Likely mistake</th><th>Check</th></tr></thead>
+      <tbody>
+        <tr><td>Relative sign is reversed</td><td>Changed dot-product order or transpose order.</td><td>Write \((R_m\mathbf q)^{\mathsf T}(R_n\mathbf k)\) one step at a time.</td></tr>
+        <tr><td>Vector length changes</td><td>Signs in the rotation matrix are wrong.</td><td>Columns must be unit and perpendicular.</td></tr>
+        <tr><td>Dimensions are mixed</td><td>Pair layout differs from the assumed adjacent pairing.</td><td>Confirm the implementation's rotate-half convention.</td></tr>
+        <tr><td>Degrees appear in code</td><td>Angle units were confused.</td><td>Trigonometric functions consume radians.</td></tr>
+      </tbody>
+    </table>
+    <p class="source">Primary source: <a href="https://arxiv.org/html/2104.09864">Su et al., RoFormer, Sections 3.1–3.2</a>. Ask the teaching agent to unpack any line you cannot reproduce without looking.</p>
+  </main>
+</body>
+</html>

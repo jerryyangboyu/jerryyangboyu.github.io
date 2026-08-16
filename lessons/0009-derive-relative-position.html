@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 9: Derive Relative Position</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0009">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/rope-reference.html">Formula sheet</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 9 of 9 · Capstone derivation</p>
+      <h1>Absolute rotations reveal relative distance.</h1>
+      <p class="lede">Your win: derive the RoPE identity from first principles, audit its sign, and teach the algorithm back without notes.</p>
+      <div class="lesson-meta"><span>18 minutes</span><span>Needs: all prior lessons</span><span>Outcome: derive \(R_m^{\mathsf T}R_n=R_{n-m}\)</span></div>
+    </section>
+    <div class="goal"><strong>Mission achieved when:</strong> every line below has both an algebraic reason and a geometric sentence you can say aloud.</div>
+
+    <h2>Set up two absolute positions</h2>
+    <p>Let the query be at position \(m\) and the key at position \(n\). For one dimension pair with frequency \(\theta\):</p>
+    <div class="equation">\[\mathbf q'_m=R_{m\theta}\mathbf q_m,\qquad \mathbf k'_n=R_{n\theta}\mathbf k_n.\]</div>
+    <p>To keep notation light, write \(R_m\) for \(R_{m\theta}\) and \(R_n\) for \(R_{n\theta}\).</p>
+
+    <h2>Derive the score</h2>
+    <div class="equation">
+      \[
+      \begin{aligned}
+      (\mathbf q'_m)^{\mathsf T}\mathbf k'_n
+      &amp;=(R_m\mathbf q_m)^{\mathsf T}(R_n\mathbf k_n)\\
+      &amp;=\mathbf q_m^{\mathsf T}R_m^{\mathsf T}R_n\mathbf k_n\\
+      &amp;=\mathbf q_m^{\mathsf T}R_{-m}R_n\mathbf k_n\\
+      &amp;=\mathbf q_m^{\mathsf T}R_{n-m}\mathbf k_n.
+      \end{aligned}
+      \]
+    </div>
+    <ol class="steps"><li>Substitute the rotated query and key.</li><li>Use \((A\mathbf x)^{\mathsf T}=\mathbf x^{\mathsf T}A^{\mathsf T}\).</li><li>Use \(R_m^{\mathsf T}=R_{-m}\): transpose reverses the query rotation.</li><li>Use \(R_\alpha R_\beta=R_{\alpha+\beta}\): \(-m+n=n-m\).</li></ol>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: \(m=5\), \(n=8\), \(\theta=0.1\)</h3>
+      <p>The absolute angles are \(0.5\) and \(0.8\) radians. Their difference is \(0.3\) radians. Substitute numerical sine and cosine values:</p>
+      <div class="equation">
+        \[
+        R_{0.5}\approx
+        \begin{bmatrix}
+        0.8776&amp;-0.4794\\
+        0.4794&amp;0.8776
+        \end{bmatrix},
+        \qquad
+        R_{0.8}\approx
+        \begin{bmatrix}
+        0.6967&amp;-0.7174\\
+        0.7174&amp;0.6967
+        \end{bmatrix}.
+        \]
+      </div>
+      <div class="equation">
+        \[
+        \begin{aligned}
+        R_{0.5}^{\mathsf T}R_{0.8}
+        &amp;\approx
+        \begin{bmatrix}
+        0.8776&amp;0.4794\\
+        -0.4794&amp;0.8776
+        \end{bmatrix}
+        \begin{bmatrix}
+        0.6967&amp;-0.7174\\
+        0.7174&amp;0.6967
+        \end{bmatrix}\\
+        &amp;\approx
+        \begin{bmatrix}
+        0.9553&amp;-0.2955\\
+        0.2955&amp;0.9553
+        \end{bmatrix}
+        =R_{0.3}.
+        \end{aligned}
+        \]
+      </div>
+      <p>The matrix product is the rotation for \((n-m)\theta=(8-5)(0.1)=0.3\) radians.</p>
+    </section>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: the resulting score</h3>
+      <p>Take \(\mathbf q=\mathbf k=(1,0)\). The rotated vectors are \((\cos0.5,\sin0.5)\) and \((\cos0.8,\sin0.8)\). Their dot product is:</p>
+      <div class="equation">
+        \[
+        \begin{aligned}
+        (R_{0.5}\mathbf q)^{\mathsf T}(R_{0.8}\mathbf k)
+        &amp;=\cos0.5\cos0.8+\sin0.5\sin0.8\\
+        &amp;=\cos(0.8-0.5)\\
+        &amp;=\cos0.3\approx0.9553.
+        \end{aligned}
+        \]
+      </div>
+      <p>The two absolute angles disappear from the final comparison; only their \(0.3\)-radian separation remains.</p>
+    </section>
+
+    <section class="worked-example">
+      <h3>Exact values: \(m=2\), \(n=7\), \(\theta=\pi/6\)</h3>
+      <div class="equation">
+        \[
+        (n-m)\theta=(7-2)\frac{\pi}{6}=\frac{5\pi}{6},
+        \qquad
+        R_{5\pi/6}=
+        \begin{bmatrix}
+        -\sqrt3/2&amp;-1/2\\
+        1/2&amp;-\sqrt3/2
+        \end{bmatrix}.
+        \]
+      </div>
+    </section>
+
+    <section class="diagram" data-rope-lab>
+      <canvas aria-label="Interactive comparison of query rotation, key rotation, and relative rotation"></canvas>
+      <div class="controls">
+        <label>Query position \(m\)<input data-m type="range" min="0" max="12" step="1" value="5"></label><output class="swatch blue" aria-label="Query vector color"></output>
+        <label>Key position \(n\)<input data-n type="range" min="0" max="12" step="1" value="8"></label><output class="swatch coral" aria-label="Key vector color"></output>
+        <label>Frequency \(\theta\)<input data-theta type="range" min="0.1" max="1" step="0.05" value="0.35"></label><output class="readout">rad/token</output>
+      </div>
+      <p class="rope-readout" data-rope-readout><span><strong>mθ</strong> = 1.75</span><span><strong>nθ</strong> = 2.80</span><span>relative angle <strong>(n−m)θ = 1.05 rad</strong></span></p>
+    </section>
+
+    <div class="callout"><strong>Sign audit for the supplied image:</strong> with \(R_\theta=\begin{bmatrix}\cos\theta&amp;-\sin\theta\\\sin\theta&amp;\cos\theta\end{bmatrix}\) and the score \((R_m\mathbf q)^{\mathsf T}(R_n\mathbf k)\), the result is \(R_{n-m}\). The second image's headline shows \(R_{m-n}\), but its matrix algebra, geometric caption, and the first image all show \(R_{n-m}\). Reversing query/key order would reverse the sign.</div>
+
+    <h2>Restore all dimension pairs</h2>
+    <p>The full \(R_m\) is block diagonal. Pair \(i\) uses angle \(m\theta_i\), but the same identity holds in every block:</p>
+    <div class="equation">
+      \[
+      R_m=
+      \begin{bmatrix}
+      R_{m\theta_0}&amp;0&amp;\cdots&amp;0\\
+      0&amp;R_{m\theta_1}&amp;\cdots&amp;0\\
+      \vdots&amp;\vdots&amp;\ddots&amp;\vdots\\
+      0&amp;0&amp;\cdots&amp;R_{m\theta_{d_h/2-1}}
+      \end{bmatrix},
+      \qquad R_m^{\mathsf T}R_n=R_{n-m}.
+      \]
+    </div>
+
+    <section class="quiz" data-quiz data-success="Correct. The query transpose contributes −m, then composition adds n." data-retry="Start with Rₘᵀ = R₋ₘ, then add the key's +n rotation.">
+      <h3>Final retrieval check</h3>
+      <p>What relative rotation appears in \((R_m\mathbf q)^{\mathsf T}(R_n\mathbf k)\)?</p>
+      <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(R_{n-m}\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(R_{m-n}\)</button></div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Capstone exercises</h2>
+      <ol>
+        <li>Derive \((R_2\mathbf q)^{\mathsf T}(R_7\mathbf k)=\mathbf q^{\mathsf T}R_5\mathbf k\) one line at a time.</li>
+        <li>If \(\theta=0.2\), \(m=3\), and \(n=9\), calculate both absolute angles and the relative angle.</li>
+        <li>Expand \(R_\theta^{\mathsf T}\) and prove directly that it equals \(R_{-\theta}\).</li>
+        <li>Explain why rotating both vectors by the same extra offset \(c\) does not change their relative rotation.</li>
+        <li>Find and correct the sign inconsistency in the supplied second image.</li>
+        <li>Without notes, give the five-part teach-back listed below.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\((R_2\mathbf q)^{\mathsf T}(R_7\mathbf k)=\mathbf q^{\mathsf T}R_2^{\mathsf T}R_7\mathbf k=\mathbf q^{\mathsf T}R_{-2}R_7\mathbf k=\mathbf q^{\mathsf T}R_5\mathbf k\).</li><li>\(m\theta=0.6\), \(n\theta=1.8\), and \((n-m)\theta=1.2\) radians.</li><li>Swap rows and columns, then use cosine evenness and sine oddness.</li><li>\((n+c)-(m+c)=n-m\).</li><li>The headline says \(R_{m-n}\); under the displayed convention it should say \(R_{n-m}\).</li><li>Use the rubric below; ask the teaching agent for assessment.</li></ol></details>
+    </section>
+
+    <h2>Two-minute teach-back</h2>
+    <ol class="steps"><li>Why does RoPE group dimensions in pairs?</li><li>What does position \(m\) do to pair \(i\)?</li><li>Why does the rotation preserve vector magnitude?</li><li>Why is the transpose a negative rotation?</li><li>How does the dot product turn \(m\) and \(n\) into \(n-m\)?</li></ol>
+    <p>Evidence of mastery is not recognizing the answer on this page. It is reconstructing the chain after a delay and applying it to a fresh \(m,n,\theta\) example.</p>
+
+    <p class="source"><strong>Primary source:</strong> <a href="https://arxiv.org/html/2104.09864#S3.SS2">Su et al., RoFormer, Sections 3.1–3.2</a>, especially Equations 11–16.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can derive the relative-position identity without looking.</label>
+    <p class="small">Ask the teaching agent to assess your teach-back. A passed teach-back should become the first learning record and determine what comes next.</p>
+    <nav class="lesson-nav"><a href="0008-position-as-frequency.html">← Frequencies</a><a href="index.html">Course map →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 9 · Derive relative position</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+  <script src="../assets/rope-lab.js"></script>
+</body>
+</html>

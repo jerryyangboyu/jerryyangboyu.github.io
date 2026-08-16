@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 3: Complex Numbers as Vectors</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0003">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 3 of 9 · Complex-number foundation</p>
+      <h1>The “imaginary” axis is simply a second axis.</h1>
+      <p class="lede">Your win: translate instantly between a 2D vector \((x,y)\) and the complex number \(x+iy\).</p>
+      <div class="lesson-meta"><span>10 minutes</span><span>Needs: coordinates</span><span>Outcome: pair ↔ complex number</span></div>
+    </section>
+
+    <div class="goal"><strong>Mission link:</strong> the RoFormer paper first derives RoPE in 2D using complex multiplication. The notation is compact, but the geometry is the same plane from Lesson 1.</div>
+
+    <h2>Give the vertical axis a name</h2>
+    <p>The imaginary unit \(i\) is defined by \(i^2=-1\). A complex number has the form:</p>
+    <div class="equation">\[z=x+iy\]</div>
+    <p>Plot \(x\) on the horizontal real axis and \(y\) on the vertical imaginary axis. The number \(3+2i\) and the vector \((3,2)\) identify the same point.</p>
+
+    <div class="three-col">
+      <article class="panel teal"><h3>Coordinates</h3><p>\((3,2)\)</p><p>Right 3, up 2.</p></article>
+      <article class="panel coral"><h3>Column vector</h3><p>\(\begin{bmatrix}3\\2\end{bmatrix}\)</p><p>Two ordered components.</p></article>
+      <article class="panel gold"><h3>Complex number</h3><p>\(3+2i\)</p><p>Real 3, imaginary 2.</p></article>
+    </div>
+
+    <h2>Magnitude does not change its meaning</h2>
+    <div class="equation">\[|z|=\sqrt{x^2+y^2}=\lVert\mathbf v\rVert\]</div>
+    <p>The vertical bar around a complex number and the double bars around a vector both mean distance from the origin here.</p>
+
+    <h2>Conjugation reflects</h2>
+    <p>The complex conjugate changes the sign of the imaginary part:</p>
+    <div class="equation">\[z=x+iy\quad\longrightarrow\quad z^*=x-iy\]</div>
+    <p>Geometrically, this reflects the point across the horizontal axis. Soon, that reflection will help us understand why a transpose reverses a rotation.</p>
+
+    <section class="worked-example">
+      <h3>Worked translation</h3>
+      <p>For the RoPE pair \((q_4,q_5)=(-2,3)\):</p>
+      <ol class="steps"><li>Complex form: \(z_2=-2+3i\).</li><li>Magnitude: \(|z_2|=\sqrt{4+9}=\sqrt{13}\).</li><li>Conjugate: \(z_2^*=-2-3i\).</li></ol>
+    </section>
+
+    <section class="quiz" data-quiz data-success="Correct. The real coordinate is 4 and the imaginary coordinate is −3." data-retry="The coefficient of i is the vertical coordinate.">
+      <h3>Retrieval check</h3>
+      <p>Which vector is the complex number \(4-3i\)?</p>
+      <div class="choices">
+        <button type="button" data-correct="true" aria-pressed="false">A · (4, −3)</button>
+        <button type="button" data-correct="false" aria-pressed="false">B · (−3, 4)</button>
+      </div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Convert \((-3,5)\) to complex form.</li>
+        <li>Convert \(7-2i\) to a column vector.</li>
+        <li>Calculate \(|3+4i|\).</li>
+        <li>Find the conjugate of \(-2+6i\), and describe its geometric effect.</li>
+        <li>For the RoPE pair \((q_6,q_7)=(1,-4)\), write the complex number, conjugate, and magnitude.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\(-3+5i\).</li><li>\(\begin{bmatrix}7\\-2\end{bmatrix}\).</li><li>\(\sqrt{3^2+4^2}=5\).</li><li>\(-2-6i\); reflection across the real axis.</li><li>\(1-4i\), \(1+4i\), and \(\sqrt{17}\).</li></ol></details>
+    </section>
+
+    <div class="callout"><strong>Do not mystify \(i\):</strong> in this course, complex notation is a convenient package for two real coordinates plus special multiplication rules.</div>
+    <p class="source"><strong>Primary source:</strong> <a href="https://openstax.org/books/precalculus-2e/pages/3-1-complex-numbers">OpenStax 3.1: Complex Numbers</a>. Read through the complex plane and complex conjugate sections.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can move between \((x,y)\), \(\begin{bmatrix}x\\y\end{bmatrix}\), and \(x+iy\).</label>
+    <p class="small">Ask the teaching agent to check two translations of your own before moving on.</p>
+    <nav class="lesson-nav"><a href="0002-radians-and-unit-circle.html">← Radians</a><a href="0004-complex-multiplication-rotates.html">Next: Multiplication rotates →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 3 · Complex numbers as vectors</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+</body>
+</html>

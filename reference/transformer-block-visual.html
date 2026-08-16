@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visual Map: One Transformer Block with RoPE</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <link rel="stylesheet" href="../assets/block-overview.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body class="overview-poster-page">
+  <header class="site-header overview-main"><a class="brand" href="../lessons/index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="transformer-block-reference.html">Formula sheet</a></header>
+  <main class="overview-main">
+    <section class="overview-hero">
+      <div><p class="eyebrow">Module 2 · Visual map</p><h1>One Transformer block with RoPE.</h1><p class="lede">Follow the data from hidden states to the next layer; read the main flow first, then use the side rail to inspect the difficult operations.</p></div>
+      <div class="overview-key" aria-label="Color key">
+        <span style="--key-color:var(--blue-soft)">Representations</span>
+        <span style="--key-color:var(--teal-soft)">Attention</span>
+        <span style="--key-color:var(--coral-soft)">Residual paths</span>
+        <span style="--key-color:var(--gold-soft)">Feed-forward</span>
+      </div>
+    </section>
+
+    <section class="whole-picture">
+      <div class="phase-stack">
+        <section class="flow-phase" style="--phase-color:var(--blue);--phase-tint:var(--blue-soft)">
+          <div class="phase-marker"><b>01</b><span>Represent</span></div>
+          <div class="phase-content">
+            <div class="phase-title"><h2>Build position-aware comparison vectors</h2><p>Feature operations; token rows remain separate</p></div>
+            <div class="flow-track" style="--track-count:4">
+              <div class="flow-node"><div><span class="node-step">1</span><strong>Hidden state</strong></div><div class="tensor-ribbon"><span></span><span></span><span></span><span></span><span></span><span></span></div><small>\(X^{(\ell)}\)</small></div>
+              <div class="flow-node"><div><span class="node-step">2</span><strong>Normalize</strong></div><div class="norm-wave"><span style="--height:35%"></span><span style="--height:80%"></span><span style="--height:55%"></span></div><small>\(\bar X=\operatorname{Norm}(X)\)</small></div>
+              <div class="flow-node"><div><span class="node-step">3</span><strong>Project</strong></div><div class="qkv-fork"><span>Q</span><span>K</span><span>V</span></div><small>\(\bar XW_Q,\bar XW_K,\bar XW_V\)</small></div>
+              <div class="flow-node"><div><span class="node-step">4</span><strong>Apply RoPE</strong></div><div class="pair-rotations"><span style="--angle:12deg"></span><span style="--angle:48deg"></span><span style="--angle:76deg"></span></div><small>rotate Q and K pairs; keep V</small></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="flow-phase" style="--phase-color:var(--teal);--phase-tint:var(--teal-soft)">
+          <div class="phase-marker"><b>02</b><span>Attend</span></div>
+          <div class="phase-content">
+            <div class="phase-title"><h2>Compare positions and blend content</h2><p>Token mixing happens here</p></div>
+            <div class="flow-track" style="--track-count:4">
+              <div class="flow-node"><div><span class="node-step">5a</span><strong>Score</strong></div><div class="score-grid"><span style="--shade:65%"></span><span style="--shade:35%"></span><span style="--shade:20%"></span><span style="--shade:50%"></span><span style="--shade:30%"></span><span style="--shade:75%"></span><span style="--shade:45%"></span><span style="--shade:20%"></span></div><small>\(Q'K'^{\mathsf T}/\sqrt{d_h}\)</small></div>
+              <div class="flow-node"><div><span class="node-step">5b</span><strong>Mask + softmax</strong></div><div class="probability-bars"><span style="--height:48%"></span><span style="--height:74%"></span><span style="--height:31%"></span><span style="--height:0%"></span></div><small>\((.323,.482,.196,0)\)</small></div>
+              <div class="flow-node"><div><span class="node-step">5c</span><strong>Blend V</strong></div><div class="residual-merge"><span>weights</span><b>×</b><span>values</span></div><small>\(O_r=P_rV_r\)</small></div>
+              <div class="flow-node"><div><span class="node-step">6</span><strong>Join heads</strong></div><div class="head-streams"><span></span><span></span><span></span></div><small>\(\operatorname{Concat}(O_1,\ldots,O_h)W_O\)</small></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="flow-phase" style="--phase-color:var(--coral);--phase-tint:var(--coral-soft)">
+          <div class="phase-marker"><b>03</b><span>Update</span></div>
+          <div class="phase-content">
+            <div class="phase-title"><h2>Merge attention with the running state</h2><p>First residual path</p></div>
+            <div class="flow-track" style="--track-count:3">
+              <div class="flow-node"><div><span class="node-step">7</span><strong>Identity route</strong></div><div class="tensor-ribbon"><span></span><span></span><span></span><span></span><span></span><span></span></div><small>carry \(X^{(\ell)}\)</small></div>
+              <div class="flow-node"><strong>Add attention update</strong><div class="residual-merge"><span>\(X\)</span><b>+</b><span>\(O_{\text{attn}}\)</span></div><small>\(Y=X^{(\ell)}+O_{\text{attn}}\)</small></div>
+              <div class="flow-node"><div><span class="node-step">8</span><strong>Normalize Y</strong></div><div class="norm-wave"><span style="--height:70%"></span><span style="--height:30%"></span><span style="--height:55%"></span></div><small>\(\hat Y=\operatorname{Norm}(Y)\)</small></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="flow-phase" style="--phase-color:var(--gold);--phase-tint:var(--gold-soft)">
+          <div class="phase-marker"><b>04</b><span>Refine</span></div>
+          <div class="phase-content">
+            <div class="phase-title"><h2>Transform features and produce the next layer</h2><p>Token-wise network, then second residual</p></div>
+            <div class="flow-track" style="--track-count:4">
+              <div class="flow-node"><div><span class="node-step">9a</span><strong>Two branches</strong></div><div class="gate-fork"><span>SiLU gate</span><span>up projection</span><b>matching \(d_{\text{ff}}\) widths</b></div></div>
+              <div class="flow-node"><div><span class="node-step">9b</span><strong>Gate + down</strong></div><div class="residual-merge"><span>gate</span><b>⊙</b><span>up</span></div><small>multiply, then \(W_{\text{down}}\)</small></div>
+              <div class="flow-node"><div><span class="node-step">10</span><strong>Residual add</strong></div><div class="residual-merge"><span>\(Y\)</span><b>+</b><span>FFN</span></div><small>feature correction</small></div>
+              <div class="flow-node"><div><span class="node-step">11</span><strong>Next state</strong></div><div class="tensor-ribbon"><span></span><span></span><span></span><span></span><span></span><span></span></div><small>\(X^{(\ell+1)}\), same outer shape</small></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="mechanics-rail">
+        <h2>Mechanics in one place</h2>
+        <section class="mechanic">
+          <h3>RoPE supplies relative phase</h3>
+          <div class="equation">\[
+            (R_mq)^{\mathsf T}(R_nk)=q^{\mathsf T}R_{n-m}k
+          \]</div>
+          <p>Pair \(i\) rotates by \(m\theta_i\), where \(\theta_i=10000^{-2i/d_h}\).</p>
+        </section>
+        <section class="mechanic">
+          <h3>Causal attention has one sequence</h3>
+          <div class="mechanic-sequence"><span>score</span><span>mask</span><span>softmax</span><span>blend V</span></div>
+          <p>Future keys receive \(-\infty\) before softmax. Every head still sees all allowed token positions.</p>
+        </section>
+        <section class="mechanic">
+          <h3>Two kinds of mixing</h3>
+          <p><strong>Attention:</strong> mixes information across tokens.</p>
+          <p><strong>SwiGLU:</strong> transforms each token across features.</p>
+        </section>
+        <section class="mechanic">
+          <h3>One shape invariant</h3>
+          <div class="equation">\[
+            X^{(\ell)},Y,X^{(\ell+1)}
+            \in\mathbb R^{B\times T\times d_{\text{model}}}
+          \]</div>
+          <p>Both sublayers return to model width before residual addition.</p>
+        </section>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

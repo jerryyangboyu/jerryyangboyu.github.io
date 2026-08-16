@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 13: Mask the Future Before Softmax</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0013">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 13 of 18 · Transformer block</p>
+      <h1>Hide the future before probabilities exist.</h1>
+      <p class="lede">Your win: build one scaled query-key score row, apply a causal mask, and explain why the mask must precede softmax.</p>
+      <div class="lesson-meta"><span>14 minutes</span><span>Needs: dot products</span><span>Outcome: construct a causal score row</span></div>
+    </section>
+
+    <div class="goal"><strong>Mission link:</strong> RoPE changes \(Q\) and \(K\); causal attention then compares \(Q'\) with \(K'\) without allowing a token to read later positions.</div>
+
+    <h2>Scores have one row per query</h2>
+    <div class="equation">
+      \[
+      S=\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}},
+      \qquad S_{ij}=\frac{\mathbf q'_i\cdot\mathbf k'_j}{\sqrt{d_h}}.
+      \]
+    </div>
+    <p>For one head, \(Q'\in\mathbb R^{T\times d_h}\) and \(K'^{\mathsf T}\in\mathbb R^{d_h\times T}\), so \(S\in\mathbb R^{T\times T}\). Row \(i\) asks: “How strongly does query token \(i\) match every key token \(j\)?”</p>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: one scaled dot product</h3>
+      <p>Let \(d_h=4\), \(\mathbf q'_3=(1,2,0,-1)\), and \(\mathbf k'_2=(2,0,1,1)\). Then</p>
+      <div class="equation">
+        \[
+        S_{3,2}=\frac{(1)(2)+(2)(0)+(0)(1)+(-1)(1)}{\sqrt4}
+        =\frac{1}{2}=0.5.
+        \]
+      </div>
+      <p>The factor \(1/\sqrt{d_h}\) keeps dot-product magnitudes from growing merely because a head has more coordinates.</p>
+    </section>
+
+    <h2>The causal mask is triangular</h2>
+    <div class="equation">
+      \[
+      M_{ij}=\begin{cases}0,&amp;j\le i,\\-\infty,&amp;j&gt;i,\end{cases}
+      \qquad A=S+M.
+      \]
+    </div>
+    <p>At query position \(i=3\), raw scores \((0.7,1.1,0.2,2.0)\) become \((0.7,1.1,0.2,-\infty)\). The tempting future score \(2.0\) is removed before normalization.</p>
+
+    <section class="diagram" data-attention-lab>
+      <h3>Explore which keys are visible</h3>
+      <div class="controls"><label>Query position \(i\)<input type="range" min="1" max="4" step="1" value="3" data-query-position></label><output class="readout">\(i=\)<strong data-position-readout>3</strong></output></div>
+      <table><thead><tr><th>Key</th><th>Raw score</th><th>After mask</th><th>Softmax weight</th><th>Value</th></tr></thead><tbody data-attention-rows></tbody></table>
+      <p>Weighted output: <strong data-attention-output></strong></p>
+    </section>
+
+    <div class="callout"><strong>Order matters:</strong> masking after softmax would assign positive probability to future tokens first. Adding \(-\infty\) before softmax makes \(e^{-\infty}=0\), so forbidden weights are exactly zero in the mathematical model.</div>
+
+    <section class="quiz" data-quiz data-success="Correct. A query at position 2 may use keys 1 and 2 only." data-retry="Causal attention permits the present and past: j ≤ i.">
+      <h3>Retrieval check</h3><p>Which keys are visible to query position \(i=2\)?</p>
+      <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(j=1,2\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(j=2,3,4\)</button></div><p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>For \(T=4\), write all four rows of the causal mask using \(0\) and \(-\infty\).</li>
+        <li>Mask the row \((3,-1,2,5)\) for query position \(i=2\).</li>
+        <li>Compute \(S_{1,2}\) when \(d_h=2\), \(\mathbf q'_1=(2,1)\), and \(\mathbf k'_2=(1,-1)\).</li>
+        <li>If \(Q'\) has shape \(6\times8\), give the shapes of \(K'^{\mathsf T}\) and \(S\).</li>
+        <li>Why is the mask added before softmax?</li>
+        <li>Does causal masking remove a key vector from memory, or only prevent particular query-key connections?</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\((0,-\infty,-\infty,-\infty)\), \((0,0,-\infty,-\infty)\), \((0,0,0,-\infty)\), and \((0,0,0,0)\).</li><li>\((3,-1,-\infty,-\infty)\).</li><li>\(((2)(1)+(1)(-1))/\sqrt2=1/\sqrt2\approx0.707\).</li><li>\(K'^{\mathsf T}:8\times6\); \(S:6\times6\).</li><li>So forbidden entries exponentiate to zero and receive no probability mass.</li><li>Only particular connections are blocked; the key still exists for queries at its own or later positions.</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., Sections 3.2.1 and 3.2.3</a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can construct a causal mask and apply it before softmax.</label>
+    <nav class="lesson-nav"><a href="0012-project-qkv-and-split-heads.html">← Q, K, V</a><a href="0014-softmax-and-weighted-values.html">Next: Softmax and values →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 13 · Mask the future before softmax</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/attention-lab.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 15: Multi-Head Attention Splits Features</title>
+  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0015">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero"><p class="eyebrow">Lesson 15 of 18 · Transformer block</p><h1>Heads split features, not the sentence.</h1><p class="lede">Your win: track the token and feature axes through independent heads, concatenation, and the output projection.</p><div class="lesson-meta"><span>12 minutes</span><span>Needs: tensor shapes</span><span>Outcome: reject a common misconception</span></div></section>
+
+    <div class="goal"><strong>Mission link:</strong> every head applies RoPE and causal attention to the full sequence; heads differ in learned feature projections.</div>
+
+    <h2>Every head sees all \(T\) positions</h2>
+    <p>For \(d_{\text{model}}=h\,d_h\), the feature width is reorganized into \(h\) heads:</p>
+    <div class="shape-line"><span class="shape-chip">\(B\times T\times d_{\text{model}}\)</span><span class="shape-arrow">→</span><span class="shape-chip">\(B\times h\times T\times d_h\)</span></div>
+    <p>The \(T\) axis is unchanged. A head is not assigned one word or one sentence segment. Each head forms its own \(T\times T\) attention matrix over the same token sequence.</p>
+
+    <section class="diagram nn-viz" data-head-viz>
+      <div class="viz-header"><h3>Choose a query token in either head</h3><span class="small">Rows fade except the selected query</span></div>
+      <div class="viz-body head-visuals" data-head-visuals></div>
+      <p class="viz-caption" data-head-readout></p>
+    </section>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: \(T=3,d_{\text{model}}=8,h=2\)</h3>
+      <table><thead><tr><th>Quantity</th><th>Shape</th><th>Meaning</th></tr></thead><tbody>
+        <tr><td>\(Q,K,V\) before split</td><td>\(3\times8\)</td><td>Three tokens, eight projected features</td></tr>
+        <tr><td>Each head's \(Q_r,K_r,V_r\)</td><td>\(3\times4\)</td><td>All three tokens, four head features</td></tr>
+        <tr><td>Each head's \(P_r\)</td><td>\(3\times3\)</td><td>Every query position compared with every key position</td></tr>
+        <tr><td>Each head's \(O_r=P_rV_r\)</td><td>\(3\times4\)</td><td>One four-feature output per token</td></tr>
+        <tr><td>\(\operatorname{Concat}(O_1,O_2)\)</td><td>\(3\times8\)</td><td>Join along the feature axis</td></tr>
+      </tbody></table>
+    </section>
+
+    <h2>Concatenate, then mix heads</h2>
+    <div class="equation">
+      \[
+      O_{\text{attn}}=\operatorname{Concat}(O_1,\ldots,O_h)W_O.
+      \]
+    </div>
+    <p>For one token with \(d_{\text{model}}=4,h=2,d_h=2\), suppose the head outputs are \(\mathbf o_1=(1,0.2)\) and \(\mathbf o_2=(-0.5,2)\). Concatenation gives</p>
+    <div class="equation">
+      \[
+      \mathbf c=\begin{bmatrix}1&amp;0.2&amp;-0.5&amp;2\end{bmatrix}.
+      \]
+    </div>
+    <p>Use this simple output matrix:</p>
+    <div class="equation">
+      \[
+      W_O=\begin{bmatrix}
+      1&amp;0&amp;1&amp;0\\
+      0&amp;1&amp;0&amp;1\\
+      0&amp;0&amp;1&amp;0\\
+      0&amp;0&amp;0&amp;1
+      \end{bmatrix}.
+      \]
+      \[
+      \mathbf cW_O
+      =\begin{bmatrix}1&amp;0.2&amp;0.5&amp;2.2\end{bmatrix}.
+      \]
+    </div>
+    <p>The output projection lets coordinates from different heads contribute to the same model feature while restoring the \(d_{\text{model}}\)-wide representation expected by the residual path.</p>
+
+    <section class="quiz" data-quiz data-success="Correct. The split is along feature width; all heads retain every token." data-retry="Track T separately from d_model."><h3>Retrieval check</h3><p>With \(T=5,d_{\text{model}}=12,h=3\), what does one head receive?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · all 5 tokens with 4 features each</button><button type="button" data-correct="false" aria-pressed="false">B · one or two tokens with all 12 features</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Calculate \(d_h\) for \(d_{\text{model}}=24,h=6\).</li>
+        <li>For \(B=2,T=7,d_{\text{model}}=24,h=6\), give the split Q shape.</li>
+        <li>Give one head's score-matrix shape for \(T=7\).</li>
+        <li>Concatenate head outputs \((2,-1)\) and \((0,3)\).</li>
+        <li>Multiply \((2,-1,0,3)\) by the displayed \(W_O\).</li>
+        <li>Correct this statement: “Head 1 reads the first half of the sentence and Head 2 reads the second half.”</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\(d_h=4\).</li><li>\(2\times6\times7\times4\).</li><li>\(7\times7\).</li><li>\((2,-1,0,3)\).</li><li>\((2,-1,2,2)\).</li><li>Both heads read all token positions; their learned projections and feature subspaces differ.</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., Section 3.2.2</a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can track all axes through heads, concatenation, and \(W_O\).</label>
+    <nav class="lesson-nav"><a href="0014-softmax-and-weighted-values.html">← Softmax and values</a><a href="0016-residual-paths-carry-state.html">Next: Residual paths →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 15 · Multi-head attention splits features</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 1: Vectors and Pairs</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0001">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 1 of 9 · Linear algebra foundation</p>
+      <h1>A vector is a list. A pair is a place.</h1>
+      <p class="lede">Your first win: look at two adjacent components of a long vector and see a point in its own 2D plane.</p>
+      <div class="lesson-meta"><span>12 minutes</span><span>Needs: arithmetic</span><span>Outcome: read dimension pairs</span></div>
+    </section>
+
+    <div class="goal"><strong>Mission link:</strong> RoPE rotates dimensions in pairs. Before “rotation” can mean anything, each pair must become a geometric object.</div>
+
+    <h2>One object, two readings</h2>
+    <p>The ordered pair \((3,2)\) is both a list of two numbers and an arrow from the origin to the point three units right and two units up. Order matters: \((3,2)\) and \((2,3)\) are different arrows.</p>
+
+    <div class="two-col">
+      <article class="panel teal"><h3>Algebraic view</h3><div class="equation">\(\displaystyle \mathbf v=\begin{bmatrix}3\\2\end{bmatrix}\)</div><p>Component 0 is 3. Component 1 is 2.</p></article>
+      <article class="panel coral"><h3>Geometric view</h3><div class="equation">\(\displaystyle (0,0)\longrightarrow(3,2)\)</div><p>Horizontal change is 3. Vertical change is 2.</p></article>
+    </div>
+
+    <h2>A long vector contains many little planes</h2>
+    <p>Suppose a query has eight components:</p>
+    <div class="equation">\[\mathbf q=\begin{bmatrix}q_0&amp;q_1&amp;q_2&amp;q_3&amp;q_4&amp;q_5&amp;q_6&amp;q_7\end{bmatrix}\]</div>
+    <p>RoPE groups adjacent components. Each group can be treated independently as coordinates in a 2D plane:</p>
+    <table>
+      <thead><tr><th>Pair index i</th><th>Components</th><th>2D point</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>\(q_0,q_1\)</td><td>\((q_0,q_1)\)</td></tr>
+        <tr><td>1</td><td>\(q_2,q_3\)</td><td>\((q_2,q_3)\)</td></tr>
+        <tr><td>2</td><td>\(q_4,q_5\)</td><td>\((q_4,q_5)\)</td></tr>
+        <tr><td>3</td><td>\(q_6,q_7\)</td><td>\((q_6,q_7)\)</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>The essential compression:</strong> an even-dimensional vector is a stack of 2D planes. RoPE turns each plane without mixing it with the others.</div>
+
+    <h2>Length is content strength</h2>
+    <p>The magnitude of \(\mathbf v=(x,y)\) is its distance from the origin:</p>
+    <div class="equation">\[\lVert\mathbf v\rVert=\sqrt{x^2+y^2}\]</div>
+    <p>For \((3,4)\), the magnitude is 5. A rotation will change the direction but preserve this magnitude. That preservation matters: position should alter how a query or key is oriented for comparison, not arbitrarily amplify it.</p>
+
+    <section class="quiz" data-quiz data-success="Correct. An eight-dimensional vector gives four independent 2D planes." data-retry="Try grouping adjacent entries two at a time.">
+      <h3>Retrieval check</h3>
+      <p>How many adjacent pairs are in an 8-dimensional query?</p>
+      <div class="choices">
+        <button type="button" data-correct="true" aria-pressed="false">A · four pairs</button>
+        <button type="button" data-correct="false" aria-pressed="false">B · eight pairs</button>
+      </div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="quiz" data-quiz data-success="Correct. The first coordinate is horizontal, so the endpoint is (−2, 5)." data-retry="Read the components in order: horizontal first, vertical second.">
+      <h3>Entry diagnostic</h3>
+      <p>Where does the vector \(\begin{bmatrix}-2\\5\end{bmatrix}\) end?</p>
+      <div class="choices">
+        <button type="button" data-correct="true" aria-pressed="false">A · (−2, 5)</button>
+        <button type="button" data-correct="false" aria-pressed="false">B · (5, −2)</button>
+      </div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Split a 12-dimensional vector into adjacent pairs. How many planes result?</li>
+        <li>For \(\mathbf v=\begin{bmatrix}-3\\4\end{bmatrix}\), name the horizontal coordinate, vertical coordinate, and quadrant.</li>
+        <li>Calculate \(\lVert(5,12)\rVert\).</li>
+        <li>Write the third adjacent pair of \(\mathbf q=[q_0,q_1,\ldots,q_9]\).</li>
+        <li>Explain in one sentence why swapping \((q_2,q_3)\) to \((q_3,q_2)\) changes the geometry.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>Six planes.</li><li>Horizontal \(-3\), vertical \(4\), quadrant II.</li><li>\(\sqrt{5^2+12^2}=13\).</li><li>\((q_4,q_5)\), when counting the first pair as pair 1.</li><li>The components are ordered axes, so swapping them reflects the point across the line \(y=x\).</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Primary source:</strong> <a href="https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/positive-definite-matrices-and-applications/linear-transformations-and-their-matrices/">MIT OCW: Linear Transformations and Their Matrices</a>. Read the session overview now; return to the full lecture after Lesson 5.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can split an even-dimensional vector into ordered 2D pairs.</label>
+    <p class="small">Ask the teaching agent about any step that felt like a rule rather than a picture. Report the entry diagnostic result before changing the course pace.</p>
+    <nav class="lesson-nav"><a href="index.html">← Course map</a><a href="0002-radians-and-unit-circle.html">Next: Radians →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 1 · Vectors and pairs</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+</body>
+</html>

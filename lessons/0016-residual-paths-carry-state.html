@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 16: Residual Paths Carry State</title>
+  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0016">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero"><p class="eyebrow">Lesson 16 of 18 · Transformer block</p><h1>Learn an update, then add it to the state.</h1><p class="lede">Your win: calculate both residual additions in a pre-norm block and explain their shape requirement.</p><div class="lesson-meta"><span>12 minutes</span><span>Needs: vector addition</span><span>Outcome: read residual equations</span></div></section>
+
+    <div class="goal"><strong>Mission link:</strong> attention and the feed-forward network do not replace the hidden state directly; each produces an update added to its input.</div>
+
+    <h2>The identity route and the learned route meet</h2>
+    <div class="equation">
+      \[
+      \text{Attention residual:}\qquad
+      Y=X^{(\ell)}+O_{\text{attn}},
+      \]
+      \[
+      \text{FFN residual:}\qquad
+      X^{(\ell+1)}=Y+\operatorname{FFN}(\operatorname{Norm}(Y)).
+      \]
+    </div>
+    <p>A residual sublayer has the pattern \(X+F(X)\), or \(X+F(\operatorname{Norm}(X))\) in a pre-norm block. The sublayer learns a correction \(F\) while the identity route carries \(X\) directly to the addition.</p>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: one token</h3>
+      <p>Suppose a token's state and attention update are</p>
+      <div class="equation">
+        \[
+        \mathbf x=\begin{bmatrix}1&amp;-2&amp;0.5\end{bmatrix},
+        \qquad
+        \mathbf o_{\text{attn}}=\begin{bmatrix}0.2&amp;0.3&amp;-0.1\end{bmatrix}.
+        \]
+        \[
+        \mathbf y=\mathbf x+\mathbf o_{\text{attn}}
+        =\begin{bmatrix}1.2&amp;-1.7&amp;0.4\end{bmatrix}.
+        \]
+      </div>
+      <p>If the feed-forward update is \(\mathbf f=(-0.1,0.5,0.2)\), then</p>
+      <div class="equation">
+        \[
+        \mathbf x^{(\ell+1)}=\mathbf y+\mathbf f
+        =\begin{bmatrix}1.1&amp;-1.2&amp;0.6\end{bmatrix}.
+        \]
+      </div>
+    </section>
+
+    <section class="diagram nn-viz" data-residual-viz>
+      <div class="viz-header">
+        <h3>Scale the learned update while the identity path stays fixed</h3>
+        <output class="readout">update scale = <strong data-update-scale-readout>1.0</strong></output>
+      </div>
+      <div class="controls"><label>Learned-update strength<input type="range" min="0" max="1.5" step="0.1" value="1" data-update-scale></label></div>
+      <div class="viz-body residual-flow">
+        <div class="vector-node"><strong>Identity \(X\)</strong><div class="vector-cells" data-residual-x></div></div>
+        <span class="math-join">+</span>
+        <div class="vector-node"><strong>Update \(F\)</strong><div class="vector-cells" data-residual-update></div></div>
+        <span class="math-join">=</span>
+        <div class="vector-node"><strong>New state \(Y\)</strong><div class="vector-cells" data-residual-output></div></div>
+      </div>
+      <p class="viz-caption" data-residual-readout></p>
+    </section>
+
+    <h2>Addition forces the output width</h2>
+    <div class="shape-line"><span class="shape-chip">\(X:B\times T\times d_{\text{model}}\)</span><span class="shape-arrow">+</span><span class="shape-chip">\(F:B\times T\times d_{\text{model}}\)</span><span class="shape-arrow">=</span><span class="shape-chip">\(Y:B\times T\times d_{\text{model}}\)</span></div>
+    <p>This is why multi-head attention uses \(W_O\) to return to \(d_{\text{model}}\), and why the feed-forward network projects its expanded hidden width back down before addition.</p>
+
+    <div class="callout"><strong>Precise intuition:</strong> the identity path provides a direct route for the current state and for gradients. It does not guarantee that every original fact survives all later computations unchanged.</div>
+
+    <section class="quiz" data-quiz data-success="Correct. Elementwise addition requires matching shapes." data-retry="Both branches meet at an elementwise plus sign."><h3>Retrieval check</h3><p>What shape must an attention update have before adding it to \(X\in\mathbb R^{B\times T\times d_{\text{model}}}\)?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(B\times T\times d_{\text{model}}\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(B\times h\times T\times T\)</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Add \((2,-1,4)\) and \((-0.5,2,1)\).</li>
+        <li>If the learned update is the zero vector, what does a residual sublayer output?</li>
+        <li>For \(X\) of shape \(2\times5\times8\), what shape must \(O_{\text{attn}}\) have?</li>
+        <li>Why is a raw concatenated head tensor sometimes reshaped before residual addition?</li>
+        <li>Write the two residual equations of a pre-norm decoder block.</li>
+        <li>Explain the phrase “learn a correction” using \(X+F(X)\).</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\((1.5,1,5)\).</li><li>\(X\), because \(X+0=X\).</li><li>\(2\times5\times8\).</li><li>The head and feature axes must be concatenated to recover model width, followed by \(W_O\) in standard attention.</li><li>\(Y=X+\operatorname{Attn}(\operatorname{Norm}(X))\); \(X^{(\ell+1)}=Y+\operatorname{FFN}(\operatorname{Norm}(Y))\).</li><li>\(F(X)\) specifies the change to add rather than an entirely new replacement state.</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Primary sources:</strong> <a href="https://openaccess.thecvf.com/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf">He et al., Deep Residual Learning</a>; <a href="https://proceedings.mlr.press/v119/xiong20b.html">Xiong et al., pre-norm analysis</a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can calculate residual updates and state their shape constraint.</label>
+    <nav class="lesson-nav"><a href="0015-multi-heads-split-features.html">← Multiple heads</a><a href="0017-swiglu-feed-forward.html">Next: SwiGLU →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 16 · Residual paths carry state</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
+</body>
+</html>

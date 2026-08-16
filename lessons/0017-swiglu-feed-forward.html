@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 17: SwiGLU Feed-Forward Sublayer</title>
+  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0017">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero"><p class="eyebrow">Lesson 17 of 18 · Transformer block</p><h1>Expand, gate, multiply, project back.</h1><p class="lede">Your win: calculate every branch of a small SwiGLU feed-forward network with actual matrices.</p><div class="lesson-meta"><span>15 minutes</span><span>Needs: matrix multiplication</span><span>Outcome: calculate SwiGLU</span></div></section>
+
+    <div class="goal"><strong>Mission link:</strong> after attention mixes information across tokens, the feed-forward sublayer transforms each token independently across features.</div>
+
+    <h2>Two parallel projections form a gated hidden vector</h2>
+    <div class="equation">
+      \[
+      \operatorname{SwiGLU}(\mathbf x)
+      =\left(\operatorname{SiLU}(\mathbf xW_{\text{gate}})\odot(\mathbf xW_{\text{up}})\right)W_{\text{down}},
+      \]
+      \[
+      \operatorname{SiLU}(z)=z\,\sigma(z),
+      \qquad \sigma(z)=\frac{1}{1+e^{-z}}.
+      \]
+    </div>
+    <div class="shape-line"><span class="shape-chip">\(d_{\text{model}}\)</span><span class="shape-arrow">→</span><span class="shape-chip">two branches of width \(d_{\text{ff}}\)</span><span class="shape-arrow">⊙</span><span class="shape-chip">\(d_{\text{ff}}\)</span><span class="shape-arrow">→</span><span class="shape-chip">\(d_{\text{model}}\)</span></div>
+    <p>The same feed-forward weights are applied separately at every token position. There is no \(T\times T\) token mixing here; attention already performed that role.</p>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: \(d_{\text{model}}=d_{\text{ff}}=2\)</h3>
+      <p>Let</p>
+      <div class="equation">
+        \[
+        \mathbf x=\begin{bmatrix}1&amp;-1\end{bmatrix},\quad
+        W_{\text{gate}}=\begin{bmatrix}1&amp;0\\0&amp;1\end{bmatrix},\quad
+        W_{\text{up}}=\begin{bmatrix}1&amp;1\\1&amp;-1\end{bmatrix},\quad
+        W_{\text{down}}=\begin{bmatrix}1&amp;0\\0&amp;-2\end{bmatrix}.
+        \]
+      </div>
+      <ol class="steps">
+        <li><strong>Gate projection:</strong> \(\mathbf g=\mathbf xW_{\text{gate}}=(1,-1)\).</li>
+        <li><strong>Apply SiLU:</strong> \(\sigma(1)\approx0.731\), \(\sigma(-1)\approx0.269\), so \(\operatorname{SiLU}(\mathbf g)\approx(0.731,-0.269)\).</li>
+        <li><strong>Up projection:</strong> \(\mathbf u=\mathbf xW_{\text{up}}=(0,2)\).</li>
+        <li><strong>Gate elementwise:</strong> \((0.731,-0.269)\odot(0,2)=(0,-0.538)\).</li>
+        <li><strong>Project down:</strong> \((0,-0.538)W_{\text{down}}=(0,1.076)\).</li>
+      </ol>
+      <p>Therefore \(\operatorname{SwiGLU}(1,-1)\approx(0,1.076)\) for these toy weights.</p>
+    </section>
+
+    <section class="diagram nn-viz" data-swiglu-viz>
+      <div class="viz-header"><h3>Trace two numbers through both SwiGLU branches</h3><output class="readout">\(x=\)<strong data-swiglu-input></strong></output></div>
+      <div class="controls">
+        <label>\(x_1\)<input type="range" min="-2" max="2" step="0.1" value="1" data-swiglu-x1></label>
+        <label>\(x_2\)<input type="range" min="-2" max="2" step="0.1" value="-1" data-swiglu-x2></label>
+      </div>
+      <div class="viz-body swiglu-flow">
+        <div class="swiglu-stage gate"><strong>Gate \(xW_g\)</strong><div class="pair-values" data-swiglu-gate></div></div>
+        <div class="swiglu-stage gate"><strong>SiLU(gate)</strong><div class="pair-values" data-swiglu-silu></div></div>
+        <div class="swiglu-stage"><strong>Up \(xW_u\)</strong><div class="pair-values" data-swiglu-up></div></div>
+        <div class="swiglu-stage product"><strong>Elementwise product</strong><div class="pair-values" data-swiglu-product></div></div>
+        <div class="swiglu-stage"><strong>Down \(W_d\)</strong><div class="pair-values" data-swiglu-output></div></div>
+      </div>
+      <p class="viz-caption">The two middle branches have matching widths so their coordinates can multiply one by one.</p>
+    </section>
+
+    <h2>Why “gate”?</h2>
+    <p>The SiLU branch scales each coordinate of the up branch through elementwise multiplication. A gate near zero suppresses that coordinate; a larger signed gate allows or reverses more of it. The final down projection mixes the gated hidden coordinates back into model width.</p>
+
+    <section class="quiz" data-quiz data-success="Correct. The two branches must align coordinate by coordinate for the Hadamard product." data-retry="The symbol ⊙ means elementwise multiplication."><h3>Retrieval check</h3><p>What must match before \(\operatorname{SiLU}(\mathbf g)\odot\mathbf u\)?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · their \(d_{\text{ff}}\) widths</button><button type="button" data-correct="false" aria-pressed="false">B · their token scores</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Calculate \(\sigma(0)\) and \(\operatorname{SiLU}(0)\).</li>
+        <li>Calculate \(\operatorname{SiLU}(1)\) to three decimals.</li>
+        <li>For gate vector \((0.5,-1)\) after SiLU and up vector \((4,3)\), compute their elementwise product.</li>
+        <li>Recompute the worked example's up projection by matrix multiplication.</li>
+        <li>If \(d_{\text{model}}=4,d_{\text{ff}}=6\), state the shapes of \(W_{\text{gate}},W_{\text{up}},W_{\text{down}}\) for row-vector notation.</li>
+        <li>Explain which sublayer mixes tokens and which transforms tokens independently.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\(\sigma(0)=0.5\), so \(\operatorname{SiLU}(0)=0\).</li><li>\(1/(1+e^{-1})\approx0.731\).</li><li>\((2,-3)\).</li><li>\((1,-1)\begin{bmatrix}1&amp;1\\1&amp;-1\end{bmatrix}=(0,2)\).</li><li>\(W_{\text{gate}},W_{\text{up}}:4\times6\); \(W_{\text{down}}:6\times4\).</li><li>Self-attention mixes information across token positions; the FFN applies the same feature transformation independently to each token.</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Primary sources:</strong> <a href="https://arxiv.org/abs/2002.05202">Shazeer, GLU Variants Improve Transformer</a>; <a href="https://arxiv.org/abs/2302.13971">Touvron et al., LLaMA</a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can calculate gate, up, product, and down stages of SwiGLU.</label>
+    <nav class="lesson-nav"><a href="0016-residual-paths-carry-state.html">← Residual paths</a><a href="0018-walk-one-transformer-block.html">Next: Complete block →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 17 · SwiGLU feed-forward sublayer</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
+</body>
+</html>

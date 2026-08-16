@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 8: Position as Frequency</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0008">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/rope-reference.html">Formula sheet</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 8 of 9 · RoPE assembly</p>
+      <h1>Each pair carries a different clock.</h1>
+      <p class="lede">Your win: explain why adjacent dimensions are paired and why the pairs rotate at geometrically spaced rates.</p>
+      <div class="lesson-meta"><span>14 minutes</span><span>Needs: radians, rotation</span><span>Outcome: interpret \(\theta_i\)</span></div>
+    </section>
+    <div class="goal"><strong>Mission link:</strong> the supplied diagram's fast and slow rotations are the multi-scale positional signal used by RoPE.</div>
+
+    <h2>Position becomes phase</h2>
+    <p>For dimension pair \(i\), choose an angular frequency \(\theta_i\). At token position \(m\), rotate by:</p>
+    <div class="equation">\[\phi_i(m)=m\theta_i.\]</div>
+    <p>Moving forward one token adds \(\theta_i\) radians. Moving forward \(r\) tokens adds \(r\theta_i\) radians.</p>
+
+    <h2>The original frequency schedule</h2>
+    <div class="equation">\[\theta_i=10000^{-2i/d_h},\qquad i=0,1,\ldots,\frac{d_h}{2}-1.\]</div>
+    <p>Here \(d_h\) is the query/key width of one attention head. The frequencies decrease geometrically: early pairs turn quickly; later pairs turn slowly.</p>
+
+    <section class="diagram" data-frequency-lab>
+      <canvas aria-label="Four dimension pairs rotating at different frequencies"></canvas>
+      <div class="controls"><label>Token position \(m\)<input type="range" min="0" max="100" step="1" value="20"></label><output class="readout" data-position-readout>position m = 20</output></div>
+    </section>
+
+    <h2>Example: \(d_h=8\)</h2>
+    <table>
+      <thead><tr><th>Pair</th><th>Dimensions</th><th>\(\theta_i\)</th><th>Period \(2\pi/\theta_i\)</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>\((q_0,q_1)\)</td><td>\(1\)</td><td>\(\approx6.28\) tokens</td></tr>
+        <tr><td>1</td><td>\((q_2,q_3)\)</td><td>\(0.1\)</td><td>\(\approx62.8\) tokens</td></tr>
+        <tr><td>2</td><td>\((q_4,q_5)\)</td><td>\(0.01\)</td><td>\(\approx628\) tokens</td></tr>
+        <tr><td>3</td><td>\((q_6,q_7)\)</td><td>\(0.001\)</td><td>\(\approx6283\) tokens</td></tr>
+      </tbody>
+    </table>
+    <p>Fast pairs are sensitive to small shifts. Slow pairs preserve distinct phase over longer ranges. Together, the stack offers multiple positional scales.</p>
+
+    <section class="quiz" data-quiz data-success="Correct. A smaller angular step requires more tokens to complete 2π radians." data-retry="Use period = 2π divided by angular frequency.">
+      <h3>Retrieval check</h3>
+      <p>Which frequency gives the longer period?</p>
+      <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(\theta=0.01\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(\theta=1.00\)</button></div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>For \(d_h=8\), list all four adjacent dimension pairs.</li>
+        <li>Calculate the angle for \(m=7\) and \(\theta_i=0.1\).</li>
+        <li>Calculate the relative angle for positions \(m=5\), \(n=8\), and \(\theta_i=0.1\).</li>
+        <li>Estimate the period for \(\theta_i=0.01\).</li>
+        <li>Explain why using only \(\theta=1\) would make long-range positions ambiguous.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\((q_0,q_1),(q_2,q_3),(q_4,q_5),(q_6,q_7)\).</li><li>\(0.7\) radians.</li><li>\((8-5)(0.1)=0.3\) radians.</li><li>\(2\pi/0.01\approx628\) tokens.</li><li>The phase repeats every \(2\pi\), so one fast clock wraps after only about 6.28 tokens; slower clocks retain other scales.</li></ol></details>
+    </section>
+
+    <div class="callout"><strong>Why pairs?</strong> a proper rotation needs a plane. Pairing two real dimensions creates that plane; assigning one \(\theta_i\) to it creates one positional clock.</div>
+    <p class="source"><strong>Primary source:</strong> <a href="https://arxiv.org/html/2104.09864#S3.SS2.SSS2">Su et al., RoFormer, Section 3.2.2</a>. Compare Equations 14–16 with the pair table above.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can explain what \(i\), \(d_h\), \(\theta_i\), \(m\theta_i\), and \(2\pi/\theta_i\) mean.</label>
+    <p class="small">Ask the teaching agent to calculate the schedule for a different head dimension if the exponent still feels opaque.</p>
+    <nav class="lesson-nav"><a href="0007-attention-is-comparison.html">← Attention</a><a href="0009-derive-relative-position.html">Next: Derivation →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 8 · Position as frequency</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+  <script src="../assets/frequency-lab.js"></script>
+</body>
+</html>

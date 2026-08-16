@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 7: Attention Is Comparison</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0007">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/rope-reference.html">Formula sheet</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 7 of 9 · Attention bridge</p>
+      <h1>Attention begins with a comparison.</h1>
+      <p class="lede">Your win: locate the query-key dot product where RoPE injects position, without learning the full Transformer.</p>
+      <div class="lesson-meta"><span>10 minutes</span><span>Needs: dot products</span><span>Outcome: identify the RoPE insertion point</span></div>
+    </section>
+    <div class="goal"><strong>Mission link:</strong> RoPE matters because it changes the score used to decide which keys a query aligns with.</div>
+
+    <h2>Three roles</h2>
+    <div class="three-col">
+      <article class="panel teal"><h3>Query \(\mathbf q_m\)</h3><p>What token \(m\) is looking for.</p></article>
+      <article class="panel coral"><h3>Key \(\mathbf k_n\)</h3><p>What token \(n\) offers for matching.</p></article>
+      <article class="panel gold"><h3>Value \(\mathbf v_n\)</h3><p>The information carried if the match receives weight.</p></article>
+    </div>
+
+    <h2>The score before softmax</h2>
+    <div class="equation">\[s_{m,n}=\frac{\mathbf q_m^{\mathsf T}\mathbf k_n}{\sqrt{d_k}}.\]</div>
+    <p>The dot product supplies alignment. The factor \(1/\sqrt{d_k}\) controls scale. Softmax later converts all scores for query \(m\) into weights, but RoPE acts earlier, on \(\mathbf q_m\) and \(\mathbf k_n\).</p>
+
+    <h2>RoPE changes the comparison frame</h2>
+    <div class="equation">
+      \[
+      \mathbf q'_m=R_m\mathbf q_m,\qquad
+      \mathbf k'_n=R_n\mathbf k_n,\qquad
+      \mathbf v'_n=\mathbf v_n.
+      \]
+    </div>
+    <p>Queries and keys rotate according to their positions. Values remain unchanged in the original RoPE formulation. The rotated score is:</p>
+    <div class="equation">\[s'_{m,n}=\frac{(R_m\mathbf q_m)^{\mathsf T}(R_n\mathbf k_n)}{\sqrt{d_k}}.\]</div>
+
+    <section class="worked-example">
+      <h3>A tiny alignment example</h3>
+      <p>Let \(\mathbf q=(1,0)\). Then \(\mathbf q^{\mathsf T}(1,0)=1\), while \(\mathbf q^{\mathsf T}(0,1)=0\). Rotating a key changes its alignment with the query even though its length stays one.</p>
+    </section>
+
+    <section class="quiz" data-quiz data-success="Correct. RoPE rotates queries and keys because their dot product determines attention scores." data-retry="Look for the two vectors inside the score numerator.">
+      <h3>Retrieval check</h3>
+      <p>Which pair does original RoPE rotate?</p>
+      <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · Q and K</button><button type="button" data-correct="false" aria-pressed="false">B · K and V</button></div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Compute \((1,2)^{\mathsf T}(3,4)\).</li>
+        <li>Which has greater alignment with \((1,0)\): \((0.8,0.2)\) or \((0.2,0.8)\)? Show the two dot products.</li>
+        <li>Write the scaled score for \(d_k=4\), \(\mathbf q=(1,2)\), and \(\mathbf k=(3,4)\).</li>
+        <li>State in one sentence why RoPE rotates \(Q\) and \(K\), not only \(V\).</li>
+        <li>If \(R_m=I\) and \(R_n\) is a quarter turn, compute \((R_m(1,0))^{\mathsf T}(R_n(1,0))\).</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\(11\).</li><li>\((0.8,0.2)\); the scores are \(0.8\) and \(0.2\).</li><li>\(11/\sqrt4=5.5\).</li><li>The query-key dot product creates the comparison score that needs positional information.</li><li>\((1,0)^{\mathsf T}(0,1)=0\).</li></ol></details>
+    </section>
+
+    <div class="callout"><strong>Keep the scope narrow:</strong> to understand RoPE, you need the query-key score. You do not yet need multi-head concatenation, masking, or the output projection.</div>
+    <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., “Attention Is All You Need,” Section 3.2.1</a>. Read Equation 1 and the paragraph immediately below it.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can point to the exact dot product that RoPE modifies.</label>
+    <p class="small">Ask the teaching agent to trace one query against two keys if the three Q/K/V roles still blur together.</p>
+    <nav class="lesson-nav"><a href="0006-dot-products-and-transposes.html">← Dot products</a><a href="0008-position-as-frequency.html">Next: Frequencies →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 7 · Attention is comparison</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+</body>
+</html>

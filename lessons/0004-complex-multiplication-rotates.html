@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 4: Complex Multiplication Rotates</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0004">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 4 of 9 · Complex-number foundation</p>
+      <h1>Multiplication can turn an arrow.</h1>
+      <p class="lede">Your win: explain why multiplying by \(e^{i\theta}\) adds an angle while preserving magnitude.</p>
+      <div class="lesson-meta"><span>14 minutes</span><span>Needs: unit circle, complex plane</span><span>Outcome: phase as rotation</span></div>
+    </section>
+
+    <div class="goal"><strong>Mission link:</strong> in the RoFormer 2D derivation, position \(m\) is applied by multiplying a query or key by \(e^{im\theta}\).</div>
+
+    <h2>Package a unit-circle point</h2>
+    <p>Euler's formula writes the unit-circle point \((\cos\theta,\sin\theta)\) as one complex number:</p>
+    <div class="equation">\[e^{i\theta}=\cos\theta+i\sin\theta\]</div>
+    <p>Its magnitude is one because \(\cos^2\theta+\sin^2\theta=1\). It carries direction, but no stretching.</p>
+
+    <h2>Multiply and collect coordinates</h2>
+    <p>Let \(z=x+iy\). Multiplying by the unit phase gives:</p>
+    <div class="equation">
+      \[
+      \begin{aligned}
+      z'&amp;=(x+iy)(\cos\theta+i\sin\theta)\\
+        &amp;=(x\cos\theta-y\sin\theta)
+          +i(x\sin\theta+y\cos\theta).
+      \end{aligned}
+      \]
+    </div>
+    <p>Read the real and imaginary parts as the new coordinates:</p>
+    <div class="equation">
+      \[
+      \begin{aligned}
+      x'&amp;=x\cos\theta-y\sin\theta,\\
+      y'&amp;=x\sin\theta+y\cos\theta.
+      \end{aligned}
+      \]
+    </div>
+
+    <section class="diagram" data-rotation-lab data-x="1" data-y="0.55">
+      <canvas aria-label="Interactive vector rotated by complex phase multiplication"></canvas>
+      <div class="controls">
+        <label>Phase \(\theta\)<input type="range" min="-180" max="180" step="10" value="60"></label>
+        <output class="readout" data-angle-readout>60° · 1.05 rad</output>
+        <span class="small">Rotated coordinates</span><output class="readout" data-vector-readout>\((0.02,1.14)\)</output>
+      </div>
+    </section>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: rotate \(2+i\) by \(\pi/2\)</h3>
+      <div class="equation">
+        \[
+        \begin{aligned}
+        z'&amp;=(2+i)e^{i\pi/2}\\
+          &amp;=(2+i)(0+i)\\
+          &amp;=2i+i^2\\
+          &amp;=-1+2i.
+        \end{aligned}
+        \]
+      </div>
+      <p>The point \((2,1)\) becomes \((-1,2)\), exactly the quarter-turn rule \((x,y)\mapsto(-y,x)\). Its magnitude stays \(\sqrt5\).</p>
+    </section>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: rotate \(2\) by \(\pi/6\)</h3>
+      <div class="equation">
+        \[
+        2e^{i\pi/6}
+        =2\left(\frac{\sqrt3}{2}+\frac12 i\right)
+        =\sqrt3+i.
+        \]
+      </div>
+      <p>The point \((2,0)\) becomes \((\sqrt3,1)\). Both have magnitude \(2\).</p>
+    </section>
+
+    <h2>Why angles add</h2>
+    <div class="equation">\[e^{i\alpha}e^{i\beta}=e^{i(\alpha+\beta)}\]</div>
+    <p>Two successive phase multiplications are two successive turns. A turn by \(\alpha\), followed by a turn by \(\beta\), is a turn by \(\alpha+\beta\). This composition rule will later collapse \(R_{-m}R_n\) into \(R_{n-m}\).</p>
+
+    <section class="quiz" data-quiz data-success="Correct. Unit complex phases multiply by adding their angles." data-retry="Think about two turns performed one after the other.">
+      <h3>Retrieval check</h3>
+      <p>What does \(e^{i\alpha}e^{i\beta}\) do to phase?</p>
+      <div class="choices">
+        <button type="button" data-correct="true" aria-pressed="false">A · sum phase</button>
+        <button type="button" data-correct="false" aria-pressed="false">B · sum scale</button>
+      </div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Rotate \(1+i\) by \(\pi/2\) using complex multiplication.</li>
+        <li>Rotate \(3-2i\) by \(\pi\).</li>
+        <li>Expand \((x+iy)(\cos\theta+i\sin\theta)\) without looking above.</li>
+        <li>Show numerically that \(|-1+2i|=|2+i|\).</li>
+        <li>Simplify \(e^{i\pi/3}e^{i\pi/6}\) and state the net angle.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\((1+i)i=-1+i\).</li><li>\((3-2i)(-1)=-3+2i\).</li><li>\((x\cos\theta-y\sin\theta)+i(x\sin\theta+y\cos\theta)\).</li><li>Both magnitudes are \(\sqrt5\).</li><li>\(e^{i\pi/2}=i\); the net angle is \(\pi/2\).</li></ol></details>
+    </section>
+
+    <div class="callout"><strong>RoPE preview:</strong> for pair \(i\), token position \(m\) contributes phase \(m\theta_i\), so the pair becomes \(z'_i=z_i e^{im\theta_i}\).</div>
+    <p class="source"><strong>Primary source:</strong> <a href="https://openstax.org/books/precalculus-2e/pages/8-key-concepts">OpenStax Chapter 8 Key Concepts</a>, especially polar form and the rule that multiplying complex numbers adds their angles.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can expand \((x+iy)e^{i\theta}\) into its two rotated coordinates.</label>
+    <p class="small">Ask the teaching agent to check your expansion with a different pair of coordinates before moving on.</p>
+    <nav class="lesson-nav"><a href="0003-complex-numbers-as-vectors.html">← Complex plane</a><a href="0005-matrices-as-motions.html">Next: Matrices →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 4 · Complex multiplication rotates</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+  <script src="../assets/rotation-lab.js"></script>
+</body>
+</html>

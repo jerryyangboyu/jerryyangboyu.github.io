@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 14: Softmax and Weighted Values</title>
+  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0014">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero"><p class="eyebrow">Lesson 14 of 18 · Transformer block</p><h1>Turn comparisons into a blend.</h1><p class="lede">Your win: calculate softmax probabilities from masked scores and use them to form a weighted sum of value vectors.</p><div class="lesson-meta"><span>15 minutes</span><span>Needs: exponentials</span><span>Outcome: calculate one attention output</span></div></section>
+
+    <div class="goal"><strong>Mission link:</strong> \(Q'\) and \(K'\) decide the weights; the weights select and blend information carried by \(V\).</div>
+
+    <h2>Softmax normalizes an entire score row</h2>
+    <div class="equation">
+      \[
+      P_{ij}=\operatorname{softmax}(A_{i,:})_j
+      =\frac{e^{A_{ij}}}{\sum_{r=1}^{T}e^{A_{ir}}},
+      \qquad \sum_jP_{ij}=1.
+      \]
+    </div>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: correct the supplied diagram</h3>
+      <p>For masked scores \((0.7,1.1,0.2,-\infty)\):</p>
+      <div class="equation">
+        \[
+        (e^{0.7},e^{1.1},e^{0.2},e^{-\infty})
+        \approx(2.014,3.004,1.221,0),
+        \]
+        \[
+        Z=2.014+3.004+1.221=6.239,
+        \]
+        \[
+        \mathbf p\approx
+        \left(\frac{2.014}{6.239},\frac{3.004}{6.239},\frac{1.221}{6.239},0\right)
+        =(0.323,0.482,0.196,0).
+        \]
+      </div>
+      <p>The image lists \((0.26,0.41,0.33,0)\), but that vector is not the softmax of the displayed scores. This course uses the calculated values above.</p>
+    </section>
+
+    <h2>The probabilities blend value vectors</h2>
+    <div class="equation">
+      \[O=PV,\qquad \mathbf o_i=\sum_jP_{ij}\mathbf v_j.\]
+    </div>
+    <p>Let \(\mathbf v_1=(1,0)\), \(\mathbf v_2=(0,2)\), \(\mathbf v_3=(1,1)\), and \(\mathbf v_4=(-1,1)\). Then for query 3:</p>
+    <div class="equation">
+      \[
+      \mathbf o_3
+      =0.323(1,0)+0.482(0,2)+0.196(1,1)+0(-1,1)
+      \approx(0.519,1.159).
+      \]
+    </div>
+
+    <section class="diagram" data-attention-lab>
+      <h3>Move the query and watch the distribution</h3>
+      <div class="controls"><label>Query position \(i\)<input type="range" min="1" max="4" step="1" value="3" data-query-position></label><output class="readout">\(i=\)<strong data-position-readout>3</strong></output></div>
+      <table><thead><tr><th>Key</th><th>Raw score</th><th>After mask</th><th>Softmax weight</th><th>Value</th></tr></thead><tbody data-attention-rows></tbody></table>
+      <p>Weighted output: <strong data-attention-output></strong></p>
+    </section>
+
+    <div class="callout"><strong>Keep the roles separate:</strong> query-key scores answer “how much?”; values answer “what content is carried into the output?” RoPE changes the former by rotating Q and K, while V stays unrotated.</div>
+
+    <section class="quiz" data-quiz data-success="Correct. Every softmax row is a probability distribution." data-retry="Softmax divides every positive exponential by their shared sum."><h3>Retrieval check</h3><p>What must the weights in one attention row sum to?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(1\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(d_h\)</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Compute \(\operatorname{softmax}(0,0)\).</li>
+        <li>Compute \(\operatorname{softmax}(\ln2,0)\).</li>
+        <li>Why does adding the same constant to every finite score leave softmax unchanged?</li>
+        <li>Use weights \((0.25,0.75)\) and values \((2,0)\), \((0,4)\) to calculate the output.</li>
+        <li>Using \((0.323,0.482,0.196,0)\), verify the weights sum to approximately one. Explain the rounding discrepancy.</li>
+        <li>If all attention weight is on \(\mathbf v_2\), what is the output?</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\((0.5,0.5)\).</li><li>\((2/3,1/3)\), because \(e^{\ln2}=2\).</li><li>The common factor \(e^c\) cancels between numerator and denominator.</li><li>\(0.25(2,0)+0.75(0,4)=(0.5,3)\).</li><li>The displayed sum is \(1.001\); the exact unrounded values sum to \(1\).</li><li>Exactly \(\mathbf v_2\).</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., Section 3.2.1</a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can calculate softmax and a weighted sum of values.</label>
+    <nav class="lesson-nav"><a href="0013-causal-mask-before-softmax.html">← Causal mask</a><a href="0015-multi-heads-split-features.html">Next: Multiple heads →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 14 · Softmax and weighted values</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/attention-lab.js"></script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 11: Normalize Each Token</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0011">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 11 of 18 · Transformer block</p>
+      <h1>Normalize across features, one token at a time.</h1>
+      <p class="lede">Your win: calculate a normalized token vector and distinguish LayerNorm, RMSNorm, Pre-LN, and Post-LN.</p>
+      <div class="lesson-meta"><span>14 minutes</span><span>Needs: mean and square root</span><span>Outcome: calculate \(\operatorname{Norm}(x)\)</span></div>
+    </section>
+
+    <div class="goal"><strong>Mission link:</strong> the depicted block is pre-norm: it normalizes the current hidden state before attention and before the feed-forward sublayer.</div>
+
+    <h2>LayerNorm</h2>
+    <p>For one token vector \(\mathbf x\in\mathbb R^d\), calculate statistics across its \(d\) features:</p>
+    <div class="equation">
+      \[
+      \mu=\frac1d\sum_{r=1}^d x_r,\qquad
+      \sigma^2=\frac1d\sum_{r=1}^d(x_r-\mu)^2,
+      \qquad
+      \operatorname{LN}(\mathbf x)=\gamma\odot\frac{\mathbf x-\mu}{\sqrt{\sigma^2+\varepsilon}}+\beta.
+      \]
+    </div>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: \(\mathbf x=(1,2,3)\)</h3>
+      <div class="equation">
+        \[
+        \mu=2,\qquad
+        \sigma^2=\frac{(1-2)^2+(2-2)^2+(3-2)^2}{3}=\frac23.
+        \]
+      </div>
+      <p>Ignoring tiny \(\varepsilon\) and taking \(\gamma=1,\beta=0\):</p>
+      <div class="equation">
+        \[
+        \operatorname{LN}(1,2,3)
+        =\frac{(-1,0,1)}{\sqrt{2/3}}
+        \approx(-1.225,0,1.225).
+        \]
+      </div>
+    </section>
+
+    <section class="diagram nn-viz" data-norm-viz>
+      <div class="viz-header">
+        <h3>Compare the same token before and after normalization</h3>
+        <div class="viz-actions" aria-label="Choose normalization"><button type="button" data-norm-mode="layer" aria-pressed="true">LayerNorm</button><button type="button" data-norm-mode="rms" aria-pressed="false">RMSNorm</button></div>
+      </div>
+      <div class="viz-body vector-compare">
+        <div class="vector-plot"><h4>Input \((1,2,3)\)</h4><div class="value-bars" data-norm-before></div></div>
+        <div class="vector-plot"><h4>Normalized features</h4><div class="value-bars" data-norm-after></div></div>
+      </div>
+      <p class="viz-caption" data-norm-readout></p>
+    </section>
+
+    <h2>RMSNorm: scale without centering</h2>
+    <div class="equation">
+      \[
+      \operatorname{RMS}(\mathbf x)=\sqrt{\frac1d\sum_{r=1}^d x_r^2+\varepsilon},
+      \qquad
+      \operatorname{RMSNorm}(\mathbf x)=\gamma\odot\frac{\mathbf x}{\operatorname{RMS}(\mathbf x)}.
+      \]
+    </div>
+    <p>For \((1,2,3)\), \(\operatorname{RMS}=\sqrt{14/3}\approx2.160\), so the unscaled output is approximately \((0.463,0.926,1.389)\). Unlike LayerNorm, its mean is not forced to zero.</p>
+
+    <h2>Placement is a separate choice</h2>
+    <div class="two-col">
+      <article class="panel teal"><h3>Pre-LN, as depicted</h3><p>\(Y=X+F(\operatorname{Norm}(X))\)</p><p>Normalize before the sublayer.</p></article>
+      <article class="panel coral"><h3>Original Post-LN</h3><p>\(Y=\operatorname{Norm}(X+F(X))\)</p><p>Normalize after residual addition.</p></article>
+    </div>
+    <p>LayerNorm vs RMSNorm asks <em>what computation?</em> Pre-LN vs Post-LN asks <em>where is it placed?</em></p>
+
+    <section class="quiz" data-quiz data-success="Correct. Normalization runs across the feature coordinates of each token." data-retry="The batch and token axes identify examples; the feature axis is normalized.">
+      <h3>Retrieval check</h3>
+      <p>Which axis supplies the mean and variance for one token?</p>
+      <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · feature axis</button><button type="button" data-correct="false" aria-pressed="false">B · token axis</button></div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Compute the mean and variance of \((2,2,4,4)\).</li>
+        <li>Normalize \((2,2,4,4)\) with LayerNorm, ignoring \(\varepsilon\), \(\gamma=1\), and \(\beta=0\).</li>
+        <li>Compute the RMS of \((3,4)\).</li>
+        <li>State whether RMSNorm subtracts the mean.</li>
+        <li>Rewrite “normalize, attend, add the original” as one Pre-LN formula.</li>
+        <li>Does normalization change the tensor shape? Explain.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\(\mu=3,\sigma^2=1\).</li><li>\((-1,-1,1,1)\).</li><li>\(\sqrt{(9+16)/2}=\sqrt{12.5}\approx3.536\).</li><li>No.</li><li>\(Y=X+\operatorname{Attention}(\operatorname{Norm}(X))\).</li><li>No; it transforms feature values but preserves every axis length.</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Primary sources:</strong> <a href="https://arxiv.org/abs/1607.06450">Ba et al., Layer Normalization</a>; <a href="https://proceedings.neurips.cc/paper/2019/hash/1e8a19426224ca89e83cef47f1e7f53b-Abstract.html">Zhang and Sennrich, RMSNorm</a>; <a href="https://proceedings.mlr.press/v119/xiong20b.html">Xiong et al., Pre-LN vs Post-LN</a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can calculate LayerNorm and name the two independent architecture choices.</label>
+    <p class="small">Ask the teaching agent to check one normalization calculation before advancing.</p>
+    <nav class="lesson-nav"><a href="0010-hidden-states-and-shapes.html">← Tensor shapes</a><a href="0012-project-qkv-and-split-heads.html">Next: Q, K, V →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 11 · Normalize each token</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
+</body>
+</html>

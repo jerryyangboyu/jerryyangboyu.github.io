@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Math Foundations for RoPE &amp; Transformers Glossary</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="../lessons/index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="transformer-block-reference.html">Block reference</a></header>
+  <main>
+    <section class="hero"><p class="eyebrow">Printable reference</p><h1>Glossary</h1><p class="lede">The vocabulary used consistently across all 18 lessons.</p></section>
+    <table>
+      <thead><tr><th>Term</th><th>Working meaning in this course</th><th>RoPE connection</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Scalar</strong></td><td>One number, such as an angle or scale.</td><td>Position \(m\) and frequency \(\theta_i\) are scalars.</td></tr>
+        <tr><td><strong>Vector</strong></td><td>An ordered list of components; geometrically, an arrow.</td><td>Each query and key is a vector.</td></tr>
+        <tr><td><strong>Dimension pair</strong></td><td>Two adjacent vector components treated as coordinates in one plane.</td><td>\((q_{2i},q_{2i+1})\) receives one rotation frequency.</td></tr>
+        <tr><td><strong>Magnitude</strong></td><td>The length \(\lVert\mathbf v\rVert=\sqrt{x^2+y^2}\).</td><td>A rotation preserves it.</td></tr>
+        <tr><td><strong>Radian</strong></td><td>An angle measured as arc length divided by radius.</td><td>\(m\theta_i\) is a radian angle.</td></tr>
+        <tr><td><strong>Phase</strong></td><td>Angular location around a cycle.</td><td>RoPE makes position act as phase.</td></tr>
+        <tr><td><strong>Frequency</strong></td><td>Angle advanced per token in this course.</td><td>Each pair uses its own \(\theta_i\).</td></tr>
+        <tr><td><strong>Complex number</strong></td><td>\(x+iy\), another notation for the point \((x,y)\).</td><td>A pair can be rotated by multiplication with \(e^{im\theta}\).</td></tr>
+        <tr><td><strong>Conjugate</strong></td><td>\(x-iy\), reflection across the real axis.</td><td>For unit phases, conjugation reverses rotation.</td></tr>
+        <tr><td><strong>Matrix</strong></td><td>A rectangular array representing a linear transformation.</td><td>\(R_m\) rotates every dimension pair.</td></tr>
+        <tr><td><strong>Transpose</strong></td><td>Swap rows and columns: \(A^{\mathsf T}\).</td><td>For a rotation, \(R_m^{\mathsf T}=R_{-m}=R_m^{-1}\).</td></tr>
+        <tr><td><strong>Dot product</strong></td><td>\(\mathbf q^{\mathsf T}\mathbf k=\sum_i q_i k_i\), a signed alignment score.</td><td>Attention compares each query and key with it.</td></tr>
+        <tr><td><strong>Orthogonal matrix</strong></td><td>A matrix whose transpose is its inverse.</td><td>Rotation matrices are orthogonal and length-preserving.</td></tr>
+        <tr><td><strong>Relative position</strong></td><td>The displacement \(n-m\) between two token indices.</td><td>\(R_m^{\mathsf T}R_n=R_{n-m}\) puts it inside the attention score.</td></tr>
+        <tr><td><strong>Hidden state</strong></td><td>The current feature vector representing one token at one layer.</td><td>Its normalized form is projected into Q, K, and V.</td></tr>
+        <tr><td><strong>Tensor axes</strong></td><td>The named directions of an array: batch \(B\), token \(T\), feature \(d_{\text{model}}\), head \(h\), and head feature \(d_h\).</td><td>RoPE pairs coordinates only inside the \(d_h\) axis.</td></tr>
+        <tr><td><strong>Projection</strong></td><td>A learned matrix multiplication that maps features into another feature space.</td><td>\(W_Q,W_K,W_V\) produce the vectors used by RoPE and attention.</td></tr>
+        <tr><td><strong>LayerNorm</strong></td><td>Centers and scales one token using statistics across its feature coordinates.</td><td>Often appears before attention in a pre-norm block.</td></tr>
+        <tr><td><strong>RMSNorm</strong></td><td>Scales one token by its root mean square without subtracting its mean.</td><td>A common modern normalization used with RoPE models.</td></tr>
+        <tr><td><strong>Pre-norm</strong></td><td>Normalize before a sublayer: \(X+F(\operatorname{Norm}(X))\).</td><td>Describes the placement used in this course's block.</td></tr>
+        <tr><td><strong>Causal mask</strong></td><td>Adds \(-\infty\) to score entries where key position \(j&gt;i\).</td><td>Prevents a query from attending to future positions.</td></tr>
+        <tr><td><strong>Softmax</strong></td><td>Turns one score row into nonnegative weights that sum to one.</td><td>Converts RoPE-modified query-key scores into attention weights.</td></tr>
+        <tr><td><strong>Attention head</strong></td><td>One learned feature subspace that attends over the full token sequence.</td><td>Each head applies RoPE within its own paired feature coordinates.</td></tr>
+        <tr><td><strong>Residual path</strong></td><td>An identity route that adds a sublayer's learned update to its input.</td><td>Keeps the block input and update in the same model-width shape.</td></tr>
+        <tr><td><strong>SiLU</strong></td><td>The smooth activation \(z\sigma(z)\).</td><td>Forms the nonlinear gate in SwiGLU.</td></tr>
+        <tr><td><strong>SwiGLU</strong></td><td>A feed-forward layer with gate and up projections multiplied elementwise, then projected down.</td><td>Transforms each token after its attention residual.</td></tr>
+      </tbody>
+    </table>
+    <p class="source">Definitions follow the course's cited sources in <a href="../RESOURCES.md">RESOURCES.md</a>. Also keep the <a href="rope-reference.html">RoPE sheet</a> and <a href="transformer-block-reference.html">block sheet</a> nearby.</p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 18: Walk One Complete Transformer Block</title>
+  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body data-lesson="0018">
+  <header class="site-header"><a class="brand" href="index.html">Math Foundations for RoPE &amp; Transformers</a><a class="course-link" href="../reference/transformer-block-visual.html">Full visual map</a></header>
+  <main>
+    <section class="hero"><p class="eyebrow">Lesson 18 of 18 · Capstone</p><h1>Walk one block without losing a dimension.</h1><p class="lede">Your win: narrate every operation in a pre-norm causal Transformer block with RoPE, including its shape and purpose.</p><div class="lesson-meta"><span>20 minutes</span><span>Needs: Lessons 1–17</span><span>Outcome: teach the complete algorithm</span></div></section>
+
+    <div class="goal"><strong>Final mission:</strong> start with \(X^{(\ell)}\), finish with \(X^{(\ell+1)}\), and explain exactly where position, comparison, probability, content, and residual updates enter.</div>
+
+    <section class="diagram nn-viz" data-block-stepper>
+      <div class="viz-header"><h3>Step through the neural network block</h3><span class="small">Input → operation → output</span></div>
+      <div class="block-step-strip" data-block-steps></div>
+      <div class="block-stage-visual">
+        <div class="stage-tensor" data-stage-input></div>
+        <div class="stage-operation" data-stage-operation></div>
+        <div class="stage-tensor" data-stage-output></div>
+      </div>
+      <div class="stepper-controls"><button type="button" data-stage-previous>Previous</button><output data-stage-status></output><button type="button" data-stage-next>Next</button></div>
+    </section>
+
+    <h2>The complete pre-norm block</h2>
+    <ol class="block-pipeline">
+      <li><span class="step-no">1</span><span><strong>Normalize:</strong> \(\bar X=\operatorname{Norm}(X^{(\ell)})\)</span><span>\(B\times T\times d_{\text{model}}\)</span></li>
+      <li><span class="step-no">2</span><span><strong>Project:</strong> \(Q=\bar XW_Q,\ K=\bar XW_K,\ V=\bar XW_V\)</span><span>then split into \(h\) heads</span></li>
+      <li><span class="step-no">3</span><span><strong>Encode position:</strong> \(Q'=\operatorname{RoPE}(Q),\ K'=\operatorname{RoPE}(K)\)</span><span>\(V\) unchanged</span></li>
+      <li><span class="step-no">4</span><span><strong>Compare and mask:</strong> \(A=Q'K'^{\mathsf T}/\sqrt{d_h}+M_{\text{causal}}\)</span><span>\(B\times h\times T\times T\)</span></li>
+      <li><span class="step-no">5</span><span><strong>Blend values:</strong> \(O_r=\operatorname{softmax}(A_r)V_r\)</span><span>each head \(T\times d_h\)</span></li>
+      <li><span class="step-no">6</span><span><strong>Join heads:</strong> \(O_{\text{attn}}=\operatorname{Concat}(O_1,\ldots,O_h)W_O\)</span><span>\(B\times T\times d_{\text{model}}\)</span></li>
+      <li><span class="step-no">7</span><span><strong>Add:</strong> \(Y=X^{(\ell)}+O_{\text{attn}}\)</span><span>first residual</span></li>
+      <li><span class="step-no">8</span><span><strong>Transform and add:</strong> \(X^{(\ell+1)}=Y+\operatorname{FFN}(\operatorname{Norm}(Y))\)</span><span>second residual</span></li>
+    </ol>
+
+    <section class="worked-example">
+      <h3>Toy walkthrough: \(B=1,T=2,d_{\text{model}}=2,h=1\)</h3>
+      <p>Use RMSNorm with unit scale, identity projection matrices, positions \(m=0,1\), RoPE angle step \(\theta=\pi/2\), and</p>
+      <div class="equation">
+        \[
+        X^{(\ell)}=\begin{bmatrix}1&amp;1\\1&amp;-1\end{bmatrix}.
+        \]
+      </div>
+      <p>Each row has RMS \(1\), so \(\bar X=X^{(\ell)}\). Identity projections give \(Q=K=V=\bar X\).</p>
+      <p>At position 0, \((1,1)\) stays \((1,1)\). At position 1,</p>
+      <div class="equation">
+        \[
+        R_{\pi/2}\begin{bmatrix}1\\-1\end{bmatrix}
+        =\begin{bmatrix}0&amp;-1\\1&amp;0\end{bmatrix}
+         \begin{bmatrix}1\\-1\end{bmatrix}
+        =\begin{bmatrix}1\\1\end{bmatrix}.
+        \]
+      </div>
+      <p>Thus \(Q'=K'=\begin{bmatrix}1&amp;1\\1&amp;1\end{bmatrix}\). The scaled score and masked score matrices are</p>
+      <div class="equation">
+        \[
+        S=\frac{Q'K'^{\mathsf T}}{\sqrt2}
+        =\begin{bmatrix}\sqrt2&amp;\sqrt2\\\sqrt2&amp;\sqrt2\end{bmatrix},
+        \qquad
+        A=\begin{bmatrix}\sqrt2&amp;-\infty\\\sqrt2&amp;\sqrt2\end{bmatrix}.
+        \]
+      </div>
+      <p>Row-wise softmax gives \(P=\begin{bmatrix}1&amp;0\\0.5&amp;0.5\end{bmatrix}\). Therefore</p>
+      <div class="equation">
+        \[
+        O=PV
+        =\begin{bmatrix}1&amp;0\\0.5&amp;0.5\end{bmatrix}
+         \begin{bmatrix}1&amp;1\\1&amp;-1\end{bmatrix}
+        =\begin{bmatrix}1&amp;1\\1&amp;0\end{bmatrix}.
+        \]
+        \[
+        Y=X^{(\ell)}+O
+        =\begin{bmatrix}2&amp;2\\2&amp;-1\end{bmatrix}.
+        \]
+      </div>
+      <p>After the second normalization, suppose the learned SwiGLU produces the toy update \(F=\begin{bmatrix}0.1&amp;-0.2\\0.3&amp;0.1\end{bmatrix}\). The block output is</p>
+      <div class="equation">
+        \[
+        X^{(\ell+1)}=Y+F
+        =\begin{bmatrix}2.1&amp;1.8\\2.3&amp;-0.9\end{bmatrix}.
+        \]
+      </div>
+      <p>The chosen \(F\) stands in for the SwiGLU calculation from Lesson 17; every attention-stage number above is calculated explicitly.</p>
+    </section>
+
+    <h2>Teach-back checkpoints</h2>
+    <div class="two-col">
+      <article class="panel teal"><h3>RoPE's exact job</h3><p>Rotate Q and K pairs by position-dependent phases so \(q_m'^{\mathsf T}k_n'=q_m^{\mathsf T}R_{n-m}k_n\). It does not rotate V.</p></article>
+      <article class="panel coral"><h3>Attention's exact job</h3><p>Use masked query-key comparisons to build probability weights, then blend value vectors from allowed positions.</p></article>
+    </div>
+
+    <section class="quiz" data-quiz data-success="Correct. Position modifies comparisons before masking and softmax." data-retry="Trace Q and K from projection to score formation."><h3>Retrieval check</h3><p>Where does RoPE occur in this block?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · after Q/K projection and before query-key scores</button><button type="button" data-correct="false" aria-pressed="false">B · after weighted values and both residual additions</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
+
+    <section class="exercises">
+      <h2>Capstone practice</h2>
+      <ol>
+        <li>Without looking above, write the eight stages of the block in order.</li>
+        <li>For \(B=2,T=5,d_{\text{model}}=12,h=3\), make a shape ledger for split Q, one head's score matrix, concatenated output, and final block output.</li>
+        <li>Repeat the toy multiplication \(PV\) and residual addition \(X^{(\ell)}+O\).</li>
+        <li>Explain why \(R_m^{\mathsf T}R_n=R_{n-m}\) matters specifically inside Step 4.</li>
+        <li>Name the two places where information is mixed across features and the place where it is mixed across tokens.</li>
+        <li>Teach the block aloud in under two minutes without saying “it just learns it.” Name the input and output of every stage.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>Normalize; project Q/K/V; apply RoPE to Q/K; score and causally mask; softmax and blend V; concatenate heads and apply \(W_O\); first residual; normalize, SwiGLU, and second residual.</li><li>Split Q: \(2\times3\times5\times4\); one head score per batch: \(5\times5\); concatenated output: \(2\times5\times12\); final output: \(2\times5\times12\).</li><li>\(O=\begin{bmatrix}1&amp;1\\1&amp;0\end{bmatrix}\); \(Y=\begin{bmatrix}2&amp;2\\2&amp;-1\end{bmatrix}\).</li><li>It turns the rotated query-key dot product into a comparison that depends on relative displacement \(n-m\).</li><li>Projection/output matrices and the FFN mix features; attention's \(PV\) mixes information across allowed token positions.</li><li>Use the reference sheet to check omissions after speaking, not during the first attempt.</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Primary sources:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al.</a>; <a href="https://arxiv.org/abs/2104.09864">Su et al., RoFormer</a>; <a href="https://arxiv.org/abs/2302.13971">Touvron et al., LLaMA</a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can teach one complete RoPE Transformer block and defend every tensor shape.</label>
+    <p class="small">Record your two-minute explanation and send its transcript plus the capstone answers to the teaching agent.</p>
+    <nav class="lesson-nav"><a href="0017-swiglu-feed-forward.html">← SwiGLU</a><a href="index.html">Return to course map →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 18 · Complete Transformer block capstone</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
+</body>
+</html>
