@@ -15,9 +15,9 @@
   <header class="site-header"><a class="brand" href="../lessons/index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="transformer-block-visual.html">Block walkthrough</a></header>
   <main>
     <section class="hero">
-      <p class="eyebrow">Module 2 · Complete reference implementation</p>
+      <p class="eyebrow">Module 3 · Complete reference implementation</p>
       <h1>Build the TransformerModel, piece by piece.</h1>
-      <p class="lede">This runnable PyTorch model joins the code checkpoints from Lessons 10–18 into one decoder-only Transformer that maps token IDs to next-token logits.</p>
+      <p class="lede">This runnable PyTorch model joins the code checkpoints from Lessons 15–23 into one decoder-only Transformer that maps token IDs to next-token logits.</p>
       <div class="lesson-meta"><span>About 180 lines</span><span>PyTorch only</span><span>Designed for tracing</span></div>
     </section>
 
@@ -27,15 +27,15 @@
       <div class="table-scroll"><table>
         <thead><tr><th>Lesson</th><th>Code element</th><th>Shape contract</th></tr></thead>
         <tbody>
-          <tr><td>10 · Hidden states</td><td><code>TransformerConfig</code>, <code>token_embedding</code></td><td>\([B,T]\rightarrow[B,T,D]\)</td></tr>
-          <tr><td>11 · Normalization</td><td><code>RMSNorm</code></td><td>\([B,T,D]\rightarrow[B,T,D]\)</td></tr>
-          <tr><td>12 · Q/K/V and position</td><td><code>split_heads</code>, <code>precompute_rope</code>, <code>apply_rope</code></td><td>\([B,T,D]\rightarrow[B,H,T,D_h]\)</td></tr>
-          <tr><td>13 · Causal mask</td><td>scaled scores and <code>masked_fill</code></td><td>\([B,H,T,D_h]\rightarrow[B,H,T,T]\)</td></tr>
-          <tr><td>14 · Weighted values</td><td><code>softmax(scores) @ v</code></td><td>\([B,H,T,T]\rightarrow[B,H,T,D_h]\)</td></tr>
-          <tr><td>15 · Join heads</td><td><code>transpose</code>, <code>view</code>, <code>out_proj</code></td><td>\([B,H,T,D_h]\rightarrow[B,T,D]\)</td></tr>
-          <tr><td>16 · Residual block</td><td><code>TransformerBlock</code></td><td>\([B,T,D]\rightarrow[B,T,D]\)</td></tr>
-          <tr><td>17 · SwiGLU</td><td><code>SwiGLU</code></td><td>\(D\rightarrow D_{\text{ff}}\rightarrow D\)</td></tr>
-          <tr><td>18 · Full model</td><td><code>TransformerModel</code>, <code>lm_head</code></td><td>\([B,T,D]\rightarrow[B,T,V]\)</td></tr>
+          <tr><td>15 · Hidden states</td><td><code>TransformerConfig</code>, <code>token_embedding</code></td><td>\([B,T]\rightarrow[B,T,D]\)</td></tr>
+          <tr><td>16 · Normalization</td><td><code>RMSNorm</code></td><td>\([B,T,D]\rightarrow[B,T,D]\)</td></tr>
+          <tr><td>17 · Q/K/V and position</td><td><code>split_heads</code>, <code>precompute_rope</code>, <code>apply_rope</code></td><td>\([B,T,D]\rightarrow[B,H,T,D_h]\)</td></tr>
+          <tr><td>18 · Causal mask</td><td>scaled scores and <code>masked_fill</code></td><td>\([B,H,T,D_h]\rightarrow[B,H,T,T]\)</td></tr>
+          <tr><td>19 · Weighted values</td><td><code>softmax(scores) @ v</code></td><td>\([B,H,T,T]\rightarrow[B,H,T,D_h]\)</td></tr>
+          <tr><td>20 · Join heads</td><td><code>transpose</code>, <code>view</code>, <code>out_proj</code></td><td>\([B,H,T,D_h]\rightarrow[B,T,D]\)</td></tr>
+          <tr><td>21 · Residual block</td><td><code>TransformerBlock</code></td><td>\([B,T,D]\rightarrow[B,T,D]\)</td></tr>
+          <tr><td>22 · SwiGLU</td><td><code>SwiGLU</code></td><td>\(D\rightarrow D_{\text{ff}}\rightarrow D\)</td></tr>
+          <tr><td>23 · Full model</td><td><code>TransformerModel</code>, <code>lm_head</code></td><td>\([B,T,D]\rightarrow[B,T,V]\)</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -77,13 +77,13 @@
         <li>For the example configuration, calculate <code>head_dim</code> before running the file.</li>
         <li>Identify the one line that prevents future information from changing an earlier token representation.</li>
         <li>Temporarily remove <code>out_proj</code>. Which conceptual role is lost even if the outer shape still matches?</li>
-        <li>Explain why <code>lm_head</code> changes the final axis from (D) to vocabulary size (V).</li>
+        <li>Explain why <code>lm_head</code> changes the final axis from \(D\) to vocabulary size \(V\).</li>
         <li>Add a forward hook or print statement that records the shape after every block.</li>
       </ol>
-      <details><summary>Check guidance</summary><ol><li><code>hidden_size % num_heads</code> fails because heads cannot receive equal feature widths.</li><li>(16/4=4).</li><li>The upper-triangular mask followed by <code>masked_fill(..., -inf)</code>.</li><li>The learned mixing of concatenated head features back into model coordinates.</li><li>Each model feature vector must become one score for every possible next token.</li><li>Print <code>x.shape</code> inside the layer loop or register a hook on each <code>TransformerBlock</code>.</li></ol></details>
+      <details><summary>Check guidance</summary><ol><li><code>hidden_size % num_heads</code> fails because heads cannot receive equal feature widths.</li><li>\(16/4=4\).</li><li>The upper-triangular mask followed by <code>masked_fill(..., -inf)</code>.</li><li>The learned mixing of concatenated head features back into model coordinates.</li><li>Each model feature vector must become one score for every possible next token.</li><li>Print <code>x.shape</code> inside the layer loop or register a hook on each <code>TransformerBlock</code>.</li></ol></details>
     </section>
 
-    <nav class="lesson-nav"><a href="../lessons/0018-walk-one-transformer-block.html">← Lesson 18</a><a href="transformer-block-visual.html">Compare with the block walkthrough →</a></nav>
+    <nav class="lesson-nav"><a href="../lessons/0023-walk-one-transformer-block.html">← Lesson 23</a><a href="transformer-block-visual.html">Compare with the block walkthrough →</a></nav>
   </main>
   <footer class="site-footer">Complete code reference · TransformerModel</footer>
 </body>

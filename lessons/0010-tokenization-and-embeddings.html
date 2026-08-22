@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 10: Tokenization and Embeddings</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
+</head>
+<body data-lesson="0010">
+  <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 10 of 23 · LLM preliminaries</p>
+      <h1>Text becomes IDs, then learned vectors.</h1>
+      <p class="lede">Your win: explain the two distinct operations that turn a string into the \(B\times T\times d_{\text{model}}\) tensor consumed by a decoder.</p>
+      <div class="lesson-meta"><span>16 minutes</span><span>Needs: vectors and matrices</span><span>Outcome: trace text to embeddings</span></div>
+    </section>
+
+    <div class="goal"><strong>Module bridge:</strong> Transformer blocks never receive raw words. They receive learned vectors selected by integer token IDs.</div>
+
+    <h2>Tokenization chooses reusable text pieces</h2>
+    <p>A tokenizer maps text to a sequence of vocabulary entries. Character tokenization is simple but long; whole-word tokenization is compact but struggles with unseen words. Subword tokenizers reuse common pieces such as <span class="mono">low</span>, <span class="mono">er</span>, and <span class="mono">est</span>.</p>
+
+    <figure class="course-figure">
+      <img src="../assets/course-visuals/byte-pair-encoding.webp" alt="Five-stage diagram showing how byte-pair encoding repeatedly merges frequent adjacent symbols into reusable subword tokens" width="1440" height="1080">
+      <figcaption>Byte-pair encoding learns a vocabulary from repeated local merges. The tokenizer and the neural network are separate learned systems.</figcaption>
+    </figure>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: one short sequence</h3>
+      <p>Suppose the tokenizer returns:</p>
+      <div class="equation">\[\text{``I like cats''}\longrightarrow [1,2,3].\]</div>
+      <p>The integers are labels, not meanings. Token ID \(2\) does not mean “twice as much” as token ID \(1\).</p>
+    </section>
+
+    <h2>Embedding lookup selects matrix rows</h2>
+    <p>Let the vocabulary size be \(V=5\) and model width be \(D=3\). The learned embedding table is \(E\in\mathbb R^{5\times3}\). For the IDs \([1,2,3]\):</p>
+    <div class="equation">
+      \[
+      E=\begin{bmatrix}
+      0.1&amp;0.0&amp;-0.2\\
+      0.2&amp;-0.1&amp;0.5\\
+      0.7&amp;0.3&amp;-0.2\\
+      -0.4&amp;0.9&amp;0.1\\
+      0.0&amp;0.2&amp;0.4
+      \end{bmatrix},\qquad
+      E[[1,2,3]]=\begin{bmatrix}
+      0.2&amp;-0.1&amp;0.5\\
+      0.7&amp;0.3&amp;-0.2\\
+      -0.4&amp;0.9&amp;0.1
+      \end{bmatrix}.
+      \]
+    </div>
+
+    <figure class="course-figure">
+      <img loading="lazy" src="../assets/course-visuals/embedding-lookup.webp" alt="Diagram showing token IDs selecting rows from a trainable embedding matrix and producing one dense vector per token" width="1440" height="1080">
+      <figcaption>For batched IDs with shape \([B,T]\), embedding lookup adds the feature axis and returns \([B,T,D]\).</figcaption>
+    </figure>
+
+    <div class="callout"><strong>Keep the boundary clear:</strong> tokenization decides which IDs represent the string. The embedding layer decides which learned \(D\)-dimensional vectors those IDs retrieve.</div>
+
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · lookup preserves batch and time</h2>
+      <details><summary>Show the PyTorch embedding lookup</summary><pre><code class="language-python">import torch
+from torch import nn
+
+token_ids = torch.tensor([[1, 2, 3], [3, 2, 1]])  # [B=2, T=3]
+embedding = nn.Embedding(num_embeddings=5, embedding_dim=3)
+x = embedding(token_ids)                           # [B=2, T=3, D=3]
+
+assert x.shape == (2, 3, 3)</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> Which output axis comes from <code>embedding_dim</code>, and which two axes came directly from <code>token_ids</code>?</p>
+    </section>
+
+    <section class="quiz" data-quiz data-success="Correct. An ID chooses a row; the row contains the learned feature vector." data-retry="Separate the vocabulary index from the values stored at that index.">
+      <h3>Retrieval check</h3>
+      <p>What does token ID \(37\) do inside an embedding layer?</p>
+      <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · select row 37 of the embedding matrix</button><button type="button" data-correct="false" aria-pressed="false">B · multiply every embedding value by 37</button></div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Explain one tradeoff between character tokens and whole-word tokens.</li>
+        <li>If \(V=32{,}000\) and \(D=512\), what is the embedding-weight shape?</li>
+        <li>For token IDs with shape \(4\times128\), what is the embedding output shape when \(D=512\)?</li>
+        <li>Using the displayed matrix \(E\), write the vector selected by token ID \(4\).</li>
+        <li>Why is token ID \(200\) not numerically “larger in meaning” than token ID \(10\)?</li>
+        <li>State the full pipeline from a text string to hidden-state tensor \(X\).</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>Characters handle unseen text but create longer sequences; whole words create shorter sequences but require a huge vocabulary and fail on unseen forms.</li><li>\(32{,}000\times512\).</li><li>\(4\times128\times512\).</li><li>\((0.0,0.2,0.4)\).</li><li>IDs are arbitrary vocabulary indices, not ordered measurements.</li><li>Text → tokenizer → token IDs \([B,T]\) → embedding lookup → \(X\in\mathbb R^{B\times T\times D}\).</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Sources:</strong> Sennrich et al., <a href="https://aclanthology.org/P16-1162/">Neural Machine Translation of Rare Words with Subword Units</a>; <a href="https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html">PyTorch <code>nn.Embedding</code></a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can distinguish tokenization from embedding lookup and state every resulting tensor shape.</label>
+    <nav class="lesson-nav"><a href="0009-derive-relative-position.html">← RoPE derivation</a><a href="0011-next-token-objective.html">Next: Next-token objective →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 10 · Tokenization and embeddings</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+</body>
+</html>

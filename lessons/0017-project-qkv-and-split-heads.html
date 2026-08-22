@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 12: Project Q, K, V and Split Heads</title>
+  <title>Lesson 17: Project Q, K, V and Split Heads</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css">
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
-<body data-lesson="0012">
+<body data-lesson="0017">
   <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/rope-reference.html">RoPE reference</a></header>
   <main>
     <section class="hero">
-      <p class="eyebrow">Lesson 12 of 18 · Transformer block</p>
+      <p class="eyebrow">Lesson 17 of 23 · Transformer block</p>
       <h1>One token becomes three views.</h1>
       <p class="lede">Your win: multiply one normalized token by explicit \(W_Q,W_K,W_V\) matrices, then reshape features into attention heads.</p>
       <div class="lesson-meta"><span>15 minutes</span><span>Needs: matrix multiplication</span><span>Outcome: track Q/K/V shapes</span></div>
@@ -117,9 +117,9 @@ k = apply_rope(k, rope_cos, rope_sin)</code></pre></details>
     <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., Sections 3.2.1–3.2.2</a>; RoPE placement follows <a href="https://arxiv.org/html/2104.09864#S3.SS2">Su et al., Section 3.2</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can project one token into Q/K/V and reshape features into heads.</label>
     <p class="small">Ask the teaching agent to give you a fresh \(d_{\text{model}},h\) shape exercise.</p>
-    <nav class="lesson-nav"><a href="0011-normalize-each-token.html">← Normalization</a><a href="0013-causal-mask-before-softmax.html">Next: Causal mask →</a></nav>
+    <nav class="lesson-nav"><a href="0016-normalize-each-token.html">← Normalization</a><a href="0018-causal-mask-before-softmax.html">Next: Causal mask →</a></nav>
   </main>
-  <footer class="site-footer">Lesson 12 · Project Q, K, V and split heads</footer>
+  <footer class="site-footer">Lesson 17 · Project Q, K, V and split heads</footer>
   <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
 </body>
 </html>

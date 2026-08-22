@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 16: Residual Paths Carry State</title>
+  <title>Lesson 21: Residual Paths Carry State</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
-<body data-lesson="0016">
+<body data-lesson="0021">
   <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
   <main>
-    <section class="hero"><p class="eyebrow">Lesson 16 of 18 · Transformer block</p><h1>Learn an update, then add it to the state.</h1><p class="lede">Your win: calculate both residual additions in a pre-norm block and explain their shape requirement.</p><div class="lesson-meta"><span>12 minutes</span><span>Needs: vector addition</span><span>Outcome: read residual equations</span></div></section>
+    <section class="hero"><p class="eyebrow">Lesson 21 of 23 · Transformer block</p><h1>Learn an update, then add it to the state.</h1><p class="lede">Your win: calculate both residual additions in a pre-norm block and explain their shape requirement.</p><div class="lesson-meta"><span>12 minutes</span><span>Needs: vector addition</span><span>Outcome: read residual equations</span></div></section>
 
     <div class="goal"><strong>Mission link:</strong> attention and the feed-forward network do not replace the hidden state directly; each produces an update added to its input.</div>
 
@@ -101,9 +101,9 @@
 
     <p class="source"><strong>Primary sources:</strong> <a href="https://openaccess.thecvf.com/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf">He et al., Deep Residual Learning</a>; <a href="https://proceedings.mlr.press/v119/xiong20b.html">Xiong et al., pre-norm analysis</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can calculate residual updates and state their shape constraint.</label>
-    <nav class="lesson-nav"><a href="0015-multi-heads-split-features.html">← Multiple heads</a><a href="0017-swiglu-feed-forward.html">Next: SwiGLU →</a></nav>
+    <nav class="lesson-nav"><a href="0020-multi-heads-split-features.html">← Multiple heads</a><a href="0022-swiglu-feed-forward.html">Next: SwiGLU →</a></nav>
   </main>
-  <footer class="site-footer">Lesson 16 · Residual paths carry state</footer>
+  <footer class="site-footer">Lesson 21 · Residual paths carry state</footer>
   <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
 </body>
 </html>

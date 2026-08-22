@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="An 18-lesson course for understanding and implementing a modern decoder-only Transformer language model.">
+  <meta name="description" content="A 23-lesson course for understanding and implementing a modern decoder-only Transformer language model.">
   <title>A Short Course for Modern Large Language Models</title>
   <link rel="stylesheet" href="../assets/course.css">
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
@@ -15,14 +15,14 @@
   </header>
   <main>
     <section class="hero">
-      <p class="eyebrow">Two-module course · 18 short lessons</p>
+      <p class="eyebrow">Three-module course · 23 short lessons</p>
       <h1>A short course for modern large language models.</h1>
       <p class="lede">Build the mathematical and implementation intuition to follow a modern decoder-only language model from token embeddings to next-token logits: derive the essential position-encoding math, keep a tensor-shape ledger through normalization, causal multi-head attention, residual paths, and SwiGLU, and read, run, and explain the course's PyTorch <code>TransformerModel</code> implementation.</p>
-      <div class="lesson-meta"><span>About 4 hours total</span><span>No calculus required</span><span>Paper and pencil recommended</span></div>
+      <div class="lesson-meta"><span>About 5.5 hours total</span><span>No calculus required</span><span>Paper and pencil recommended</span></div>
     </section>
 
     <section>
-      <h2>Module 1 · Mathematical foundations for RoPE</h2>
+      <h2>Module 1 · Mathematical foundations for attention and position</h2>
       <p>Study one lesson at a time. Write every exercise answer before opening its solution; the effort of retrieval is part of the course.</p>
       <table class="course-table">
         <thead><tr><th>#</th><th>Lesson and tangible win</th><th>Time</th></tr></thead>
@@ -41,20 +41,35 @@
     </section>
 
     <section>
-      <h2>Module 2 · One Transformer decoder block</h2>
-      <p>Begin only when you can explain \(R_m^{\mathsf T}R_n=R_{n-m}\). Keep a shape ledger beside every calculation. Use the <a href="../reference/transformer-block-visual.html">transformer block walkthrough</a> to review how the stages connect, and build toward the runnable <a href="../reference/transformer-model-code.html"><code>TransformerModel</code> reference implementation</a>.</p>
+      <h2>Module 2 · LLM preliminaries: text, training, and generation</h2>
+      <p>Connect the foundation math to the complete language-model system before opening a Transformer block. Follow raw text through tokenization and embeddings, construct next-token targets, read one training update, generate with sampling controls, and finish with one end-to-end model map.</p>
       <table class="course-table">
         <thead><tr><th>#</th><th>Lesson and tangible win</th><th>Time</th></tr></thead>
         <tbody>
-          <tr><td>10</td><td><a href="0010-hidden-states-and-shapes.html">Hidden states and tensor shapes</a><br><span class="small">Read \(B\times T\times d_{\text{model}}\) and follow one token row.</span></td><td>12 min</td></tr>
-          <tr><td>11</td><td><a href="0011-normalize-each-token.html">Normalize each token</a><br><span class="small">Calculate LayerNorm and distinguish RMSNorm and Pre-LN.</span></td><td>14 min</td></tr>
-          <tr><td>12</td><td><a href="0012-project-qkv-and-split-heads.html">Project Q, K, V and split heads</a><br><span class="small">Track the projection and reshape dimensions numerically.</span></td><td>15 min</td></tr>
-          <tr><td>13</td><td><a href="0013-causal-mask-before-softmax.html">Mask the future before softmax</a><br><span class="small">Construct the causal score row and replace forbidden scores by \(-\infty\).</span></td><td>14 min</td></tr>
-          <tr><td>14</td><td><a href="0014-softmax-and-weighted-values.html">Softmax and weighted values</a><br><span class="small">Turn scores into probabilities and blend value vectors.</span></td><td>15 min</td></tr>
-          <tr><td>15</td><td><a href="0015-multi-heads-split-features.html">Multi-head attention splits features</a><br><span class="small">Reject the “one token per head” misconception.</span></td><td>12 min</td></tr>
-          <tr><td>16</td><td><a href="0016-residual-paths-carry-state.html">Residual paths carry state</a><br><span class="small">Read \(X+F(\operatorname{Norm}(X))\) as a learned update.</span></td><td>12 min</td></tr>
-          <tr><td>17</td><td><a href="0017-swiglu-feed-forward.html">SwiGLU feed-forward sublayer</a><br><span class="small">Calculate gate, value branch, product, and projection back.</span></td><td>15 min</td></tr>
-          <tr><td>18</td><td><a href="0018-walk-one-transformer-block.html">Walk one complete block</a><br><span class="small">Narrate every operation, tensor shape, and residual path.</span></td><td>20 min</td></tr>
+          <tr><td>10</td><td><a href="0010-tokenization-and-embeddings.html">Tokenization and embeddings</a><br><span class="small">Trace text through subword IDs into a learned \(B\times T\times D\) tensor.</span></td><td>16 min</td></tr>
+          <tr><td>11</td><td><a href="0011-next-token-objective.html">The next-token objective</a><br><span class="small">Shift one sequence into inputs and targets, then calculate cross-entropy.</span></td><td>16 min</td></tr>
+          <tr><td>12</td><td><a href="0012-training-loop.html">Training updates model weights</a><br><span class="small">Narrate forward, loss, backward, optimizer step, batch, and epoch.</span></td><td>18 min</td></tr>
+          <tr><td>13</td><td><a href="0013-generation-and-sampling.html">Autoregressive generation and sampling</a><br><span class="small">Compare greedy decoding, temperature, top-k, and top-p.</span></td><td>18 min</td></tr>
+          <tr><td>14</td><td><a href="0014-llm-system-map.html">The complete decoder-only LLM map</a><br><span class="small">Connect embeddings, blocks, logits, training stages, and generation.</span></td><td>20 min</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Module 3 · One Transformer decoder block</h2>
+      <p>Begin when you can trace a prompt from text to next-token logits and explain \(R_m^{\mathsf T}R_n=R_{n-m}\). Keep a shape ledger beside every calculation. Use the <a href="../reference/transformer-block-visual.html">transformer block walkthrough</a> to review how the stages connect, and build toward the runnable <a href="../reference/transformer-model-code.html"><code>TransformerModel</code> reference implementation</a>.</p>
+      <table class="course-table">
+        <thead><tr><th>#</th><th>Lesson and tangible win</th><th>Time</th></tr></thead>
+        <tbody>
+          <tr><td>15</td><td><a href="0015-hidden-states-and-shapes.html">Hidden states and tensor shapes</a><br><span class="small">Read \(B\times T\times d_{\text{model}}\) and follow one token row.</span></td><td>12 min</td></tr>
+          <tr><td>16</td><td><a href="0016-normalize-each-token.html">Normalize each token</a><br><span class="small">Calculate LayerNorm and distinguish RMSNorm and Pre-LN.</span></td><td>14 min</td></tr>
+          <tr><td>17</td><td><a href="0017-project-qkv-and-split-heads.html">Project Q, K, V and split heads</a><br><span class="small">Track the projection and reshape dimensions numerically.</span></td><td>15 min</td></tr>
+          <tr><td>18</td><td><a href="0018-causal-mask-before-softmax.html">Mask the future before softmax</a><br><span class="small">Construct the causal score row and replace forbidden scores by \(-\infty\).</span></td><td>14 min</td></tr>
+          <tr><td>19</td><td><a href="0019-softmax-and-weighted-values.html">Softmax and weighted values</a><br><span class="small">Turn scores into probabilities and blend value vectors.</span></td><td>15 min</td></tr>
+          <tr><td>20</td><td><a href="0020-multi-heads-split-features.html">Multi-head attention splits features</a><br><span class="small">Reject the “one token per head” misconception.</span></td><td>12 min</td></tr>
+          <tr><td>21</td><td><a href="0021-residual-paths-carry-state.html">Residual paths carry state</a><br><span class="small">Read \(X+F(\operatorname{Norm}(X))\) as a learned update.</span></td><td>12 min</td></tr>
+          <tr><td>22</td><td><a href="0022-swiglu-feed-forward.html">SwiGLU feed-forward sublayer</a><br><span class="small">Calculate gate, value branch, product, and projection back.</span></td><td>15 min</td></tr>
+          <tr><td>23</td><td><a href="0023-walk-one-transformer-block.html">Walk one complete block</a><br><span class="small">Narrate every operation, tensor shape, and residual path.</span></td><td>20 min</td></tr>
         </tbody>
       </table>
     </section>

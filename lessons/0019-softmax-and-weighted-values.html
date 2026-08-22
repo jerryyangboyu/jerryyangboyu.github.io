@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 14: Softmax and Weighted Values</title>
+  <title>Lesson 19: Softmax and Weighted Values</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
-<body data-lesson="0014">
+<body data-lesson="0019">
   <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
   <main>
-    <section class="hero"><p class="eyebrow">Lesson 14 of 18 · Transformer block</p><h1>Turn comparisons into a blend.</h1><p class="lede">Your win: calculate softmax probabilities from masked scores and use them to form a weighted sum of value vectors.</p><div class="lesson-meta"><span>15 minutes</span><span>Needs: exponentials</span><span>Outcome: calculate one attention output</span></div></section>
+    <section class="hero"><p class="eyebrow">Lesson 19 of 23 · Transformer block</p><h1>Turn comparisons into a blend.</h1><p class="lede">Your win: calculate softmax probabilities from masked scores and use them to form a weighted sum of value vectors.</p><div class="lesson-meta"><span>15 minutes</span><span>Needs: exponentials</span><span>Outcome: calculate one attention output</span></div></section>
 
     <div class="goal"><strong>Mission link:</strong> \(Q'\) and \(K'\) decide the weights; the weights select and blend information carried by \(V\).</div>
 
@@ -95,9 +95,9 @@ context = weights @ v
 
     <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., Section 3.2.1</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can calculate softmax and a weighted sum of values.</label>
-    <nav class="lesson-nav"><a href="0013-causal-mask-before-softmax.html">← Causal mask</a><a href="0015-multi-heads-split-features.html">Next: Multiple heads →</a></nav>
+    <nav class="lesson-nav"><a href="0018-causal-mask-before-softmax.html">← Causal mask</a><a href="0020-multi-heads-split-features.html">Next: Multiple heads →</a></nav>
   </main>
-  <footer class="site-footer">Lesson 14 · Softmax and weighted values</footer>
+  <footer class="site-footer">Lesson 19 · Softmax and weighted values</footer>
   <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/attention-lab.js"></script>
 </body>
 </html>

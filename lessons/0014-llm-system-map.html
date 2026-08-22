@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 14: The Complete Decoder-Only LLM Map</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
+</head>
+<body data-lesson="0014">
+  <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/transformer-model-code.html">Model code</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 14 of 23 · LLM preliminaries capstone</p>
+      <h1>Place every component on one model map.</h1>
+      <p class="lede">Your win: follow token IDs to logits, separate architecture from training stages, and explain how pretraining, supervised fine-tuning, and generation use the same decoder.</p>
+      <div class="lesson-meta"><span>20 minutes</span><span>Needs: Lessons 10–13</span><span>Outcome: enter Module 3 with context</span></div>
+    </section>
+
+    <div class="goal"><strong>Module bridge:</strong> the next nine lessons open the purple “Transformer blocks” stage below and explain every operation inside one block.</div>
+
+    <figure class="course-figure">
+      <img src="../assets/course-visuals/decoder-model-overview.webp" alt="Decoder-only language model architecture from token IDs through embeddings, repeated Transformer blocks, final RMSNorm, language-model head, and vocabulary logits" width="1440" height="1019">
+      <figcaption>The residual stream keeps shape \([B,T,D]\) through the block stack. The language-model head changes the final axis from model width \(D\) to vocabulary size \(V\).</figcaption>
+    </figure>
+
+    <h2>Keep a five-line shape ledger</h2>
+    <table>
+      <thead><tr><th>Stage</th><th>Shape</th><th>What changes</th></tr></thead>
+      <tbody>
+        <tr><td>Token IDs</td><td>\([B,T]\)</td><td>Discrete vocabulary indices</td></tr>
+        <tr><td>Token embeddings</td><td>\([B,T,D]\)</td><td>Add one learned feature vector per token</td></tr>
+        <tr><td>\(N\) decoder blocks</td><td>\([B,T,D]\)</td><td>Build contextual representations while preserving the residual shape</td></tr>
+        <tr><td>Final normalization</td><td>\([B,T,D]\)</td><td>Rescale each token's features</td></tr>
+        <tr><td>LM head logits</td><td>\([B,T,V]\)</td><td>Score every vocabulary token at every position</td></tr>
+      </tbody>
+    </table>
+
+    <h2>One architecture supports several training stages</h2>
+    <div class="three-col">
+      <article class="panel teal"><h3>1 · Pretraining</h3><p>Learn broad language patterns from next-token prediction over large text corpora.</p><p><strong>Objective:</strong> predict the continuation.</p></article>
+      <article class="panel coral"><h3>2 · Supervised fine-tuning</h3><p>Continue next-token training on structured prompt-response demonstrations.</p><p><strong>Objective:</strong> imitate useful responses.</p></article>
+      <article class="panel gold"><h3>3 · Preference alignment</h3><p>Use preference data or rewards to favor responses judged more helpful and safe.</p><p><strong>Objective:</strong> improve behavioral choices.</p></article>
+    </div>
+    <p>The model still produces next-token logits in every stage. What changes is the data, loss construction, or optimization procedure.</p>
+
+    <details class="visual-reference">
+      <summary>Optional implementation view · how chat messages become supervised tensors</summary>
+      <figure class="course-figure">
+        <img loading="lazy" src="../assets/course-visuals/sft-conversation-tensors.webp" alt="Workflow converting system, user, and assistant messages into token IDs and completion-only training targets" width="1440" height="810">
+        <figcaption>Completion-only SFT commonly masks system and user targets, so only assistant response tokens contribute to the loss.</figcaption>
+      </figure>
+    </details>
+
+    <details class="visual-reference">
+      <summary>Optional implementation view · long conversations become training windows</summary>
+      <figure class="course-figure">
+        <img loading="lazy" src="../assets/course-visuals/sft-sliding-windows.webp" alt="Sliding-window construction for long supervised fine-tuning conversations with assistant-only loss masks" width="1440" height="856">
+        <figcaption>Overlapping windows fit long conversations into a fixed context length while retaining assistant targets.</figcaption>
+      </figure>
+    </details>
+
+    <h2>Training and generation reuse the forward pass</h2>
+    <div class="two-col">
+      <article class="panel teal"><h3>Training</h3><p>Forward all positions, compare \([B,T,V]\) logits with shifted targets, backpropagate the loss, update weights.</p></article>
+      <article class="panel coral"><h3>Generation</h3><p>Forward the visible context, read final-position logits, sample one ID, append it, repeat without updating weights.</p></article>
+    </div>
+
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · the full model in five operations</h2>
+      <p>This is the outer structure implemented by the course's <a href="../reference/transformer-model-code.html"><code>TransformerModel</code></a>. Module 3 will replace the block placeholder with its complete implementation.</p>
+      <details><summary>Show the model-level forward pass</summary><pre><code class="language-python">def forward(self, token_ids):
+    x = self.token_embedding(token_ids)  # [B, T] -> [B, T, D]
+
+    for block in self.layers:
+        x = block(x)                     # [B, T, D] -> [B, T, D]
+
+    x = self.final_norm(x)               # [B, T, D]
+    logits = self.lm_head(x)             # [B, T, D] -> [B, T, V]
+    return logits</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> Which operation changes the final axis from \(D\) to \(V\)?</p>
+    </section>
+
+    <section class="quiz" data-quiz data-success="Correct. The LM head scores the vocabulary; decoder blocks keep model width." data-retry="Look for the first tensor whose final dimension is V.">
+      <h3>Retrieval check</h3>
+      <p>Where do next-token vocabulary logits first appear?</p>
+      <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · after the language-model head</button><button type="button" data-correct="false" aria-pressed="false">B · directly after tokenization</button></div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Write the shape chain for \(B=2,T=128,D=512,V=32{,}000\).</li>
+        <li>Which two axes are preserved from token IDs through logits?</li>
+        <li>Why must every decoder block return width \(D\)?</li>
+        <li>Compare the data used for pretraining and supervised fine-tuning.</li>
+        <li>Name the four operations used only during training after the forward pass begins.</li>
+        <li>Teach the complete path from a prompt string to one sampled continuation token.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\([2,128]\to[2,128,512]\to[2,128,512]\to[2,128,512]\to[2,128,32000]\).</li><li>Batch \(B\) and token position \(T\).</li><li>Residual additions and the next block expect the shared residual-stream width.</li><li>Pretraining uses broad text continuation data; SFT uses curated prompt-response demonstrations, often with loss focused on assistant tokens.</li><li>Target comparison, scalar loss, backward/gradient computation, and optimizer update.</li><li>Tokenize → embed → decoder blocks → final norm → LM head → final-position logits → filtering/softmax → sample and append.</li></ol></details>
+    </section>
+
+    <div class="callout"><strong>Ready for Module 3:</strong> you now know what enters a block, why it is trained, and where its output goes. Next, keep a shape ledger while opening the block itself.</div>
+    <label class="completion"><input type="checkbox" data-completion> I can place embeddings, blocks, normalization, the LM head, training loss, and generation on one coherent map.</label>
+    <nav class="lesson-nav"><a href="0013-generation-and-sampling.html">← Generation</a><a href="0015-hidden-states-and-shapes.html">Next: Enter one Transformer block →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 14 · The complete decoder-only LLM map</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+</body>
+</html>

@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 15: Multi-Head Attention Splits Features</title>
+  <title>Lesson 20: Multi-Head Attention Splits Features</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
-<body data-lesson="0015">
+<body data-lesson="0020">
   <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
   <main>
-    <section class="hero"><p class="eyebrow">Lesson 15 of 18 · Transformer block</p><h1>Heads split features, not the sentence.</h1><p class="lede">Your win: track the token and feature axes through independent heads, concatenation, and the output projection.</p><div class="lesson-meta"><span>12 minutes</span><span>Needs: tensor shapes</span><span>Outcome: reject a common misconception</span></div></section>
+    <section class="hero"><p class="eyebrow">Lesson 20 of 23 · Transformer block</p><h1>Heads split features, not the sentence.</h1><p class="lede">Your win: track the token and feature axes through independent heads, concatenation, and the output projection.</p><div class="lesson-meta"><span>12 minutes</span><span>Needs: tensor shapes</span><span>Outcome: reject a common misconception</span></div></section>
 
     <div class="goal"><strong>Mission link:</strong> every head applies RoPE and causal attention to the full sequence; heads differ in learned feature projections.</div>
 
@@ -25,6 +25,11 @@
       <div class="viz-body head-visuals" data-head-visuals></div>
       <p class="viz-caption" data-head-readout></p>
     </section>
+
+    <figure class="course-figure">
+      <img loading="lazy" src="../assets/course-visuals/multi-head-attention.webp" width="1440" height="1080" alt="Multi-head attention showing shared token positions, separate feature subspaces, and concatenation">
+      <figcaption>Every head sees the full token sequence. Heads differ by their learned feature projections, then their outputs are concatenated along the feature axis and mixed by \(W_O\).</figcaption>
+    </figure>
 
     <section class="worked-example">
       <h3>Numbers substituted: \(T=3,d_{\text{model}}=8,h=2\)</h3>
@@ -97,9 +102,9 @@ attention_output = out_proj(context)  # [B, T, D]</code></pre></details>
 
     <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., Section 3.2.2</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can track all axes through heads, concatenation, and \(W_O\).</label>
-    <nav class="lesson-nav"><a href="0014-softmax-and-weighted-values.html">← Softmax and values</a><a href="0016-residual-paths-carry-state.html">Next: Residual paths →</a></nav>
+    <nav class="lesson-nav"><a href="0019-softmax-and-weighted-values.html">← Softmax and values</a><a href="0021-residual-paths-carry-state.html">Next: Residual paths →</a></nav>
   </main>
-  <footer class="site-footer">Lesson 15 · Multi-head attention splits features</footer>
+  <footer class="site-footer">Lesson 20 · Multi-head attention splits features</footer>
   <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
 </body>
 </html>

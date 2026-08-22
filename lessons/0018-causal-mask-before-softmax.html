@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 13: Mask the Future Before Softmax</title>
+  <title>Lesson 18: Mask the Future Before Softmax</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css">
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
-<body data-lesson="0013">
+<body data-lesson="0018">
   <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
   <main>
     <section class="hero">
-      <p class="eyebrow">Lesson 13 of 18 · Transformer block</p>
+      <p class="eyebrow">Lesson 18 of 23 · Transformer block</p>
       <h1>Hide the future before probabilities exist.</h1>
       <p class="lede">Your win: build one scaled query-key score row, apply a causal mask, and explain why the mask must precede softmax.</p>
       <div class="lesson-meta"><span>14 minutes</span><span>Needs: dot products</span><span>Outcome: construct a causal score row</span></div>
@@ -94,9 +94,9 @@ scores = scores.masked_fill(future, float("-inf"))</code></pre></details>
 
     <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., Sections 3.2.1 and 3.2.3</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can construct a causal mask and apply it before softmax.</label>
-    <nav class="lesson-nav"><a href="0012-project-qkv-and-split-heads.html">← Q, K, V</a><a href="0014-softmax-and-weighted-values.html">Next: Softmax and values →</a></nav>
+    <nav class="lesson-nav"><a href="0017-project-qkv-and-split-heads.html">← Q, K, V</a><a href="0019-softmax-and-weighted-values.html">Next: Softmax and values →</a></nav>
   </main>
-  <footer class="site-footer">Lesson 13 · Mask the future before softmax</footer>
+  <footer class="site-footer">Lesson 18 · Mask the future before softmax</footer>
   <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/attention-lab.js"></script>
 </body>
 </html>

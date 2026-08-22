@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 13: Autoregressive Generation and Sampling</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
+</head>
+<body data-lesson="0013">
+  <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 13 of 23 · LLM preliminaries</p>
+      <h1>Predict one token, append it, repeat.</h1>
+      <p class="lede">Your win: trace the autoregressive generation loop and explain how temperature, top-k, and top-p alter the next-token choice.</p>
+      <div class="lesson-meta"><span>18 minutes</span><span>Needs: logits and softmax</span><span>Outcome: read a sampling loop</span></div>
+    </section>
+
+    <div class="goal"><strong>Module bridge:</strong> training predicts every aligned next token in parallel; generation repeatedly uses the final visible position to choose one new token.</div>
+
+    <figure class="course-figure">
+      <img src="../assets/course-visuals/autoregressive-generation.webp" alt="Circular six-step workflow for autoregressive generation: choose context, compute logits, sample, append, and stop or repeat" width="1440" height="1080">
+      <figcaption>The updated sequence becomes the next input. Generation stops at an end token or a configured length limit.</figcaption>
+    </figure>
+
+    <h2>Only the final logits choose the new token</h2>
+    <p>For model output \(L\in\mathbb R^{B\times T\times V}\), one sequence uses</p>
+    <div class="equation">\[\mathbf z=L[0,T-1,:]\in\mathbb R^V.\]</div>
+    <p>The earlier logits describe earlier next-token decisions. The final row scores the token that should follow the complete visible context.</p>
+
+    <h2>Temperature reshapes, but does not reorder, logits</h2>
+    <div class="equation">\[p_i=\frac{e^{z_i/\tau}}{\sum_j e^{z_j/\tau}}.\]</div>
+    <p>Lower \(\tau\) sharpens differences and makes the highest-logit tokens dominate. Higher \(\tau\) flattens the distribution and increases randomness.</p>
+
+    <section class="diagram nn-viz" data-temperature-lab>
+      <div class="viz-header"><h3>Change temperature for fixed logits \((2.1,1.3,0.2,-0.4,-1.2)\)</h3><output class="readout">\(\tau=\)<strong data-temperature-value>1.0</strong></output></div>
+      <div class="controls"><label>Temperature<input type="range" min="0.5" max="2" step="0.1" value="1" data-temperature></label><span class="small">Lower = sharper; higher = flatter</span></div>
+      <div class="sampling-bars" data-sampling-bars></div>
+    </section>
+
+    <figure class="course-figure">
+      <img loading="lazy" src="../assets/course-visuals/next-token-sampling.webp" alt="Four-stage next-token sampling diagram covering logits, temperature, top-k and top-p filtering, softmax, and random sampling" width="1440" height="1080">
+      <figcaption>Filtering restricts candidates before sampling. Top-k keeps a fixed count; top-p keeps the smallest high-probability set whose cumulative mass reaches \(p\).</figcaption>
+    </figure>
+
+    <div class="callout"><strong>Greedy is not sampling:</strong> choosing \(\arg\max_i z_i\) is deterministic. Sampling draws according to a probability distribution and can produce different continuations from the same prompt.</div>
+
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · one temperature and top-k decision</h2>
+      <details><summary>Show a compact sampling function</summary><pre><code class="language-python">def sample_next_token(logits, temperature=1.0, top_k=None):
+    scores = logits / temperature
+
+    if top_k is not None:
+        cutoff = torch.topk(scores, top_k).values[..., -1, None]
+        scores = scores.masked_fill(scores &lt; cutoff, float("-inf"))
+
+    probabilities = torch.softmax(scores, dim=-1)
+    return torch.multinomial(probabilities, num_samples=1)
+
+# logits is the final-position vector: model(input_ids)[:, -1, :]</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> Why must filtering happen before <code>torch.multinomial</code>?</p>
+    </section>
+
+    <section class="quiz" data-quiz data-success="Correct. A low temperature magnifies score differences before softmax." data-retry="Look at the division by temperature in the exponent.">
+      <h3>Retrieval check</h3>
+      <p>What normally happens as temperature moves from \(1.0\) to \(0.5\)?</p>
+      <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · the distribution becomes sharper</button><button type="button" data-correct="false" aria-pressed="false">B · every token becomes equally likely</button></div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>For logits with shape \(2\times6\times1000\), what slice supplies one next-token decision for each batch item?</li>
+        <li>Scale logits \((2,1)\) using temperatures \(0.5\) and \(2.0\).</li>
+        <li>With probabilities \((0.50,0.25,0.15,0.10)\), which tokens remain under top-k with \(k=2\)?</li>
+        <li>For the same probabilities, what is the smallest top-p set for \(p=0.80\)?</li>
+        <li>Name two stopping conditions for generation.</li>
+        <li>Explain why appending a sampled token changes the next forward pass.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li><code>logits[:, -1, :]</code>, with shape \(2\times1000\).</li><li>At \(0.5\): \((4,2)\); at \(2.0\): \((1,0.5)\).</li><li>The first two tokens.</li><li>The first three tokens, because \(0.50+0.25+0.15=0.90\ge0.80\), while the first two total only \(0.75\).</li><li>An EOS token or a maximum number of new tokens.</li><li>The new ID joins the context, so later hidden states and logits are conditioned on it.</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Source:</strong> Holtzman et al., <a href="https://openreview.net/forum?id=rygGQyrFvH">The Curious Case of Neural Text Degeneration</a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can trace one generation iteration and compare temperature, top-k, top-p, and greedy decoding.</label>
+    <nav class="lesson-nav"><a href="0012-training-loop.html">← Training loop</a><a href="0014-llm-system-map.html">Next: The complete LLM map →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 13 · Autoregressive generation and sampling</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/llm-foundations.js"></script>
+</body>
+</html>

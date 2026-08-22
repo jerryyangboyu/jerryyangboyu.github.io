@@ -1,6 +1,6 @@
 # A Short Course for Modern Large Language Models
 
-An 18-lesson course that builds the mathematical and implementation intuition needed to understand a modern decoder-only Transformer language model.
+A 23-lesson course that builds the mathematical and implementation intuition needed to understand a modern decoder-only Transformer language model.
 
 **Live course:** [jerryyangboyu.github.io](https://jerryyangboyu.github.io/)
 
@@ -9,6 +9,8 @@ An 18-lesson course that builds the mathematical and implementation intuition ne
 By the end of the course, a student should be able to:
 
 - derive the linear algebra and trigonometry behind rotary position encoding;
+- explain how text becomes token IDs and learned embeddings;
+- connect next-token prediction to the training loop and autoregressive generation;
 - track tensor shapes through normalization, attention, residual paths, and SwiGLU;
 - explain how causal self-attention converts query-key comparisons into weighted value mixtures;
 - trace a decoder block from token embeddings to next-token logits; and
@@ -29,9 +31,19 @@ Lessons 1-9 develop the prerequisites used by positional encoding and attention:
 - attention as vector comparison; and
 - position-dependent frequencies and relative position.
 
-### Module 2: One Transformer Decoder Block
+### Module 2: LLM Preliminaries
 
-Lessons 10-18 follow the implementation path of a decoder-only Transformer:
+Lessons 10-14 connect raw text, model training, and text generation:
+
+- byte-pair tokenization and embedding lookup;
+- shifted inputs, targets, logits, and cross-entropy loss;
+- the forward, backward, optimizer training loop;
+- autoregressive generation, temperature, and sampling; and
+- the full decoder-only path from token IDs to next-token logits.
+
+### Module 3: One Transformer Decoder Block
+
+Lessons 15-23 follow the implementation path of a decoder-only Transformer:
 
 - hidden states and tensor shapes;
 - LayerNorm, RMSNorm, and pre-norm placement;
@@ -43,7 +55,7 @@ Lessons 10-18 follow the implementation path of a decoder-only Transformer:
 - SwiGLU feed-forward layers; and
 - the complete `TransformerModel`.
 
-Each Module 2 lesson includes a focused, syntax-highlighted PyTorch code checkpoint. The checkpoints accumulate into the final runnable implementation.
+Each Module 3 lesson includes a focused, syntax-highlighted PyTorch code checkpoint. The checkpoints accumulate into the final runnable implementation.
 
 ## Reference Implementation
 
@@ -77,7 +89,7 @@ For each lesson:
 4. Trace the lesson's code checkpoint and annotate every tensor shape.
 5. Explain the concept aloud without relying on the page.
 
-The full course takes approximately four hours and assumes no calculus.
+The full course takes approximately five and a half hours and assumes no calculus.
 
 ## Local Preview
 
@@ -93,7 +105,7 @@ Then open [http://localhost:8765/](http://localhost:8765/).
 
 ```text
 assets/       Course styles and interactive visualizations
-lessons/      Course index and 18 lessons
+lessons/      Course index and 23 lessons
 reference/    Formula sheets, visual maps, and TransformerModel source
 index.html    GitHub Pages entry point
 ```

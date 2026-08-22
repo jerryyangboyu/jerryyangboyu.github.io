@@ -37,6 +37,11 @@
     </div>
     <ol class="steps"><li>Substitute the rotated query and key.</li><li>Use \((A\mathbf x)^{\mathsf T}=\mathbf x^{\mathsf T}A^{\mathsf T}\).</li><li>Use \(R_m^{\mathsf T}=R_{-m}\): transpose reverses the query rotation.</li><li>Use \(R_\alpha R_\beta=R_{\alpha+\beta}\): \(-m+n=n-m\).</li></ol>
 
+    <figure class="course-figure">
+      <img loading="lazy" src="../assets/course-visuals/relative-position-rotation.webp" width="1306" height="1204" alt="Geometric and matrix views of composing a key rotation with the inverse query rotation">
+      <figcaption>Use this board as a sign audit: rotate by \(n\theta\), then undo \(m\theta\). With the convention used in this course, the net rotation is \((n-m)\theta\), so the correct matrix is \(R_{n-m}\).</figcaption>
+    </figure>
+
     <section class="worked-example">
       <h3>Numbers substituted: \(m=5\), \(n=8\), \(\theta=0.1\)</h3>
       <p>The absolute angles are \(0.5\) and \(0.8\) radians. Their difference is \(0.3\) radians. Substitute numerical sine and cosine values:</p>
@@ -165,7 +170,7 @@
     <p class="source"><strong>Primary source:</strong> <a href="https://arxiv.org/html/2104.09864#S3.SS2">Su et al., RoFormer, Sections 3.1–3.2</a>, especially Equations 11–16.</p>
     <label class="completion"><input type="checkbox" data-completion> I can derive the relative-position identity without looking.</label>
     <p class="small">Ask the teaching agent to assess your teach-back. A passed teach-back should become the first learning record and determine what comes next.</p>
-    <nav class="lesson-nav"><a href="0008-position-as-frequency.html">← Frequencies</a><a href="index.html">Course map →</a></nav>
+    <nav class="lesson-nav"><a href="0008-position-as-frequency.html">← Frequencies</a><a href="0010-tokenization-and-embeddings.html">Next: Tokens and embeddings →</a></nav>
   </main>
   <footer class="site-footer">Lesson 9 · Derive relative position</footer>
   <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>

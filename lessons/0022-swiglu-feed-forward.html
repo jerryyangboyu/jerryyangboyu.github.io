@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 17: SwiGLU Feed-Forward Sublayer</title>
+  <title>Lesson 22: SwiGLU Feed-Forward Sublayer</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
-<body data-lesson="0017">
+<body data-lesson="0022">
   <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
   <main>
-    <section class="hero"><p class="eyebrow">Lesson 17 of 18 · Transformer block</p><h1>Expand, gate, multiply, project back.</h1><p class="lede">Your win: calculate every branch of a small SwiGLU feed-forward network with actual matrices.</p><div class="lesson-meta"><span>15 minutes</span><span>Needs: matrix multiplication</span><span>Outcome: calculate SwiGLU</span></div></section>
+    <section class="hero"><p class="eyebrow">Lesson 22 of 23 · Transformer block</p><h1>Expand, gate, multiply, project back.</h1><p class="lede">Your win: calculate every branch of a small SwiGLU feed-forward network with actual matrices.</p><div class="lesson-meta"><span>15 minutes</span><span>Needs: matrix multiplication</span><span>Outcome: calculate SwiGLU</span></div></section>
 
     <div class="goal"><strong>Mission link:</strong> after attention mixes information across tokens, the feed-forward sublayer transforms each token independently across features.</div>
 
@@ -69,6 +69,11 @@
     <h2>Why “gate”?</h2>
     <p>The SiLU branch scales each coordinate of the up branch through elementwise multiplication. A gate near zero suppresses that coordinate; a larger signed gate allows or reverses more of it. The final down projection mixes the gated hidden coordinates back into model width.</p>
 
+    <figure class="course-figure">
+      <img loading="lazy" src="../assets/course-visuals/gated-mlp.webp" width="1440" height="1080" alt="Gated feed-forward network with gate, up, elementwise product, and down projection paths">
+      <figcaption>The two expanded branches must have matching \(d_{\text{ff}}\) widths for elementwise multiplication. The down projection restores \(d_{\text{model}}\) so the residual addition is valid.</figcaption>
+    </figure>
+
     <section class="code-checkpoint">
       <h2>Code checkpoint · SwiGLU in two lines</h2>
       <p>The gate and up projections expand to the same intermediate width. Their elementwise product is then projected back to model width.</p>
@@ -97,9 +102,9 @@
 
     <p class="source"><strong>Primary sources:</strong> <a href="https://arxiv.org/abs/2002.05202">Shazeer, GLU Variants Improve Transformer</a>; <a href="https://arxiv.org/abs/2302.13971">Touvron et al., LLaMA</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can calculate gate, up, product, and down stages of SwiGLU.</label>
-    <nav class="lesson-nav"><a href="0016-residual-paths-carry-state.html">← Residual paths</a><a href="0018-walk-one-transformer-block.html">Next: Complete block →</a></nav>
+    <nav class="lesson-nav"><a href="0021-residual-paths-carry-state.html">← Residual paths</a><a href="0023-walk-one-transformer-block.html">Next: Complete block →</a></nav>
   </main>
-  <footer class="site-footer">Lesson 17 · SwiGLU feed-forward sublayer</footer>
+  <footer class="site-footer">Lesson 22 · SwiGLU feed-forward sublayer</footer>
   <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
 </body>
 </html>

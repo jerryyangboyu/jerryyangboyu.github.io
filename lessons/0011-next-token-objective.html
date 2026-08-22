@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 11: The Next-Token Objective</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
+</head>
+<body data-lesson="0011">
+  <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 11 of 23 · LLM preliminaries</p>
+      <h1>Every position predicts what comes next.</h1>
+      <p class="lede">Your win: construct autoregressive inputs and targets, read vocabulary logits, and calculate one next-token cross-entropy loss.</p>
+      <div class="lesson-meta"><span>16 minutes</span><span>Needs: token IDs and softmax</span><span>Outcome: build training pairs</span></div>
+    </section>
+
+    <div class="goal"><strong>Module bridge:</strong> the decoder learns by repeatedly answering one question: given the visible prefix, which vocabulary token should come next?</div>
+
+    <h2>One sequence supplies many training examples</h2>
+    <p>For tokens \([t_0,t_1,t_2,t_3,t_4,t_5]\), remove the last token to form the input and remove the first token to form the targets:</p>
+    <div class="equation">\[x=[t_0,t_1,t_2,t_3,t_4],\qquad y=[t_1,t_2,t_3,t_4,t_5].\]</div>
+
+    <div class="token-shift" aria-label="Input tokens aligned with their next-token targets">
+      <div class="token-shift-row"><strong>Input</strong><span>The</span><span>cat</span><span>sat</span><span>on</span><span>the</span></div>
+      <div class="token-shift-row targets"><strong>Target</strong><span>cat</span><span>sat</span><span>on</span><span>the</span><span>mat</span></div>
+    </div>
+    <p>At input position 2, the visible prefix ends in “sat” and the target is “on.” A causal mask prevents that position from reading the target token before predicting it.</p>
+
+    <h2>Logits score every vocabulary item</h2>
+    <p>For batch size \(B\), sequence length \(T\), and vocabulary size \(V\), the language-model head returns</p>
+    <div class="equation">\[L\in\mathbb R^{B\times T\times V}.\]</div>
+    <p>The slice \(L[b,t,:]\) contains \(V\) unnormalized scores for one next-token decision. Softmax converts that score vector to probabilities.</p>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: one prediction over three tokens</h3>
+      <p>Let the logits be \((2,1,0)\), with target index \(1\). Then</p>
+      <div class="equation">
+        \[
+        p=\operatorname{softmax}(2,1,0)
+        =\frac{(e^2,e^1,e^0)}{e^2+e^1+e^0}
+        \approx(0.665,0.245,0.090).
+        \]
+        \[
+        \mathcal L=-\log p_{\text{target}}=-\log(0.245)\approx1.407.
+        \]
+      </div>
+      <p>Increasing the target logit raises its probability and lowers the loss.</p>
+    </section>
+
+    <div class="callout"><strong>Do not confuse positions:</strong> the model returns one vocabulary distribution at every input position during training. Generation normally reads only the distribution at the final visible position.</div>
+
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · shift, flatten, compare</h2>
+      <details><summary>Show next-token labels and cross-entropy</summary><pre><code class="language-python">import torch
+import torch.nn.functional as F
+
+tokens = torch.tensor([[4, 8, 15, 16, 23, 42]])
+inputs = tokens[:, :-1]   # [B=1, T=5] = [4, 8, 15, 16, 23]
+targets = tokens[:, 1:]   # [B=1, T=5] = [8, 15, 16, 23, 42]
+
+logits = model(inputs)    # [B=1, T=5, V]
+loss = F.cross_entropy(
+    logits.reshape(-1, logits.size(-1)),
+    targets.reshape(-1),
+)</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> Why do <code>inputs</code> and <code>targets</code> have the same \(B\times T\) shape even though they contain different tokens?</p>
+    </section>
+
+    <section class="quiz" data-quiz data-success="Correct. Each input token aligns with the token immediately to its right." data-retry="Shift the original sequence one place and compare columns.">
+      <h3>Retrieval check</h3>
+      <p>For tokens \([5,9,2,7]\), which targets train next-token prediction?</p>
+      <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \([9,2,7]\)</button><button type="button" data-correct="false" aria-pressed="false">B · \([5,9,2]\)</button></div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Form inputs and targets from \([10,20,30,40,50]\).</li>
+        <li>If \(B=4,T=128,V=32{,}000\), state the logits shape.</li>
+        <li>What does \(L[2,7,:]\) represent?</li>
+        <li>Compute \(\operatorname{softmax}(0,0)\) and the loss when either class is correct.</li>
+        <li>Why must a causal model hide future target tokens during training?</li>
+        <li>Explain why one length-100 sequence provides 99 aligned next-token targets.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>Inputs \([10,20,30,40]\); targets \([20,30,40,50]\).</li><li>\(4\times128\times32{,}000\).</li><li>All vocabulary scores for the token following position 7 in batch item 2.</li><li>Probabilities \((0.5,0.5)\); loss \(-\log0.5\approx0.693\).</li><li>Otherwise it could copy the answer instead of learning from the prefix.</li><li>Every token after the first becomes the target for the prefix ending immediately before it.</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Source:</strong> Bengio et al., <a href="https://www.jmlr.org/papers/v3/bengio03a.html">A Neural Probabilistic Language Model</a>; PyTorch <a href="https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html"><code>CrossEntropyLoss</code></a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can shift a token sequence into inputs and targets and interpret one logits row.</label>
+    <nav class="lesson-nav"><a href="0010-tokenization-and-embeddings.html">← Tokenization</a><a href="0012-training-loop.html">Next: Training updates →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 11 · The next-token objective</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+</body>
+</html>

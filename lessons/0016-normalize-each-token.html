@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 11: Normalize Each Token</title>
+  <title>Lesson 16: Normalize Each Token</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css">
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
-<body data-lesson="0011">
+<body data-lesson="0016">
   <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
   <main>
     <section class="hero">
-      <p class="eyebrow">Lesson 11 of 18 · Transformer block</p>
+      <p class="eyebrow">Lesson 16 of 23 · Transformer block</p>
       <h1>Normalize across features, one token at a time.</h1>
       <p class="lede">Your win: calculate a normalized token vector and distinguish LayerNorm, RMSNorm, Pre-LN, and Post-LN.</p>
       <div class="lesson-meta"><span>14 minutes</span><span>Needs: mean and square root</span><span>Outcome: calculate \(\operatorname{Norm}(x)\)</span></div>
@@ -73,6 +73,11 @@
     </div>
     <p>For \((1,2,3)\), \(\operatorname{RMS}=\sqrt{14/3}\approx2.160\), so the unscaled output is approximately \((0.463,0.926,1.389)\). Unlike LayerNorm, its mean is not forced to zero.</p>
 
+    <figure class="course-figure">
+      <img loading="lazy" src="../assets/course-visuals/rmsnorm.webp" width="1440" height="1080" alt="RMSNorm workflow from a token vector through root mean square scaling">
+      <figcaption>RMSNorm rescales each token across its feature axis. The batch and sequence axes stay separate, and the output keeps the same \([B,T,D]\) shape.</figcaption>
+    </figure>
+
     <h2>Placement is a separate choice</h2>
     <div class="two-col">
       <article class="panel teal"><h3>Pre-LN, as depicted</h3><p>\(Y=X+F(\operatorname{Norm}(X))\)</p><p>Normalize before the sublayer.</p></article>
@@ -120,9 +125,9 @@
     <p class="source"><strong>Primary sources:</strong> <a href="https://arxiv.org/abs/1607.06450">Ba et al., Layer Normalization</a>; <a href="https://proceedings.neurips.cc/paper/2019/hash/1e8a19426224ca89e83cef47f1e7f53b-Abstract.html">Zhang and Sennrich, RMSNorm</a>; <a href="https://proceedings.mlr.press/v119/xiong20b.html">Xiong et al., Pre-LN vs Post-LN</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can calculate LayerNorm and name the two independent architecture choices.</label>
     <p class="small">Ask the teaching agent to check one normalization calculation before advancing.</p>
-    <nav class="lesson-nav"><a href="0010-hidden-states-and-shapes.html">← Tensor shapes</a><a href="0012-project-qkv-and-split-heads.html">Next: Q, K, V →</a></nav>
+    <nav class="lesson-nav"><a href="0015-hidden-states-and-shapes.html">← Tensor shapes</a><a href="0017-project-qkv-and-split-heads.html">Next: Q, K, V →</a></nav>
   </main>
-  <footer class="site-footer">Lesson 11 · Normalize each token</footer>
+  <footer class="site-footer">Lesson 16 · Normalize each token</footer>
   <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
 </body>
 </html>

@@ -366,6 +366,55 @@ details > ol, details > div, details > p { margin: 0; padding: 4px 36px 20px; }
 .masked { background: #ecefed; color: var(--muted); }
 progress { width: min(180px, 100%); height: 12px; accent-color: var(--teal); }
 
+.course-figure {
+  margin: 32px 0;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.course-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: white;
+}
+
+.course-figure figcaption {
+  padding: 12px 16px;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.visual-reference > summary { color: var(--blue); }
+.visual-reference .course-figure { margin: 0; border: 0; border-top: 1px solid var(--rule); border-radius: 0; box-shadow: none; }
+
+.token-shift {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.token-shift-row {
+  display: grid;
+  grid-template-columns: 90px repeat(5, minmax(0, 1fr));
+  gap: 7px;
+  align-items: center;
+}
+
+.token-shift-row > strong { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; }
+.token-shift-row > span { min-width: 0; padding: 9px 5px; border: 1px solid var(--rule); background: var(--surface); font-size: 0.82rem; text-align: center; }
+.token-shift-row.targets > span { border-color: #d4a744; background: var(--gold-soft); }
+
+.sampling-bars { display: grid; gap: 10px; padding: 20px; }
+.sampling-row { display: grid; grid-template-columns: 62px minmax(0, 1fr) 64px; gap: 10px; align-items: center; font-size: 0.82rem; }
+.sampling-track { height: 16px; border: 1px solid var(--rule); background: #eef1ef; }
+.sampling-fill { display: block; width: var(--probability); height: 100%; background: var(--blue); transition: width 160ms ease; }
+.sampling-row:first-child .sampling-fill { background: var(--teal); }
+
 .block-pipeline {
   margin: 28px 0;
   padding: 0;
@@ -842,6 +891,8 @@ progress { width: min(180px, 100%); height: 12px; accent-color: var(--teal); }
   .lesson-map-aside { border-top: 1px solid var(--rule); border-left: 0; }
   .lesson-map-stage { grid-template-columns: 32px minmax(0, 1fr); }
   .map-schematic { grid-column: 2; }
+  .token-shift { overflow-x: auto; }
+  .token-shift-row { min-width: 560px; grid-template-columns: 80px repeat(5, minmax(76px, 1fr)); }
   th, td { padding: 10px 8px; }
   .course-table td:last-child { width: auto; }
 }

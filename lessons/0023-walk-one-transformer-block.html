@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lesson 18: Walk One Complete Transformer Block</title>
+  <title>Lesson 23: Walk One Complete Transformer Block</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
-<body data-lesson="0018">
+<body data-lesson="0023">
   <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/transformer-block-visual.html">Block walkthrough</a></header>
   <main>
-    <section class="hero"><p class="eyebrow">Lesson 18 of 18 · Capstone</p><h1>Walk one block without losing a dimension.</h1><p class="lede">Your win: narrate every operation in a pre-norm causal Transformer block with RoPE, including its shape and purpose.</p><div class="lesson-meta"><span>20 minutes</span><span>Needs: Lessons 1–17</span><span>Outcome: teach the complete algorithm</span></div></section>
+    <section class="hero"><p class="eyebrow">Lesson 23 of 23 · Capstone</p><h1>Walk one block without losing a dimension.</h1><p class="lede">Your win: narrate every operation in a pre-norm causal Transformer block with RoPE, including its shape and purpose.</p><div class="lesson-meta"><span>20 minutes</span><span>Needs: Lessons 1–22</span><span>Outcome: teach the complete algorithm</span></div></section>
 
     <div class="goal"><strong>Final mission:</strong> start with \(X^{(\ell)}\), finish with \(X^{(\ell+1)}\), and explain exactly where position, comparison, probability, content, and residual updates enter.</div>
 
@@ -37,6 +37,11 @@
       <li><span class="step-no">7</span><span><strong>Add:</strong> \(Y=X^{(\ell)}+O_{\text{attn}}\)</span><span>first residual</span></li>
       <li><span class="step-no">8</span><span><strong>Transform and add:</strong> \(X^{(\ell+1)}=Y+\operatorname{FFN}(\operatorname{Norm}(Y))\)</span><span>second residual</span></li>
     </ol>
+
+    <figure class="course-figure">
+      <img loading="lazy" src="../assets/course-visuals/transformer-block-overview.webp" width="1122" height="1402" alt="Complete decoder-only Transformer block from hidden states through attention, residual paths, normalization, and SwiGLU">
+      <figcaption>The whole block in one view. Follow the numbered path top to bottom, then use the worked example below to substitute actual matrices at the attention stages.</figcaption>
+    </figure>
 
     <section class="worked-example">
       <h3>Toy walkthrough: \(B=1,T=2,d_{\text{model}}=2,h=1\)</h3>
@@ -85,7 +90,7 @@
         =\begin{bmatrix}2.1&amp;1.8\\2.3&amp;-0.9\end{bmatrix}.
         \]
       </div>
-      <p>The chosen \(F\) stands in for the SwiGLU calculation from Lesson 17; every attention-stage number above is calculated explicitly.</p>
+      <p>The chosen \(F\) stands in for the SwiGLU calculation from Lesson 22; every attention-stage number above is calculated explicitly.</p>
     </section>
 
     <h2>Teach-back checkpoints</h2>
@@ -96,7 +101,7 @@
 
     <section class="code-checkpoint">
       <h2>Code checkpoint · assemble the TransformerModel</h2>
-      <p>The pieces from Lessons 10–17 now form a decoder-only language model. Every block preserves \([B,T,D]\); the language-model head converts the final features into one logit per vocabulary item.</p>
+      <p>The block pieces from Lessons 15–22 now form a decoder-only language model. Every block preserves \([B,T,D]\); the language-model head converts the final features into one logit per vocabulary item.</p>
       <details open><summary>Show the final assembly</summary><pre><code class="language-python">class TransformerModel(nn.Module):
     def __init__(self, config):
         super().__init__()
@@ -135,9 +140,9 @@
     <p class="source"><strong>Primary sources:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al.</a>; <a href="https://arxiv.org/abs/2104.09864">Su et al., RoFormer</a>; <a href="https://arxiv.org/abs/2302.13971">Touvron et al., LLaMA</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can teach one complete RoPE Transformer block and defend every tensor shape.</label>
     <p class="small">Record your two-minute explanation and send its transcript plus the capstone answers to the teaching agent.</p>
-    <nav class="lesson-nav"><a href="0017-swiglu-feed-forward.html">← SwiGLU</a><a href="index.html">Return to course map →</a></nav>
+    <nav class="lesson-nav"><a href="0022-swiglu-feed-forward.html">← SwiGLU</a><a href="index.html">Return to course map →</a></nav>
   </main>
-  <footer class="site-footer">Lesson 18 · Complete Transformer block capstone</footer>
+  <footer class="site-footer">Lesson 23 · Complete Transformer block capstone</footer>
   <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
 </body>
 </html>

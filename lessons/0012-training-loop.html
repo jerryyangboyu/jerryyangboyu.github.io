@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 12: Training Updates Model Weights</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
+</head>
+<body data-lesson="0012">
+  <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Lesson 12 of 23 · LLM preliminaries</p>
+      <h1>Loss becomes a direction for changing weights.</h1>
+      <p class="lede">Your win: narrate one complete training step and distinguish the forward pass, backward pass, optimizer update, batch, step, and epoch.</p>
+      <div class="lesson-meta"><span>18 minutes</span><span>Needs: next-token loss</span><span>Outcome: read a training loop</span></div>
+    </section>
+
+    <div class="goal"><strong>Module bridge:</strong> the architecture defines a function \(f_\theta\). Training searches for parameter values \(\theta\) that make its next-token predictions less wrong.</div>
+
+    <h2>Four operations form the essential loop</h2>
+    <ol class="steps">
+      <li><strong>Forward:</strong> compute logits \(L=f_\theta(x)\).</li>
+      <li><strong>Loss:</strong> compare logits with targets to obtain scalar \(\mathcal L\).</li>
+      <li><strong>Backward:</strong> compute a gradient \(\nabla_\theta\mathcal L\) for every trainable parameter.</li>
+      <li><strong>Update:</strong> let the optimizer change \(\theta\), then begin the next step.</li>
+    </ol>
+
+    <section class="worked-example">
+      <h3>Numbers substituted: one SGD update</h3>
+      <p>For one weight \(w=2.00\), gradient \(g=0.30\), and learning rate \(\eta=0.10\):</p>
+      <div class="equation">\[w_{\text{new}}=w-\eta g=2.00-(0.10)(0.30)=1.97.\]</div>
+      <p>The gradient is not the new weight. It is the local direction in which the loss increases; gradient descent steps in the opposite direction.</p>
+    </section>
+
+    <figure class="course-figure">
+      <img src="../assets/course-visuals/training-loop.webp" alt="Detailed training-step workflow from clearing gradients through mini-batch accumulation, backward pass, clipping, learning-rate schedule, optimizer update, and bookkeeping" width="1440" height="960">
+      <figcaption>The full engineering loop adds gradient accumulation, clipping, schedules, and bookkeeping around the same forward-loss-backward-update core.</figcaption>
+    </figure>
+
+    <h2>Batch, step, and epoch are different counters</h2>
+    <div class="three-col">
+      <article class="panel teal"><h3>Mini-batch</h3><p>A group of (B) training windows processed together to estimate one useful gradient.</p></article>
+      <article class="panel coral"><h3>Optimizer step</h3><p>One parameter update. Gradient accumulation may combine several mini-batches before this happens.</p></article>
+      <article class="panel gold"><h3>Epoch</h3><p>One pass over the chosen training dataset, usually containing many optimizer steps.</p></article>
+    </div>
+
+    <div class="callout"><strong>Training versus inference:</strong> both run a forward pass. Training also has targets, loss, backward, and optimizer updates. Inference keeps the learned parameters fixed.</div>
+
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · the irreducible PyTorch loop</h2>
+      <details><summary>Show one optimizer step</summary><pre><code class="language-python">model.train()
+optimizer.zero_grad(set_to_none=True)
+
+logits = model(inputs)  # forward: [B, T, V]
+loss = F.cross_entropy(
+    logits.reshape(-1, logits.size(-1)),
+    targets.reshape(-1),
+)
+
+loss.backward()         # fill parameter .grad tensors
+optimizer.step()        # update parameters once</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> Which line changes parameters, and which line only computes their gradients?</p>
+    </section>
+
+    <section class="quiz" data-quiz data-success="Correct. Backward computes gradients; the optimizer applies the update." data-retry="Look for the operation that owns the learning rate and parameter state.">
+      <h3>Retrieval check</h3>
+      <p>Which call actually changes the model parameters?</p>
+      <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · <code>optimizer.step()</code></button><button type="button" data-correct="false" aria-pressed="false">B · <code>loss.backward()</code></button></div>
+      <p class="feedback" data-feedback aria-live="polite"></p>
+    </section>
+
+    <section class="exercises">
+      <h2>Practice before moving on</h2>
+      <ol>
+        <li>Update \(w=5\) using gradient \(g=-2\) and learning rate \(\eta=0.1\).</li>
+        <li>Put these in order: optimizer step, forward pass, backward pass, loss.</li>
+        <li>Why clear old gradients before a normal optimizer step?</li>
+        <li>If four mini-batches are accumulated before one update, how many forward and backward passes occur per optimizer step?</li>
+        <li>State one operation present in training but absent in ordinary inference.</li>
+        <li>Explain why a lower training loss does not automatically prove better real-world behavior.</li>
+      </ol>
+      <details><summary>Check solutions</summary><ol><li>\(5-0.1(-2)=5.2\).</li><li>Forward → loss → backward → optimizer step.</li><li>PyTorch accumulates into <code>.grad</code>; stale gradients would contaminate the next update.</li><li>Four forward and four backward passes, followed by one optimizer update.</li><li>Examples include computing target loss, backward, or updating weights.</li><li>The model may overfit training data or optimize a narrow objective that does not capture deployment quality.</li></ol></details>
+    </section>
+
+    <p class="source"><strong>Source:</strong> PyTorch, <a href="https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html">Optimizing Model Parameters</a>.</p>
+    <label class="completion"><input type="checkbox" data-completion> I can narrate one training step and say exactly when parameters change.</label>
+    <nav class="lesson-nav"><a href="0011-next-token-objective.html">← Next-token objective</a><a href="0013-generation-and-sampling.html">Next: Generation and sampling →</a></nav>
+  </main>
+  <footer class="site-footer">Lesson 12 · Training updates model weights</footer>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script>
+</body>
+</html>

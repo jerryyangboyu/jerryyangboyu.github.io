@@ -37,39 +37,59 @@
       ['Rotate two positions', 'Query and key receive different phases.', '§(q_m^{§prime}=R_mq_m,§ k_n^{§prime}=R_nk_n§)', 'distance'],
       ['Move rotations together', 'Transpose places both rotations side by side.', '§(q_m^{§prime§mathsf T}k_n^{§prime}=q_m^{§mathsf T}R_m^{§mathsf T}R_nk_n§)', 'matrix'],
       ['Collapse displacement', 'Composition leaves only relative offset.', '§(R_m^{§mathsf T}R_n=R_{n-m}§)', 'distance']]],
-    '0010': ['How to read a hidden-state tensor', 'Batch selects a sequence, token selects a row, and feature selects one coordinate of that token representation.', ['batch B', 'token T', 'features d_model'], [
+    '0010': ['How text becomes model coordinates', 'The tokenizer chooses discrete symbols; the embedding table turns each token ID into one learned feature vector.', ['text pieces', 'integer token IDs', 'dense embeddings'], [
+      ['Split text', 'A tokenizer reuses character, byte, or subword pieces.', '§(§text{text}§to[t_0,t_1,§ldots]§)', 'features'],
+      ['Assign IDs', 'Vocabulary entries provide stable integer indices.', '§([t_0,t_1,t_2]§to[41,8,203]§)', 'tensor'],
+      ['Look up vectors', 'Each ID selects one row of the embedding matrix.', '§(X=E[§text{token IDs}]§)', 'features']]],
+    '0011': ['How next-token examples are formed', 'Training shifts one token sequence by one position so every input position has the token that should follow it as a target.', ['input tokens', 'next-token targets', 'cross-entropy loss'], [
+      ['Shift by one', 'Inputs stop one token early; targets start one token later.', '§(x=t_{0:T-1},§quad y=t_{1:T}§)', 'features'],
+      ['Predict logits', 'Every position scores the complete vocabulary.', '§(L§in§mathbb R^{B§times T§times V}§)', 'bars'],
+      ['Measure error', 'Cross-entropy rewards probability on the correct next token.', '§(§mathcal L=-§log p(y_t§mid x_{§le t})§)', 'sum']]],
+    '0012': ['How one optimization step changes the model', 'A training step predicts, measures error, sends gradients backward, and lets the optimizer update shared parameters.', ['mini-batch', 'forward and loss', 'gradient update'], [
+      ['Read a batch', 'Batching groups independent training windows.', '§(x,y)§in§mathbb Z^{B§times T}§)', 'tensor'],
+      ['Compute loss', 'The forward pass creates logits and one scalar objective.', '§(L=f_§theta(x),§quad§mathcal L=§operatorname{CE}(L,y)§)', 'block'],
+      ['Update parameters', 'Backward computes gradients before the optimizer moves weights.', '§(§theta§leftarrow§theta-§eta§nabla_§theta§mathcal L§)', 'sum']]],
+    '0013': ['How generation repeats one-token decisions', 'Inference reuses the latest context, produces vocabulary logits, samples one token, appends it, and repeats.', ['current context', 'filtered probabilities', 'longer sequence'], [
+      ['Score candidates', 'The final position supplies one logit per vocabulary item.', '§(z=§text{logits}[:,-1,:]§)', 'bars'],
+      ['Shape randomness', 'Temperature and top-k/top-p alter the candidate distribution.', '§(p=§operatorname{softmax}(z/§tau)§)', 'bars'],
+      ['Append and repeat', 'The sampled ID becomes part of the next model input.', '§(x§leftarrow[x,§operatorname{sample}(p)]§)', 'branch']]],
+    '0014': ['How the complete LLM system fits together', 'Token IDs become vectors, Transformer blocks contextualize them, and the language-model head returns vocabulary logits for training or generation.', ['token IDs and embeddings', 'stacked decoder blocks', 'next-token logits'], [
+      ['Enter model space', 'Embedding lookup creates one model-width vector per token.', '§([B,T]§to[B,T,D]§)', 'tensor'],
+      ['Build context', 'Every decoder block preserves the residual-stream shape.', '§([B,T,D]§xrightarrow{N§text{ blocks}}[B,T,D]§)', 'block'],
+      ['Score vocabulary', 'The final linear head maps each position to V logits.', '§([B,T,D]§to[B,T,V]§)', 'bars']]],
+    '0015': ['How to read a hidden-state tensor', 'Batch selects a sequence, token selects a row, and feature selects one coordinate of that token representation.', ['batch B', 'token T', 'features d_model'], [
       ['Name every axis', 'Do not treat tensor dimensions as interchangeable.', '§(X§in§mathbb R^{B§times T§times d_{§mathrm{model}}}§)', 'tensor'],
       ['Select one token', 'Fix batch and token; keep every feature.', '§(X[b,t,:]§in§mathbb R^{d_{§mathrm{model}}}§)', 'features'],
       ['Preserve outer shape', 'Residual additions require model width again.', '§(B§times T§times d_{§mathrm{model}}§to B§times T§times d_{§mathrm{model}}§)', 'sum']]],
-    '0011': ['How normalization changes values, not axes', 'Statistics come from one token’s features. Token positions remain separate and tensor shape stays fixed.', ['token vector', 'feature statistics', 'scaled vector'], [
+    '0016': ['How normalization changes values, not axes', 'Statistics come from one token’s features. Token positions remain separate and tensor shape stays fixed.', ['token vector', 'feature statistics', 'scaled vector'], [
       ['Take one token row', 'Normalization acts independently per position.', '§(§mathbf x=(x_1,§ldots,x_d)§)', 'features'],
       ['Compute a scale', 'LayerNorm centers; RMSNorm only rescales.', '§(§mu,§sigma^2§quad§text{or}§quad§operatorname{RMS}(§mathbf x)§)', 'bars'],
       ['Return same width', 'Only feature values change.', '§(§operatorname{Norm}:§mathbb R^d§to§mathbb R^d§)', 'features']]],
-    '0012': ['How one token branches into Q, K, and V', 'Projection changes feature meaning. Splitting heads reorganizes features but never divides the sentence.', ['normalized token', 'three projections', 'head feature chunks'], [
+    '0017': ['How one token branches into Q, K, and V', 'Projection changes feature meaning. Splitting heads reorganizes features but never divides the sentence.', ['normalized token', 'three projections', 'head feature chunks'], [
       ['Start from normalized X', 'The same row feeds all three matrices.', '§(§bar X§in§mathbb R^{B§times T§times d_{§mathrm{model}}}§)', 'tensor'],
       ['Project three views', 'Q asks, K is compared, V carries content.', '§(Q=§bar XW_Q,§ K=§bar XW_K,§ V=§bar XW_V§)', 'branch'],
       ['Split feature width', 'Model width becomes heads times head width.', '§(d_{§mathrm{model}}=h§,d_h§)', 'pairs']]],
-    '0013': ['How a causal mask removes future connections', 'The mask acts on connections, not stored vectors. It precedes softmax so forbidden weights become zero.', ['Q′K′ scores', 'triangular mask', 'future weight = 0'], [
+    '0018': ['How a causal mask removes future connections', 'The mask acts on connections, not stored vectors. It precedes softmax so forbidden weights become zero.', ['Q′K′ scores', 'triangular mask', 'future weight = 0'], [
       ['Build all scores', 'Each query row compares with every key.', '§(S=Q^{§prime}K^{§prime§mathsf T}/§sqrt{d_h}§)', 'attention'],
       ['Mark the future', 'Columns with key index \(j>i\) are forbidden.', '§(M_{ij}=-§infty§quad§text{when }j>i§)', 'mask'],
       ['Normalize safely', 'Exponentiating negative infinity yields zero.', '§(P=§operatorname{softmax}(S+M)§)', 'bars']]],
-    '0014': ['How scores become a weighted content blend', 'Q/K comparisons decide how much each position contributes; V supplies the content being combined.', ['masked scores', 'softmax weights', 'weighted V sum'], [
+    '0019': ['How scores become a weighted content blend', 'Q/K comparisons decide how much each position contributes; V supplies the content being combined.', ['masked scores', 'softmax weights', 'weighted V sum'], [
       ['Exponentiate scores', 'Larger allowed scores receive more mass.', '§(e^{A_{ij}}§)', 'bars'],
       ['Normalize the row', 'Allowed weights are nonnegative and total one.', '§(P_{ij}=e^{A_{ij}}/§sum_re^{A_{ir}}§)', 'bars'],
       ['Blend values', 'One output combines allowed value vectors.', '§(§mathbf o_i=§sum_jP_{ij}§mathbf v_j§)', 'sum']]],
-    '0015': ['How multiple heads share one sequence', 'Heads specialize through different feature projections while all of them compare the same token sequence.', ['full sequence', 'parallel head spaces', 'joined output'], [
+    '0020': ['How multiple heads share one sequence', 'Heads specialize through different feature projections while all of them compare the same token sequence.', ['full sequence', 'parallel head spaces', 'joined output'], [
       ['Split feature width', 'Every token supplies \(d_h\) features per head.', '§(B§times T§times d_{§mathrm{model}}§to B§times h§times T§times d_h§)', 'pairs'],
       ['Attend in parallel', 'Each head builds its own token map.', '§(P_1,§ldots,P_h§in§mathbb R^{T§times T}§)', 'heads'],
       ['Join features', 'Concatenation and \(W_O\) restore width.', '§(O_{§mathrm{attn}}=§operatorname{Concat}(O_1,§ldots,O_h)W_O§)', 'branch']]],
-    '0016': ['How a residual path carries and updates state', 'The identity route remains available while the sublayer proposes a correction of exactly the same shape.', ['current state X', 'learned update F(X)', 'new state X + F(X)'], [
+    '0021': ['How a residual path carries and updates state', 'The identity route remains available while the sublayer proposes a correction of exactly the same shape.', ['current state X', 'learned update F(X)', 'new state X + F(X)'], [
       ['Keep identity', 'The hidden state travels directly to addition.', '§(X§)', 'features'],
       ['Compute correction', 'Attention or FFN produces a learned update.', '§(F(§operatorname{Norm}(X))§)', 'branch'],
       ['Add coordinates', 'Matching shapes produce the next state.', '§(Y=X+F(§operatorname{Norm}(X))§)', 'sum']]],
-    '0017': ['How two SwiGLU branches gate features', 'One expanded branch sets a signed gate; the other carries candidate values. Their product is projected back.', ['gate and up', 'coordinate product', 'down projection'], [
+    '0022': ['How two SwiGLU branches gate features', 'One expanded branch sets a signed gate; the other carries candidate values. Their product is projected back.', ['gate and up', 'coordinate product', 'down projection'], [
       ['Expand twice', 'Two matrices create matching hidden widths.', '§(g=xW_g,§quad u=xW_u§)', 'gate'],
       ['Apply gate', 'SiLU shapes one branch before multiplication.', '§(z=§operatorname{SiLU}(g)§odot u§)', 'gate'],
       ['Return to model width', 'Down projection enables residual addition.', '§(§operatorname{FFN}(x)=zW_d§)', 'branch']]],
-    '0018': ['How all block stages connect', 'Position affects Q/K comparison, attention mixes tokens, SwiGLU transforms features, and residual paths carry state.', ['normalize and attend', 'first residual', 'normalize and SwiGLU', 'second residual'], [
+    '0023': ['How all block stages connect', 'Position affects Q/K comparison, attention mixes tokens, SwiGLU transforms features, and residual paths carry state.', ['normalize and attend', 'first residual', 'normalize and SwiGLU', 'second residual'], [
       ['Attention sublayer', 'Normalize, project, rotate, mask, and blend.', '§(O_{§mathrm{attn}}=§operatorname{MHA}(§operatorname{Norm}(X))§)', 'block'],
       ['First state update', 'Add attention information to current state.', '§(Y=X+O_{§mathrm{attn}}§)', 'sum'],
       ['Feature update', 'Normalize Y, apply SwiGLU, and add again.', '§(X^{(§ell+1)}=Y+§operatorname{FFN}(§operatorname{Norm}(Y))§)', 'block']]]
