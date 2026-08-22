@@ -70,6 +70,17 @@
 
     <div class="callout"><strong>Precise intuition:</strong> the identity path provides a direct route for the current state and for gradients. It does not guarantee that every original fact survives all later computations unchanged.</div>
 
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · the complete pre-norm block skeleton</h2>
+      <p>The identity path is visible in the repeated <code>x + ...</code> form. Each sublayer receives a normalized view, but its update is added to the unnormalized running state.</p>
+      <details><summary>Show both residual updates</summary><pre><code>class TransformerBlock(nn.Module):
+    def forward(self, x):
+        x = x + self.attention(self.attn_norm(x))
+        x = x + self.feed_forward(self.ffn_norm(x))
+        return x</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> Point to the two identity routes and the two learned routes in these three lines.</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. Elementwise addition requires matching shapes." data-retry="Both branches meet at an elementwise plus sign."><h3>Retrieval check</h3><p>What shape must an attention update have before adding it to \(X\in\mathbb R^{B\times T\times d_{\text{model}}}\)?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(B\times T\times d_{\text{model}}\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(B\times h\times T\times T\)</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
     <section class="exercises">

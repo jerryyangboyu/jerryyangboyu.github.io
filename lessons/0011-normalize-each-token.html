@@ -77,6 +77,23 @@
     </div>
     <p>LayerNorm vs RMSNorm asks <em>what computation?</em> Pre-LN vs Post-LN asks <em>where is it placed?</em></p>
 
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · RMSNorm over the last axis</h2>
+      <p>MiniMind uses RMSNorm. Notice that <code>mean(dim=-1)</code> reduces only the feature axis, independently for every batch item and token.</p>
+      <details><summary>Show the RMSNorm module</summary><pre><code>class RMSNorm(nn.Module):
+    def __init__(self, width, eps=1e-6):
+        super().__init__()
+        self.eps = eps
+        self.weight = nn.Parameter(torch.ones(width))
+
+    def forward(self, x):
+        rms = torch.rsqrt(
+            x.float().pow(2).mean(dim=-1, keepdim=True) + self.eps
+        )
+        return (x.float() * rms * self.weight).to(dtype=x.dtype)</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> For <code>x.shape == [2, 3, 8]</code>, what is the shape of <code>rms</code> after <code>keepdim=True</code>?</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. Normalization runs across the feature coordinates of each token." data-retry="The batch and token axes identify examples; the feature axis is normalized.">
       <h3>Retrieval check</h3>
       <p>Which axis supplies the mean and variance for one token?</p>

@@ -91,6 +91,29 @@
       <article class="panel coral"><h3>Attention's exact job</h3><p>Use masked query-key comparisons to build probability weights, then blend value vectors from allowed positions.</p></article>
     </div>
 
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · assemble the TransformerModel</h2>
+      <p>The pieces from Lessons 10–17 now form a decoder-only language model. Every block preserves \([B,T,D]\); the language-model head converts the final features into one logit per vocabulary item.</p>
+      <details open><summary>Show the final assembly</summary><pre><code>class TransformerModel(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.token_embedding = nn.Embedding(config.vocab_size, config.hidden_size)
+        self.layers = nn.ModuleList(
+            TransformerBlock(config) for _ in range(config.num_layers)
+        )
+        self.final_norm = RMSNorm(config.hidden_size, config.norm_eps)
+        self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
+        self.lm_head.weight = self.token_embedding.weight
+
+    def forward(self, input_ids):
+        x = self.token_embedding(input_ids)  # [B, T] -> [B, T, D]
+        for layer in self.layers:
+            x = layer(x)                    # [B, T, D] -> [B, T, D]
+        return self.lm_head(self.final_norm(x))  # [B, T, vocab]</code></pre></details>
+      <p><a href="../reference/transformer-model-code.html"><strong>Open the annotated complete implementation →</strong></a> or <a href="../reference/transformer_model.py" download>download <code>transformer_model.py</code></a>.</p>
+      <p class="code-prompt"><strong>Trace it:</strong> Starting from <code>input_ids</code>, name the final axis at each of the three comments.</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. Position modifies comparisons before masking and softmax." data-retry="Trace Q and K from projection to score formation."><h3>Retrieval check</h3><p>Where does RoPE occur in this block?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · after Q/K projection and before query-key scores</button><button type="button" data-correct="false" aria-pressed="false">B · after weighted values and both residual additions</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
     <section class="exercises">

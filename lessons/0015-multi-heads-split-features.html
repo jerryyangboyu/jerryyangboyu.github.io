@@ -63,6 +63,20 @@
     </div>
     <p>The output projection lets coordinates from different heads contribute to the same model feature while restoring the \(d_{\text{model}}\)-wide representation expected by the residual path.</p>
 
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · join every head</h2>
+      <p>Attention produced one context tensor per head. Transpose restores token-major order, then reshape concatenates head features before the learned output projection.</p>
+      <details><summary>Show head recombination</summary><pre><code># context begins as [B, H, T, Dh]
+context = context.transpose(1, 2).contiguous()
+# now [B, T, H, Dh]
+
+context = context.view(batch, tokens, hidden_size)
+# now [B, T, H * Dh] = [B, T, D]
+
+attention_output = out_proj(context)  # [B, T, D]</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> Why must the output projection return width \(D\) before the residual addition?</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. The split is along feature width; all heads retain every token." data-retry="Track T separately from d_model."><h3>Retrieval check</h3><p>With \(T=5,d_{\text{model}}=12,h=3\), what does one head receive?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · all 5 tokens with 4 features each</button><button type="button" data-correct="false" aria-pressed="false">B · one or two tokens with all 12 features</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
     <section class="exercises">

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Build the TransformerModel · Complete Reference Code</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="../lessons/index.html">Transformer Foundations: Math, Attention &amp; RoPE</a><a class="course-link" href="transformer-block-visual.html">Visual map</a></header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Module 2 · Complete reference implementation</p>
+      <h1>Build the TransformerModel, piece by piece.</h1>
+      <p class="lede">This runnable PyTorch model joins the code checkpoints from Lessons 10–18 into one decoder-only Transformer that maps token IDs to next-token logits.</p>
+      <div class="lesson-meta"><span>About 180 lines</span><span>PyTorch only</span><span>Designed for tracing</span></div>
+    </section>
+
+    <section>
+      <h2>Implementation map</h2>
+      <p>Read down the table once, then follow the source in the same order. Every row corresponds to one conceptual checkpoint in the course.</p>
+      <div class="table-scroll"><table>
+        <thead><tr><th>Lesson</th><th>Code element</th><th>Shape contract</th></tr></thead>
+        <tbody>
+          <tr><td>10 · Hidden states</td><td><code>TransformerConfig</code>, <code>token_embedding</code></td><td>\([B,T]\rightarrow[B,T,D]\)</td></tr>
+          <tr><td>11 · Normalization</td><td><code>RMSNorm</code></td><td>\([B,T,D]\rightarrow[B,T,D]\)</td></tr>
+          <tr><td>12 · Q/K/V and position</td><td><code>split_heads</code>, <code>precompute_rope</code>, <code>apply_rope</code></td><td>\([B,T,D]\rightarrow[B,H,T,D_h]\)</td></tr>
+          <tr><td>13 · Causal mask</td><td>scaled scores and <code>masked_fill</code></td><td>\([B,H,T,D_h]\rightarrow[B,H,T,T]\)</td></tr>
+          <tr><td>14 · Weighted values</td><td><code>softmax(scores) @ v</code></td><td>\([B,H,T,T]\rightarrow[B,H,T,D_h]\)</td></tr>
+          <tr><td>15 · Join heads</td><td><code>transpose</code>, <code>view</code>, <code>out_proj</code></td><td>\([B,H,T,D_h]\rightarrow[B,T,D]\)</td></tr>
+          <tr><td>16 · Residual block</td><td><code>TransformerBlock</code></td><td>\([B,T,D]\rightarrow[B,T,D]\)</td></tr>
+          <tr><td>17 · SwiGLU</td><td><code>SwiGLU</code></td><td>\(D\rightarrow D_{\text{ff}}\rightarrow D\)</td></tr>
+          <tr><td>18 · Full model</td><td><code>TransformerModel</code>, <code>lm_head</code></td><td>\([B,T,D]\rightarrow[B,T,V]\)</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="two-col">
+      <article class="panel teal">
+        <h3>Retained from MiniMind</h3>
+        <p>Decoder-only causal attention, RMSNorm, rotary position encoding on Q/K, pre-norm residual paths, SwiGLU, stacked blocks, final normalization, and tied token/output embeddings.</p>
+      </article>
+      <article class="panel coral">
+        <h3>Deliberately omitted</h3>
+        <p>Grouped-query attention, KV caching, Flash Attention, YaRN scaling, dropout, mixture-of-experts routing, Hugging Face wrappers, generation sampling, and training loss.</p>
+      </article>
+    </section>
+
+    <p class="code-lineage"><strong>Reference lineage:</strong> teaching adaptation of <a href="https://github.com/jingyaogong/minimind/blob/d65ef2c00ebc6082f9df11541e1b191655eddb00/model/model_minimind.py">MiniMind <code>model_minimind.py</code> at commit <code>d65ef2c</code></a>. Names and tensor layout were simplified to match this course's notation.</p>
+
+    <section>
+      <h2>Run the model</h2>
+      <p><a href="transformer_model.py" download><strong>Download <code>transformer_model.py</code></strong></a>, install PyTorch, then run:</p>
+      <pre class="source-code"><code>python transformer_model.py
+
+# Expected shape lines:
+# input: (1, 4)
+# logits: (1, 4, 32)</code></pre>
+      <div class="callout"><strong>Read the output:</strong> there is one vector of 32 vocabulary logits for each of the four input positions. A tokenizer and sampling loop would turn those logits into generated text; they are outside this core architecture lesson.</div>
+    </section>
+
+    <section>
+      <h2>Complete source</h2>
+      <p>First locate each class from the implementation map. Then trace one tensor through <code>TransformerModel.forward</code>, one <code>TransformerBlock</code>, and <code>CausalSelfAttention.forward</code>.</p>
+      <pre class="source-code"><code data-source-code>Loading transformer_model.py…</code></pre>
+    </section>
+
+    <section class="exercises">
+      <h2>Code-reading exercises</h2>
+      <ol>
+        <li>Change <code>hidden_size</code> to 18 while keeping 4 heads. Which validation fails, and why?</li>
+        <li>For the example configuration, calculate <code>head_dim</code> before running the file.</li>
+        <li>Identify the one line that prevents future information from changing an earlier token representation.</li>
+        <li>Temporarily remove <code>out_proj</code>. Which conceptual role is lost even if the outer shape still matches?</li>
+        <li>Explain why <code>lm_head</code> changes the final axis from (D) to vocabulary size (V).</li>
+        <li>Add a forward hook or print statement that records the shape after every block.</li>
+      </ol>
+      <details><summary>Check guidance</summary><ol><li><code>hidden_size % num_heads</code> fails because heads cannot receive equal feature widths.</li><li>(16/4=4).</li><li>The upper-triangular mask followed by <code>masked_fill(..., -inf)</code>.</li><li>The learned mixing of concatenated head features back into model coordinates.</li><li>Each model feature vector must become one score for every possible next token.</li><li>Print <code>x.shape</code> inside the layer loop or register a hook on each <code>TransformerBlock</code>.</li></ol></details>
+    </section>
+
+    <nav class="lesson-nav"><a href="../lessons/0018-walk-one-transformer-block.html">← Lesson 18</a><a href="transformer-block-visual.html">Compare with the visual map →</a></nav>
+  </main>
+  <footer class="site-footer">Complete code reference · TransformerModel</footer>
+  <script src="../assets/source-code.js"></script>
+</body>
+</html>

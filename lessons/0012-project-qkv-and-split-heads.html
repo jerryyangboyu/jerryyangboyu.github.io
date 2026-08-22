@@ -75,6 +75,22 @@
     <div class="equation">\[Q'=\operatorname{RoPE}(Q),\qquad K'=\operatorname{RoPE}(K),\qquad V'=V.\]</div>
     <p>RoPE rotates adjacent pairs inside each head. With \(d_h=2\), each head above contains exactly one rotation plane. Every head still receives all \(T\) token positions.</p>
 
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · project, split heads, rotate Q and K</h2>
+      <p>Three linear maps create Q, K, and V. Reshaping exposes the head axis; RoPE then changes Q and K while V stays untouched.</p>
+      <details><summary>Show projection and head splitting</summary><pre><code>def split_heads(x):
+    batch, tokens, _ = x.shape
+    return x.view(batch, tokens, num_heads, head_dim).transpose(1, 2)
+
+q = split_heads(q_proj(x))  # [B, H, T, Dh]
+k = split_heads(k_proj(x))  # [B, H, T, Dh]
+v = split_heads(v_proj(x))  # [B, H, T, Dh]
+
+q = apply_rope(q, rope_cos, rope_sin)
+k = apply_rope(k, rope_cos, rope_sin)</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> If <code>x</code> is <code>[2, 5, 12]</code> and there are 3 heads, what is each projected tensor's shape after <code>split_heads</code>?</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. Heads partition feature width; every head keeps the token axis." data-retry="The reshape replaces one feature axis by head and head-feature axes.">
       <h3>Retrieval check</h3>
       <p>What does \(d_{\text{model}}=8,h=2\) imply for \(d_h\)?</p>

@@ -61,6 +61,17 @@
 
     <div class="callout"><strong>Index discipline:</strong> use \(i\) for a query position and \(j\) for a key/value position. Both range over the token axis \(T\); neither is a feature dimension.</div>
 
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · tokens become hidden states</h2>
+      <p>The implementation starts with integer token IDs and looks up one learned feature vector per token. The batch and token axes stay in place.</p>
+      <details><summary>Show the PyTorch shape transition</summary><pre><code>token_ids = torch.tensor([[4, 7, 2], [9, 1, 5]])  # [B=2, T=3]
+embedding = nn.Embedding(vocab_size=32, embedding_dim=8)
+x = embedding(token_ids)                           # [B=2, T=3, D=8]
+
+assert x.shape == (2, 3, 8)</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> Which axis is introduced by the embedding lookup, and which two axes are preserved?</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. Selecting one batch item and one token leaves the feature vector." data-retry="Fix the first two indices and ask which axis remains.">
       <h3>Retrieval check</h3>
       <p>What is the shape of \(X[b,t,:]\)?</p>

@@ -58,6 +58,19 @@
 
     <div class="callout"><strong>Order matters:</strong> masking after softmax would assign positive probability to future tokens first. Adding \(-\infty\) before softmax makes \(e^{-\infty}=0\), so forbidden weights are exactly zero in the mathematical model.</div>
 
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · mask scores before softmax</h2>
+      <p>The upper triangle represents future key positions. Replacing those scores with \(-\infty\) guarantees zero probability after softmax.</p>
+      <details><summary>Show score scaling and the causal mask</summary><pre><code>scores = q @ k.transpose(-2, -1) / math.sqrt(head_dim)
+# scores: [B, H, query_token, key_token]
+
+tokens = scores.size(-1)
+future = torch.ones(tokens, tokens, dtype=torch.bool, device=x.device)
+future = future.triu(diagonal=1)
+scores = scores.masked_fill(future, float("-inf"))</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> In row 2 of a \(4\times4\) mask, which column receives \(-\infty\)?</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. A query at position 2 may use keys 1 and 2 only." data-retry="Causal attention permits the present and past: j ≤ i.">
       <h3>Retrieval check</h3><p>Which keys are visible to query position \(i=2\)?</p>
       <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(j=1,2\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(j=2,3,4\)</button></div><p class="feedback" data-feedback aria-live="polite"></p>

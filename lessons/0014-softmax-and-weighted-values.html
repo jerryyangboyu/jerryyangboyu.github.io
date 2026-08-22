@@ -63,6 +63,18 @@
 
     <div class="callout"><strong>Keep the roles separate:</strong> query-key scores answer “how much?”; values answer “what content is carried into the output?” RoPE changes the former by rotating Q and K, while V stays unrotated.</div>
 
+    <section class="code-checkpoint">
+      <h2>Code checkpoint · probabilities blend values</h2>
+      <p>Softmax acts across the key axis. The following matrix multiplication replaces that key axis with the value feature axis.</p>
+      <details><summary>Show softmax and weighted values</summary><pre><code>weights = F.softmax(scores.float(), dim=-1).to(dtype=q.dtype)
+# weights: [B, H, T, T], each row sums to 1
+
+context = weights @ v
+# v:       [B, H, T, Dh]
+# context: [B, H, T, Dh]</code></pre></details>
+      <p class="code-prompt"><strong>Trace it:</strong> Why does the final dimension of <code>context</code> equal <code>Dh</code> rather than <code>T</code>?</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. Every softmax row is a probability distribution." data-retry="Softmax divides every positive exponential by their shared sum."><h3>Retrieval check</h3><p>What must the weights in one attention row sum to?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(1\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(d_h\)</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
     <section class="exercises">
