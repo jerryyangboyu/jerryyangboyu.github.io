@@ -12,7 +12,7 @@
   <script defer src="../assets/source-code.js"></script>
 </head>
 <body>
-  <header class="site-header"><a class="brand" href="../lessons/index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="transformer-block-visual.html">Visual map</a></header>
+  <header class="site-header"><a class="brand" href="../lessons/index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="transformer-block-visual.html">Block walkthrough</a></header>
   <main>
     <section class="hero">
       <p class="eyebrow">Module 2 · Complete reference implementation</p>
@@ -83,7 +83,7 @@
       <details><summary>Check guidance</summary><ol><li><code>hidden_size % num_heads</code> fails because heads cannot receive equal feature widths.</li><li>(16/4=4).</li><li>The upper-triangular mask followed by <code>masked_fill(..., -inf)</code>.</li><li>The learned mixing of concatenated head features back into model coordinates.</li><li>Each model feature vector must become one score for every possible next token.</li><li>Print <code>x.shape</code> inside the layer loop or register a hook on each <code>TransformerBlock</code>.</li></ol></details>
     </section>
 
-    <nav class="lesson-nav"><a href="../lessons/0018-walk-one-transformer-block.html">← Lesson 18</a><a href="transformer-block-visual.html">Compare with the visual map →</a></nav>
+    <nav class="lesson-nav"><a href="../lessons/0018-walk-one-transformer-block.html">← Lesson 18</a><a href="transformer-block-visual.html">Compare with the block walkthrough →</a></nav>
   </main>
   <footer class="site-footer">Complete code reference · TransformerModel</footer>
 </body>

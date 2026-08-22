@@ -49,7 +49,7 @@ Each Module 2 lesson includes a focused, syntax-highlighted PyTorch code checkpo
 
 - [Annotated implementation](https://jerryyangboyu.github.io/reference/transformer-model-code.html)
 - [Complete Python source](reference/transformer_model.py)
-- [Transformer block visual map](https://jerryyangboyu.github.io/reference/transformer-block-visual.html)
+- [Walk Through a Transformer Block](https://jerryyangboyu.github.io/reference/transformer-block-visual.html)
 - [Transformer block formula sheet](https://jerryyangboyu.github.io/reference/transformer-block-reference.html)
 
 The teaching model is adapted from MiniMind's `model/model_minimind.py`. It retains the core decoder path while omitting production features such as grouped-query attention, KV caching, Flash Attention, YaRN scaling, mixture-of-experts routing, and Hugging Face generation wrappers.
