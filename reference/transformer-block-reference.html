@@ -3,15 +3,34 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Transformer Block Reference</title>
-  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script><script defer src="../assets/reference-stepper.js"></script>
 </head>
 <body>
   <header class="site-header"><a class="brand" href="../lessons/index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="transformer-block-visual.html">Block walkthrough</a></header>
   <main>
-    <section class="hero"><p class="eyebrow">Printable reference</p><h1>One pre-norm decoder block.</h1><p class="lede">Equations, tensor shapes, and numerical checks for the block used in Lessons 15–23.</p></section>
+    <section class="hero"><p class="eyebrow">Guided reference · 5 steps</p><h1>Walk through one decoder block.</h1><p class="lede">Follow the residual stream through attention, verify every tensor shape, inspect masking and softmax, then finish with normalization and SwiGLU.</p></section>
 
-    <h2>Block equations</h2>
-    <div class="equation">
+    <div class="reference-sequence" data-reference-sequence>
+      <nav class="reference-stepper" aria-label="Transformer block steps">
+        <div class="reference-step-tabs" role="tablist" aria-label="Choose a Transformer block step">
+          <button type="button" data-step-target="0"><b>01</b><span>Trace the block</span></button>
+          <button type="button" data-step-target="1"><b>02</b><span>Track shapes</span></button>
+          <button type="button" data-step-target="2"><b>03</b><span>Mask and rotate</span></button>
+          <button type="button" data-step-target="3"><b>04</b><span>Check softmax</span></button>
+          <button type="button" data-step-target="4"><b>05</b><span>Transform features</span></button>
+        </div>
+        <div class="reference-step-controls">
+          <button type="button" data-step-prev aria-label="Previous step">← <span>Previous</span></button>
+          <output data-step-status aria-live="polite">Step 1 of 5</output>
+          <button type="button" data-step-next><span>Next</span> →</button>
+          <button type="button" data-step-all aria-pressed="false">Show all</button>
+        </div>
+      </nav>
+
+      <section class="reference-step" id="block-trace" data-reference-step>
+        <p class="reference-step-kicker">Step 1 · See the complete path before opening it</p>
+        <h2>Block equations</h2>
+        <div class="equation">
       \[
       \bar X=\operatorname{Norm}(X^{(\ell)}),
       \qquad Q=\bar XW_Q,\quad K=\bar XW_K,\quad V=\bar XW_V,
@@ -27,53 +46,72 @@
       Y=X^{(\ell)}+O_{\text{attn}},
       \qquad X^{(\ell+1)}=Y+\operatorname{FFN}(\operatorname{Norm}(Y)).
       \]
+        </div>
+        <div class="callout"><strong>Checkpoint:</strong> find the two residual additions and verify that both return \([B,T,d_{\text{model}}]\).</div>
+      </section>
+
+      <section class="reference-step" id="block-shapes" data-reference-step>
+        <p class="reference-step-kicker">Step 2 · Keep the tensor-shape ledger</p>
+        <h2>Track every axis</h2>
+        <table><thead><tr><th>Quantity</th><th>Shape</th><th>Invariant to remember</th></tr></thead><tbody>
+          <tr><td>\(X,\bar X,Q,K,V\)</td><td>\(B\times T\times d_{\text{model}}\)</td><td>Projection acts on the final feature axis.</td></tr>
+          <tr><td>Split Q, K, V</td><td>\(B\times h\times T\times d_h\)</td><td>\(d_{\text{model}}=h\,d_h\); every head keeps all \(T\) tokens.</td></tr>
+          <tr><td>Scores and probabilities</td><td>\(B\times h\times T\times T\)</td><td>Rows are queries; columns are keys.</td></tr>
+          <tr><td>One head output</td><td>\(B\times T\times d_h\)</td><td>\(P_rV_r\) blends value vectors.</td></tr>
+          <tr><td>Concatenated/output state</td><td>\(B\times T\times d_{\text{model}}\)</td><td>Required for residual addition.</td></tr>
+        </tbody></table>
+        <div class="callout"><strong>Checkpoint:</strong> explain why heads split the feature axis \(d_{\text{model}}\), not the token axis \(T\).</div>
+      </section>
+
+      <section class="reference-step" id="block-attention" data-reference-step>
+        <p class="reference-step-kicker">Step 3 · Add position, then prevent peeking</p>
+        <h2>Rotate Q and K; mask future keys</h2>
+        <section class="two-col">
+          <article class="panel teal"><h3>Causal mask</h3><div class="equation">
+            \[
+            M_{ij}=\begin{cases}0,&amp;j\le i,\\-\infty,&amp;j&gt;i.\end{cases}
+            \]
+          </div><p>Add it before softmax. Future weights then become zero.</p></article>
+          <article class="panel coral"><h3>RoPE identity</h3><div class="equation">
+            \[
+            (R_mq)^{\mathsf T}(R_nk)=q^{\mathsf T}R_{n-m}k.
+            \]
+          </div><p>With the course's counterclockwise convention, the sign is \(n-m\).</p></article>
+        </section>
+        <div class="callout"><strong>Checkpoint:</strong> RoPE changes score geometry; the causal mask changes which key positions are allowed.</div>
+      </section>
+
+      <section class="reference-step" id="block-softmax" data-reference-step>
+        <p class="reference-step-kicker">Step 4 · Turn one score row into weights</p>
+        <h2>Numerical softmax check</h2>
+        <div class="equation">
+          \[
+          \operatorname{softmax}(0.7,1.1,0.2,-\infty)
+          \approx(0.323,0.482,0.196,0).
+          \]
+        </div>
+        <p>The three displayed rounded finite weights total \(1.001\); the unrounded values total exactly \(1\).</p>
+        <div class="callout"><strong>Checkpoint:</strong> the masked future position receives probability zero, while the allowed positions sum to one.</div>
+      </section>
+
+      <section class="reference-step" id="block-features" data-reference-step>
+        <p class="reference-step-kicker">Step 5 · Normalize and transform each token's features</p>
+        <h2>Normalization and SwiGLU</h2>
+        <div class="equation">
+          \[
+          \operatorname{LN}(x)=\gamma\odot\frac{x-\mu}{\sqrt{\sigma^2+\varepsilon}}+\beta,
+          \qquad
+          \operatorname{RMSNorm}(x)=\gamma\odot\frac{x}{\sqrt{\frac1d\sum_rx_r^2+\varepsilon}},
+          \]
+          \[
+          \operatorname{FFN}(x)
+          =\left(\operatorname{SiLU}(xW_{\text{gate}})\odot(xW_{\text{up}})\right)W_{\text{down}}.
+          \]
+        </div>
+
+        <div class="callout"><strong>Role check:</strong> Q asks, K is compared, V carries content. RoPE rotates Q and K only. Attention mixes across token positions; the FFN transforms each token independently.</div>
+      </section>
     </div>
-
-    <h2>Shape ledger</h2>
-    <table><thead><tr><th>Quantity</th><th>Shape</th><th>Invariant to remember</th></tr></thead><tbody>
-      <tr><td>\(X,\bar X,Q,K,V\)</td><td>\(B\times T\times d_{\text{model}}\)</td><td>Projection acts on the final feature axis.</td></tr>
-      <tr><td>Split Q, K, V</td><td>\(B\times h\times T\times d_h\)</td><td>\(d_{\text{model}}=h\,d_h\); every head keeps all \(T\) tokens.</td></tr>
-      <tr><td>Scores and probabilities</td><td>\(B\times h\times T\times T\)</td><td>Rows are queries; columns are keys.</td></tr>
-      <tr><td>One head output</td><td>\(B\times T\times d_h\)</td><td>\(P_rV_r\) blends value vectors.</td></tr>
-      <tr><td>Concatenated/output state</td><td>\(B\times T\times d_{\text{model}}\)</td><td>Required for residual addition.</td></tr>
-    </tbody></table>
-
-    <section class="two-col">
-      <article class="panel teal"><h3>Causal mask</h3><div class="equation">
-        \[
-        M_{ij}=\begin{cases}0,&amp;j\le i,\\-\infty,&amp;j&gt;i.\end{cases}
-        \]
-      </div><p>Add it before softmax. Future weights then become zero.</p></article>
-      <article class="panel coral"><h3>RoPE identity</h3><div class="equation">
-        \[
-        (R_mq)^{\mathsf T}(R_nk)=q^{\mathsf T}R_{n-m}k.
-        \]
-      </div><p>With the course's counterclockwise convention, the sign is \(n-m\).</p></article>
-    </section>
-
-    <h2>Numerical softmax check</h2>
-    <div class="equation">
-      \[
-      \operatorname{softmax}(0.7,1.1,0.2,-\infty)
-      \approx(0.323,0.482,0.196,0).
-      \]
-    </div>
-    <p>The three displayed rounded finite weights total \(1.001\); the unrounded values total exactly \(1\).</p>
-
-    <h2>Normalization and SwiGLU</h2>
-    <div class="equation">
-      \[
-      \operatorname{LN}(x)=\gamma\odot\frac{x-\mu}{\sqrt{\sigma^2+\varepsilon}}+\beta,
-      \qquad
-      \operatorname{RMSNorm}(x)=\gamma\odot\frac{x}{\sqrt{\frac1d\sum_rx_r^2+\varepsilon}},
-      \]
-      \[
-      \operatorname{FFN}(x)
-      =\left(\operatorname{SiLU}(xW_{\text{gate}})\odot(xW_{\text{up}})\right)W_{\text{down}}.
-      \]
-    </div>
-
-    <div class="callout"><strong>Role check:</strong> Q asks, K is compared, V carries content. RoPE rotates Q and K only. Attention mixes across token positions; the FFN transforms each token independently.</div>
     <p class="source">See <a href="../RESOURCES.md">RESOURCES.md</a> for the primary papers and <a href="../lessons/0023-walk-one-transformer-block.html">Lesson 23</a> for a fully substituted walkthrough.</p>
   </main>
 </body>

@@ -205,6 +205,81 @@ mjx-container[jax="CHTML"][display="true"] {
   line-height: 1.45;
 }
 
+.reference-sequence { margin-top: 28px; }
+
+.reference-stepper {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  margin-bottom: 34px;
+  border-block: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.reference-step-tabs {
+  display: grid;
+  grid-template-columns: repeat(var(--reference-step-count, 5), minmax(0, 1fr));
+  border-bottom: 1px solid var(--rule);
+}
+
+.reference-step-tabs:has(> :nth-child(4):last-child) { --reference-step-count: 4; }
+
+.reference-step-tabs button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 58px;
+  padding: 10px 12px;
+  border: 0;
+  border-right: 1px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+}
+
+.reference-step-tabs button:last-child { border-right: 0; }
+.reference-step-tabs button:hover { background: var(--surface); }
+.reference-step-tabs button[aria-current="step"] { background: var(--teal-soft); color: var(--ink); }
+.reference-step-tabs b { color: var(--coral); font-size: 0.72rem; }
+.reference-step-tabs span { overflow: hidden; font-size: 0.78rem; text-overflow: ellipsis; white-space: nowrap; }
+
+.reference-step-controls {
+  display: grid;
+  grid-template-columns: auto minmax(110px, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.reference-step-controls button {
+  min-height: 40px;
+  padding: 7px 12px;
+  text-align: center;
+}
+
+.reference-step-controls output { color: var(--muted); font-size: 0.82rem; text-align: center; }
+.reference-step-controls [data-step-all] { color: var(--blue); }
+.reference-step-controls [data-step-all][aria-pressed="true"] { background: var(--blue-soft); }
+
+.reference-step {
+  min-height: 390px;
+  padding-bottom: 18px;
+  scroll-margin-top: 160px;
+}
+
+.reference-step[hidden] { display: none; }
+.reference-step > h2 { margin-top: 8px; }
+
+.reference-step-kicker {
+  margin: 0;
+  color: var(--coral);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .code-checkpoint {
   margin: 34px 0;
   padding-left: 18px;
@@ -928,6 +1003,12 @@ progress { width: min(180px, 100%); height: 12px; accent-color: var(--teal); }
   .course-toolkit { grid-template-columns: 1fr; gap: 26px; margin-top: 48px; padding: 26px 0; }
   .toolkit-intro h2 { font-size: 1.65rem; }
   .toolkit-references { padding: 24px 0 0; border-top: 1px solid var(--rule); border-left: 0; }
+  .reference-stepper { margin-inline: -12px; }
+  .reference-step-tabs { display: flex; overflow-x: auto; scrollbar-width: thin; }
+  .reference-step-tabs button { flex: 0 0 148px; }
+  .reference-step-controls { grid-template-columns: auto minmax(80px, 1fr) auto; padding-inline: 8px; }
+  .reference-step-controls [data-step-all] { grid-column: 1 / -1; }
+  .reference-step { min-height: 0; scroll-margin-top: 190px; }
   .diagram canvas { height: 260px; }
   .equation { padding: 16px 10px; font-size: 1.05rem; }
   .controls { grid-template-columns: 1fr; }
@@ -958,12 +1039,13 @@ progress { width: min(180px, 100%); height: 12px; accent-color: var(--teal); }
 
 @media print {
   body { background: white; color: black; font-size: 11pt; }
-  .site-header, .site-footer, .lesson-nav, .completion, .controls, .quiz { display: none; }
+  .site-header, .site-footer, .lesson-nav, .completion, .controls, .quiz, .reference-stepper { display: none; }
   main { width: 100%; }
   .hero { padding-top: 0; }
   h1 { font-size: 25pt; }
   h2 { break-after: avoid; }
   .panel, .worked-example, .diagram, table { break-inside: avoid; box-shadow: none; }
+  .reference-step[hidden] { display: block !important; }
   a { color: black; text-decoration: none; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; }
 }
