@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 18: Walk One Complete Transformer Block</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
 </head>
 <body data-lesson="0018">
   <header class="site-header"><a class="brand" href="index.html">Transformer Foundations: Math, Attention &amp; RoPE</a><a class="course-link" href="../reference/transformer-block-visual.html">Full visual map</a></header>
@@ -94,7 +97,7 @@
     <section class="code-checkpoint">
       <h2>Code checkpoint · assemble the TransformerModel</h2>
       <p>The pieces from Lessons 10–17 now form a decoder-only language model. Every block preserves \([B,T,D]\); the language-model head converts the final features into one logit per vocabulary item.</p>
-      <details open><summary>Show the final assembly</summary><pre><code>class TransformerModel(nn.Module):
+      <details open><summary>Show the final assembly</summary><pre><code class="language-python">class TransformerModel(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.token_embedding = nn.Embedding(config.vocab_size, config.hidden_size)

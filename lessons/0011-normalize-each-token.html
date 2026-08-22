@@ -4,8 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 11: Normalize Each Token</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css">
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
 </head>
 <body data-lesson="0011">
   <header class="site-header"><a class="brand" href="index.html">Transformer Foundations: Math, Attention &amp; RoPE</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
@@ -80,7 +83,7 @@
     <section class="code-checkpoint">
       <h2>Code checkpoint · RMSNorm over the last axis</h2>
       <p>MiniMind uses RMSNorm. Notice that <code>mean(dim=-1)</code> reduces only the feature axis, independently for every batch item and token.</p>
-      <details><summary>Show the RMSNorm module</summary><pre><code>class RMSNorm(nn.Module):
+      <details><summary>Show the RMSNorm module</summary><pre><code class="language-python">class RMSNorm(nn.Module):
     def __init__(self, width, eps=1e-6):
         super().__init__()
         self.eps = eps

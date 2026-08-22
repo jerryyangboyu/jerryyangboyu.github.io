@@ -4,8 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 12: Project Q, K, V and Split Heads</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css">
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
 </head>
 <body data-lesson="0012">
   <header class="site-header"><a class="brand" href="index.html">Transformer Foundations: Math, Attention &amp; RoPE</a><a class="course-link" href="../reference/rope-reference.html">RoPE reference</a></header>
@@ -78,7 +81,7 @@
     <section class="code-checkpoint">
       <h2>Code checkpoint · project, split heads, rotate Q and K</h2>
       <p>Three linear maps create Q, K, and V. Reshaping exposes the head axis; RoPE then changes Q and K while V stays untouched.</p>
-      <details><summary>Show projection and head splitting</summary><pre><code>def split_heads(x):
+      <details><summary>Show projection and head splitting</summary><pre><code class="language-python">def split_heads(x):
     batch, tokens, _ = x.shape
     return x.view(batch, tokens, num_heads, head_dim).transpose(1, 2)
 

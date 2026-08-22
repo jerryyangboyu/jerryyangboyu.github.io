@@ -4,8 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 10: Hidden States and Tensor Shapes</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css">
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
 </head>
 <body data-lesson="0010">
   <header class="site-header"><a class="brand" href="index.html">Transformer Foundations: Math, Attention &amp; RoPE</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
@@ -64,7 +67,7 @@
     <section class="code-checkpoint">
       <h2>Code checkpoint · tokens become hidden states</h2>
       <p>The implementation starts with integer token IDs and looks up one learned feature vector per token. The batch and token axes stay in place.</p>
-      <details><summary>Show the PyTorch shape transition</summary><pre><code>token_ids = torch.tensor([[4, 7, 2], [9, 1, 5]])  # [B=2, T=3]
+      <details><summary>Show the PyTorch shape transition</summary><pre><code class="language-python">token_ids = torch.tensor([[4, 7, 2], [9, 1, 5]])  # [B=2, T=3]
 embedding = nn.Embedding(vocab_size=32, embedding_dim=8)
 x = embedding(token_ids)                           # [B=2, T=3, D=8]
 

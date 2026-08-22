@@ -4,8 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 13: Mask the Future Before Softmax</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css">
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
 </head>
 <body data-lesson="0013">
   <header class="site-header"><a class="brand" href="index.html">Transformer Foundations: Math, Attention &amp; RoPE</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
@@ -61,7 +64,7 @@
     <section class="code-checkpoint">
       <h2>Code checkpoint · mask scores before softmax</h2>
       <p>The upper triangle represents future key positions. Replacing those scores with \(-\infty\) guarantees zero probability after softmax.</p>
-      <details><summary>Show score scaling and the causal mask</summary><pre><code>scores = q @ k.transpose(-2, -1) / math.sqrt(head_dim)
+      <details><summary>Show score scaling and the causal mask</summary><pre><code class="language-python">scores = q @ k.transpose(-2, -1) / math.sqrt(head_dim)
 # scores: [B, H, query_token, key_token]
 
 tokens = scores.size(-1)

@@ -8,6 +8,7 @@ if (sourceTarget) {
     })
     .then((source) => {
       sourceTarget.textContent = source;
+      if (window.hljs) window.hljs.highlightElement(sourceTarget);
     })
     .catch(() => {
       sourceTarget.textContent = "The inline preview could not load. Use the download link above to open transformer_model.py.";

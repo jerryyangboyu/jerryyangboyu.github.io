@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 17: SwiGLU Feed-Forward Sublayer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
 </head>
 <body data-lesson="0017">
   <header class="site-header"><a class="brand" href="index.html">Transformer Foundations: Math, Attention &amp; RoPE</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
@@ -69,7 +72,7 @@
     <section class="code-checkpoint">
       <h2>Code checkpoint · SwiGLU in two lines</h2>
       <p>The gate and up projections expand to the same intermediate width. Their elementwise product is then projected back to model width.</p>
-      <details><summary>Show the feed-forward computation</summary><pre><code>def forward(self, x):
+      <details><summary>Show the feed-forward computation</summary><pre><code class="language-python">def forward(self, x):
     gate = F.silu(self.gate_proj(x))  # [B, T, Dff]
     up = self.up_proj(x)              # [B, T, Dff]
     gated = gate * up                 # [B, T, Dff]

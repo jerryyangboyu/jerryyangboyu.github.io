@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 16: Residual Paths Carry State</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
 </head>
 <body data-lesson="0016">
   <header class="site-header"><a class="brand" href="index.html">Transformer Foundations: Math, Attention &amp; RoPE</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
@@ -73,7 +76,7 @@
     <section class="code-checkpoint">
       <h2>Code checkpoint · the complete pre-norm block skeleton</h2>
       <p>The identity path is visible in the repeated <code>x + ...</code> form. Each sublayer receives a normalized view, but its update is added to the unnormalized running state.</p>
-      <details><summary>Show both residual updates</summary><pre><code>class TransformerBlock(nn.Module):
+      <details><summary>Show both residual updates</summary><pre><code class="language-python">class TransformerBlock(nn.Module):
     def forward(self, x):
         x = x + self.attention(self.attn_norm(x))
         x = x + self.feed_forward(self.ffn_norm(x))

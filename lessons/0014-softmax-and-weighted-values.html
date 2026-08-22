@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 14: Softmax and Weighted Values</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
 </head>
 <body data-lesson="0014">
   <header class="site-header"><a class="brand" href="index.html">Transformer Foundations: Math, Attention &amp; RoPE</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
@@ -66,7 +69,7 @@
     <section class="code-checkpoint">
       <h2>Code checkpoint · probabilities blend values</h2>
       <p>Softmax acts across the key axis. The following matrix multiplication replaces that key axis with the value feature axis.</p>
-      <details><summary>Show softmax and weighted values</summary><pre><code>weights = F.softmax(scores.float(), dim=-1).to(dtype=q.dtype)
+      <details><summary>Show softmax and weighted values</summary><pre><code class="language-python">weights = F.softmax(scores.float(), dim=-1).to(dtype=q.dtype)
 # weights: [B, H, T, T], each row sums to 1
 
 context = weights @ v

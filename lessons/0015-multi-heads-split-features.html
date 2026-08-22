@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 15: Multi-Head Attention Splits Features</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
   <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
 </head>
 <body data-lesson="0015">
   <header class="site-header"><a class="brand" href="index.html">Transformer Foundations: Math, Attention &amp; RoPE</a><a class="course-link" href="../reference/glossary.html">Glossary</a></header>
@@ -66,7 +69,7 @@
     <section class="code-checkpoint">
       <h2>Code checkpoint · join every head</h2>
       <p>Attention produced one context tensor per head. Transpose restores token-major order, then reshape concatenates head features before the learned output projection.</p>
-      <details><summary>Show head recombination</summary><pre><code># context begins as [B, H, T, Dh]
+      <details><summary>Show head recombination</summary><pre><code class="language-python"># context begins as [B, H, T, Dh]
 context = context.transpose(1, 2).contiguous()
 # now [B, T, H, Dh]
 
