@@ -74,27 +74,30 @@
       </table>
     </section>
 
-    <section class="two-col">
-      <article class="panel teal">
-        <h3>Your study loop</h3>
-        <p>Read the short explanation, predict at every prompt, complete the exercises on paper, then reveal and correct. Mark complete only when you can explain the lesson aloud.</p>
-      </article>
-      <article class="panel coral">
-        <h3>Your translation page</h3>
-        <p>Keep one page with three columns: vector form, complex form, matrix form. Most of RoPE is the same motion written three ways.</p>
-      </article>
-    </section>
-
-    <section>
-      <h2>Reference sheets</h2>
-      <div class="three-col">
-        <article class="panel teal"><h3><a href="../reference/rope-reference.html">RoPE formula sheet</a></h3><p>Rotation matrices, frequency schedule, relative-position derivation, and sign checks.</p></article>
-        <article class="panel coral"><h3><a href="../reference/transformer-block-reference.html">Transformer block sheet</a></h3><p>Complete pre-norm block equations, tensor shapes, mask rule, softmax, and SwiGLU.</p></article>
-        <article class="panel gold"><h3><a href="../reference/transformer-block-visual.html">Walk Through a Transformer Block</a></h3><p>Trace one representation through attention, both residual paths, and the token-wise feed-forward network.</p></article>
+    <section class="course-toolkit" aria-labelledby="course-toolkit-title">
+      <div class="toolkit-intro">
+        <p class="eyebrow">Course toolkit</p>
+        <h2 id="course-toolkit-title">Study, translate, and review.</h2>
+        <p><strong><a href="0001-vectors-and-pairs.html">Start with Lesson 1.</a></strong> Complete its short diagnostic, then use the same loop for every lesson: predict before revealing, work the exercises on paper, correct your answer, and explain the idea aloud.</p>
+        <p>Keep one translation page with three columns: <strong>vector form</strong>, <strong>complex form</strong>, and <strong>matrix form</strong>. They often describe the same motion in different notation.</p>
       </div>
-    </section>
 
-    <div class="callout"><strong>Start here:</strong> Lesson 1 includes a small diagnostic. Report your result to the teaching agent so later lessons can be adjusted to your level.</div>
+      <nav class="toolkit-references" aria-label="Course reference sheets">
+        <h3>Quick references</h3>
+        <a href="../reference/rope-reference.html">
+          <span>RoPE formula sheet</span>
+          <small>Rotations, frequencies, relative position, and sign checks</small>
+        </a>
+        <a href="../reference/transformer-block-reference.html">
+          <span>Transformer block sheet</span>
+          <small>Block equations, tensor shapes, masking, softmax, and SwiGLU</small>
+        </a>
+        <a href="../reference/transformer-block-visual.html">
+          <span>Transformer block walkthrough</span>
+          <small>Attention, residual paths, and the feed-forward network</small>
+        </a>
+      </nav>
+    </section>
 
   </main>
   <footer class="site-footer">Built around the original RoFormer derivation, with foundations from OpenStax and MIT OpenCourseWare.</footer>
