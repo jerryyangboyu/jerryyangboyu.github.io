@@ -5,26 +5,13 @@
     "title": "Walk Through a Transformer Block",
     "quality_profile": "showcase",
     "output": "reference/transformer-block-visual.html",
-    "viewBox": [1080, 480],
-    "legend": {
-      "mode": "auto",
-      "entries": {
-        "external": { "label": "Block state" },
-        "backend": { "label": "Feature transform" },
-        "messagebus": { "label": "Token mixing" },
-        "database": { "label": "Residual merge" }
-      }
-    }
+    "viewBox": [820, 466],
+    "legend": { "mode": "hidden" }
   },
   "lanes": [
     { "id": "attention", "label": "Causal self-attention" },
-    { "id": "state", "label": "Residual stream" },
+    { "id": "residual", "label": "Residual stream" },
     { "id": "feedforward", "label": "Token-wise feed-forward" }
-  ],
-  "phases": [
-    { "id": "prepare", "label": "Prepare", "fromCol": 0, "toCol": 1 },
-    { "id": "attend", "label": "Position and attend", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
-    { "id": "update", "label": "Update and refine", "fromCol": 4, "toCol": 5, "variant": "dashed" }
   ],
   "mainPath": [
     "input_state",
@@ -32,7 +19,7 @@
     "project_qkv",
     "apply_rope",
     "causal_attention",
-    "join_heads",
+    "output_projection",
     "attention_residual",
     "ffn_norm",
     "swiglu",
@@ -41,20 +28,20 @@
   "nodes": [
     {
       "id": "input_state",
-      "lane": "state",
+      "lane": "residual",
       "col": 0,
+      "width": 96,
       "type": "external",
-      "label": "Input X",
-      "sublabel": "X^(l)  [B, T, D]",
-      "tag": "running state"
+      "label": "Input X^(l)",
+      "sublabel": "[B, T, D]"
     },
     {
       "id": "attention_norm",
       "lane": "attention",
       "col": 0,
       "type": "backend",
-      "label": "Normalize X",
-      "sublabel": "RMSNorm over D"
+      "label": "RMSNorm",
+      "sublabel": "normalize each token"
     },
     {
       "id": "project_qkv",
@@ -72,8 +59,8 @@
       "width": 52,
       "type": "backend",
       "label": "RoPE",
-      "sublabel": "rotate Q/K",
-      "tag": "V unchanged"
+      "sublabel": "rotate Q + K",
+      "tag": "V same"
     },
     {
       "id": "causal_attention",
@@ -83,93 +70,65 @@
       "type": "messagebus",
       "label": "Attend",
       "sublabel": "mask + V",
-      "tag": "tokens"
+      "tag": "softmax"
     },
     {
-      "id": "join_heads",
+      "id": "output_projection",
       "lane": "attention",
       "col": 4,
       "width": 42,
       "type": "backend",
-      "label": "Join",
-      "sublabel": "W_O"
+      "label": "W_O",
+      "sublabel": "join H",
+      "tag": "[B, T, D]"
     },
     {
       "id": "attention_residual",
-      "lane": "state",
+      "lane": "residual",
       "col": 4,
+      "width": 96,
       "type": "database",
-      "label": "Add residual",
-      "sublabel": "Y = X^(l) + O_attn",
-      "tag": "attention update"
+      "label": "Y = X + A",
+      "sublabel": "A: attention output"
     },
     {
       "id": "ffn_norm",
       "lane": "feedforward",
       "col": 4,
       "type": "backend",
-      "label": "Normalize Y",
-      "sublabel": "RMSNorm over D"
+      "label": "RMSNorm",
+      "sublabel": "normalize Y"
     },
     {
       "id": "swiglu",
       "lane": "feedforward",
       "col": 5,
       "type": "backend",
-      "label": "SwiGLU",
-      "sublabel": "gate * up, then down",
+      "label": "SwiGLU FFN",
+      "sublabel": "gate, expand, project",
       "tag": "mix features"
     },
     {
       "id": "next_state",
-      "lane": "state",
+      "lane": "residual",
       "col": 5,
+      "width": 96,
       "type": "external",
-      "label": "Next state",
-      "sublabel": "X^(l+1) = Y + O_ffn",
-      "tag": "[B, T, D]"
+      "label": "X' = Y + F",
+      "sublabel": "F: feed-forward output"
     }
   ],
   "edges": [
-    { "id": "input_to_norm", "from": "input_state", "to": "attention_norm", "variant": "default", "role": "main" },
-    { "id": "norm_to_qkv", "from": "attention_norm", "to": "project_qkv", "variant": "default", "role": "main" },
-    { "id": "qkv_to_rope", "from": "project_qkv", "to": "apply_rope", "variant": "default", "role": "main" },
+    { "id": "input_to_norm", "from": "input_state", "to": "attention_norm", "role": "main" },
+    { "id": "norm_to_qkv", "from": "attention_norm", "to": "project_qkv", "role": "main" },
+    { "id": "qkv_to_rope", "from": "project_qkv", "to": "apply_rope", "role": "main" },
     { "id": "rope_to_attention", "from": "apply_rope", "to": "causal_attention", "variant": "emphasis", "role": "main" },
-    { "id": "attention_to_join", "from": "causal_attention", "to": "join_heads", "variant": "emphasis", "role": "main" },
-    { "id": "join_to_residual", "from": "join_heads", "to": "attention_residual", "variant": "default", "role": "main" },
-    { "id": "residual_to_ffn_norm", "from": "attention_residual", "to": "ffn_norm", "variant": "default", "role": "main" },
-    { "id": "ffn_norm_to_swiglu", "from": "ffn_norm", "to": "swiglu", "variant": "default", "role": "main" },
-    { "id": "swiglu_to_next", "from": "swiglu", "to": "next_state", "variant": "default", "role": "main" },
+    { "id": "attention_to_output", "from": "causal_attention", "to": "output_projection", "variant": "emphasis", "role": "main" },
+    { "id": "output_to_residual", "from": "output_projection", "to": "attention_residual", "role": "main" },
+    { "id": "residual_to_norm", "from": "attention_residual", "to": "ffn_norm", "role": "main" },
+    { "id": "norm_to_swiglu", "from": "ffn_norm", "to": "swiglu", "role": "main" },
+    { "id": "swiglu_to_next", "from": "swiglu", "to": "next_state", "role": "main" },
     { "id": "carry_input", "from": "input_state", "to": "attention_residual", "label": "carry X^(l)", "variant": "dashed", "role": "branch" },
-    { "id": "carry_y", "from": "attention_residual", "to": "next_state", "label": "carry Y", "labelDy": -28, "variant": "dashed", "role": "branch" }
-  ],
-  "cards": [
-    {
-      "dot": "cyan",
-      "title": "Walk-through goal",
-      "items": [
-        "Trace one [B, T, D] representation through the complete block",
-        "Separate token mixing from feature mixing",
-        "See where both residual paths rejoin the running state"
-      ]
-    },
-    {
-      "dot": "emerald",
-      "title": "Shape invariant",
-      "items": [
-        "The residual stream remains [B, T, D]",
-        "Attention temporarily exposes [B, H, T, Dh]",
-        "Both sublayers return to D before addition"
-      ]
-    },
-    {
-      "dot": "amber",
-      "title": "Code anchors",
-      "items": [
-        "CausalSelfAttention.forward handles Q/K/V and token mixing",
-        "SwiGLU.forward transforms each token independently",
-        "TransformerBlock.forward contains both residual equations"
-      ]
-    }
+    { "id": "carry_y", "from": "attention_residual", "to": "next_state", "label": "carry Y", "route": "up-channel", "channelY": 205, "variant": "dashed", "role": "branch" }
   ]
 }
