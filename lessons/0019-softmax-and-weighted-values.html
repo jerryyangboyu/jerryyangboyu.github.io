@@ -63,7 +63,8 @@
 
     <div class="callout"><strong>Keep the roles separate:</strong> query-key scores answer “how much?”; values answer “what content is carried into the output?” RoPE changes the former by rotating Q and K, while V stays unrotated.</div>
 
-    <section id="code-checkpoint" class="code-checkpoint">
+    <div class="practice-studio" aria-label="Practice studio">
+    <section id="code-checkpoint" class="code-checkpoint studio-card studio-code">
       <h2>Code checkpoint · probabilities blend values</h2>
       <p>Softmax acts across the key axis. The following matrix multiplication replaces that key axis with the value feature axis.</p>
       <details><summary>Show softmax and weighted values</summary><pre><code class="language-python">weights = F.softmax(scores.float(), dim=-1).to(dtype=q.dtype)
@@ -75,7 +76,7 @@ context = weights @ v
       <p class="code-prompt"><strong>Trace it:</strong> Why does the final dimension of <code>context</code> equal <code>Dh</code> rather than <code>T</code>?</p>
     </section>
 
-    <section class="code-checkpoint">
+    <section class="code-checkpoint studio-card studio-engineering">
       <h2>Engineering bridge · dtype-safe attention output</h2>
       <p>MiniMind keeps the probability calculation in float32 for numerical stability, casts the weights back to the query dtype, optionally drops attention links during training, then projects and drops the residual update.</p>
       <details><summary>Show the explicit attention path</summary><pre><code class="language-python">scores = (xq @ xk.transpose(-2, -1)) / math.sqrt(self.head_dim)
@@ -87,10 +88,10 @@ context = context.transpose(1, 2).reshape(bsz, seq_len, -1)
 output = self.resid_dropout(self.o_proj(context))  # [B, Tq, D]</code></pre></details>
       <p class="code-prompt"><strong>Runtime check:</strong> dropout probabilities are zero in evaluation mode, so the same shape contract holds for training and inference.</p>
     </section>
-    <section class="quiz" data-quiz data-success="Correct. Every softmax row is a probability distribution." data-retry="Softmax divides every positive exponential by their shared sum."><h3>Retrieval check</h3><p>What must the weights in one attention row sum to?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(1\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(d_h\)</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
+    <section class="quiz studio-card studio-retrieval" data-quiz data-success="Correct. Every softmax row is a probability distribution." data-retry="Softmax divides every positive exponential by their shared sum."><h3>Retrieval check</h3><p class="studio-instruction">Answer once before reopening the code; use the feedback to correct your explanation.</p><p>What must the weights in one attention row sum to?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(1\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(d_h\)</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
-    <section class="exercises">
-      <h2>Practice before moving on</h2>
+    <section class="exercises studio-card studio-practice">
+      <p class="studio-kicker">STAGE 4 · PROVE IT</p><h2>Practice studio · recall → build → verify</h2>
       <ol>
         <li>Compute \(\operatorname{softmax}(0,0)\).</li>
         <li>Compute \(\operatorname{softmax}(\ln2,0)\).</li>
@@ -99,8 +100,18 @@ output = self.resid_dropout(self.o_proj(context))  # [B, Tq, D]</code></pre></de
         <li>Using \((0.323,0.482,0.196,0)\), verify the weights sum to approximately one. Explain the rounding discrepancy.</li>
         <li>If all attention weight is on \(\mathbf v_2\), what is the output?</li>
       </ol>
+      <aside class="engineering-challenge">
+        <p class="studio-kicker">BUILD CHALLENGE · RUN IT LOCALLY</p>
+        <h3>Engineering challenge · stabilize the weighted value path</h3>
+        <p>Implement row-wise softmax in float32 and use it to blend V. Assert every probability row sums to one before casting back to the query dtype.</p>
+        <details class="standard-answer"><summary>Standard answer · compare after your attempt</summary><pre><code class="language-python">weights = torch.softmax(scores.float(), dim=-1).to(q.dtype)
+assert torch.allclose(weights.float().sum(dim=-1), torch.ones_like(weights[..., 0].float()))
+context = weights @ value_states
+assert context.shape == (B, H, Tq, Dh)</code></pre><p>The score axis disappears in `weights @ V`; the remaining last axis is the value width `Dh`.</p></details>
+      </aside>
       <details><summary>Check solutions</summary><ol><li>\((0.5,0.5)\).</li><li>\((2/3,1/3)\), because \(e^{\ln2}=2\).</li><li>The common factor \(e^c\) cancels between numerator and denominator.</li><li>\(0.25(2,0)+0.75(0,4)=(0.5,3)\).</li><li>The displayed sum is \(1.001\); the exact unrounded values sum to \(1\).</li><li>Exactly \(\mathbf v_2\).</li></ol></details>
     </section>
+    </div>
 
     <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., Section 3.2.1</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can calculate softmax and a weighted sum of values.</label>

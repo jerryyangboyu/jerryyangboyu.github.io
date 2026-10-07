@@ -57,7 +57,8 @@
 
     <div class="callout"><strong>Index discipline:</strong> use \(i\) for a query position and \(j\) for a key/value position. Both range over the token axis \(T\); neither is a feature dimension.</div>
 
-    <section id="code-checkpoint" class="code-checkpoint">
+    <div class="practice-studio" aria-label="Practice studio">
+    <section id="code-checkpoint" class="code-checkpoint studio-card studio-code">
       <h2>Code checkpoint · tokens become hidden states</h2>
       <p>The implementation starts with integer token IDs and looks up one learned feature vector per token. The batch and token axes stay in place.</p>
       <details><summary>Show the PyTorch shape transition</summary><pre><code class="language-python">token_ids = torch.tensor([[4, 7, 2], [9, 1, 5]])  # [B=2, T=3]
@@ -68,7 +69,7 @@ assert x.shape == (2, 3, 8)</code></pre></details>
       <p class="code-prompt"><strong>Trace it:</strong> Which axis is introduced by the embedding lookup, and which two axes are preserved?</p>
     </section>
 
-    <section class="code-checkpoint">
+    <section class="code-checkpoint studio-card studio-engineering">
       <h2>Engineering bridge · the embedding contract</h2>
       <p>MiniMind names this lookup <code>embed_tokens</code>. Its model forward first unpacks <code>(B, T)</code>, embeds integer IDs, and applies the configured dropout while preserving <code>[B, T, D]</code> for every Transformer block.</p>
       <details><summary>Show the model entry point</summary><pre><code class="language-python">batch_size, seq_length = input_ids.shape       # [B, T]
@@ -77,15 +78,15 @@ hidden_states = self.dropout(self.embed_tokens(input_ids))
       <p class="code-prompt"><strong>Contract check:</strong> IDs must be integer values with <code>0 &lt;= id &lt; vocab_size</code>; only the final axis is created by the embedding table.</p>
     </section>
 
-    <section class="quiz" data-quiz data-success="Correct. Selecting one batch item and one token leaves the feature vector." data-retry="Fix the first two indices and ask which axis remains.">
-      <h3>Retrieval check</h3>
+    <section class="quiz studio-card studio-retrieval" data-quiz data-success="Correct. Selecting one batch item and one token leaves the feature vector." data-retry="Fix the first two indices and ask which axis remains.">
+      <h3>Retrieval check</h3><p class="studio-instruction">Answer once before reopening the code; use the feedback to correct your explanation.</p>
       <p>What is the shape of \(X[b,t,:]\)?</p>
       <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(d_{\text{model}}\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(B\times T\)</button></div>
       <p class="feedback" data-feedback aria-live="polite"></p>
     </section>
 
-    <section class="exercises">
-      <h2>Practice before moving on</h2>
+    <section class="exercises studio-card studio-practice">
+      <p class="studio-kicker">STAGE 4 · PROVE IT</p><h2>Practice studio · recall → build → verify</h2>
       <ol>
         <li>For \(B=3,T=5,d_{\text{model}}=8\), how many scalars are in \(X\)?</li>
         <li>What does \(X[2,4,:]\) select?</li>
@@ -93,8 +94,21 @@ hidden_states = self.dropout(self.embed_tokens(input_ids))
         <li>If the block input is \(4\times128\times512\), what must its final output shape be for residual addition?</li>
         <li>Explain why \(T\) counts token positions but \(d_{\text{model}}\) does not.</li>
       </ol>
+      <aside class="engineering-challenge">
+        <p class="studio-kicker">BUILD CHALLENGE · RUN IT LOCALLY</p>
+        <h3>Engineering challenge · write a shape-safe selector</h3>
+        <p>Implement `select_token(x, batch, token)` for `x.shape == [B, T, D]`. Return one `[D]` vector and raise a useful error for an invalid index. Test it with `B=2, T=3, D=8`.</p>
+        <details class="standard-answer"><summary>Standard answer · compare after your attempt</summary><pre><code class="language-python">def select_token(x, batch, token):
+    B, T, D = x.shape
+    if not (0 <= batch < B and 0 <= token < T):
+        raise IndexError("batch/token outside the tensor")
+    return x[batch, token, :]
+
+assert select_token(torch.zeros(2, 3, 8), 1, 2).shape == (8,)</code></pre><p>The contract is a slice, not a reshape: only the batch and token indices are fixed; every feature remains.</p></details>
+      </aside>
       <details><summary>Check solutions</summary><ol><li>\(3\cdot5\cdot8=120\).</li><li>The eight-feature vector for batch item 2 at token position 4.</li><li>\(B\times d_{\text{model}}=3\times8\) in this example.</li><li>\(4\times128\times512\).</li><li>The \(T\) axis indexes sequence locations; the feature axis stores the numerical representation at each location.</li></ol></details>
     </section>
+    </div>
 
     <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., “Attention Is All You Need,” Sections 3.1–3.2</a>. Track every occurrence of \(d_{\text{model}}\), \(d_k\), and \(d_v\).</p>
     <label class="completion"><input type="checkbox" data-completion> I can interpret and slice \(B\times T\times d_{\text{model}}\).</label>

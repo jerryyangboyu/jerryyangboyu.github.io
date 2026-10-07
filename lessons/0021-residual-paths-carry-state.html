@@ -61,7 +61,8 @@
 
     <div class="callout"><strong>Precise intuition:</strong> the identity path provides a direct route for the current state and for gradients. It does not guarantee that every original fact survives all later computations unchanged.</div>
 
-    <section id="code-checkpoint" class="code-checkpoint">
+    <div class="practice-studio" aria-label="Practice studio">
+    <section id="code-checkpoint" class="code-checkpoint studio-card studio-code">
       <h2>Code checkpoint · the complete pre-norm block skeleton</h2>
       <p>The identity path is visible in the repeated <code>x + ...</code> form. Each sublayer receives a normalized view, but its update is added to the unnormalized running state.</p>
       <details><summary>Show both residual updates</summary><pre><code class="language-python">class TransformerBlock(nn.Module):
@@ -72,7 +73,7 @@
       <p class="code-prompt"><strong>Trace it:</strong> Point to the two identity routes and the two learned routes in these three lines.</p>
     </section>
 
-    <section class="code-checkpoint">
+    <section class="code-checkpoint studio-card studio-engineering">
       <h2>Engineering bridge · cache the attention branch</h2>
       <p>MiniMind's residual contract has one extra return value: the present K/V cache. The hidden state keeps shape \([B,T_q,D]\), while K/V grow along the cached token axis for the next decode step. The residual additions remain ordinary elementwise adds.</p>
       <details><summary>Show the block's cache-aware forward</summary><pre><code class="language-python">residual = hidden_states
@@ -91,10 +92,10 @@ return hidden_states, present_key_value</code></pre></details>
       <p class="code-prompt"><strong>Decode test:</strong> run a full prompt once, then feed one token at a time with <code>use_cache=True</code>. The newly produced logits should match the corresponding full-prefix logits within floating-point tolerance.</p>
     </section>
 
-    <section class="quiz" data-quiz data-success="Correct. Elementwise addition requires matching shapes." data-retry="Both branches meet at an elementwise plus sign."><h3>Retrieval check</h3><p>What shape must an attention update have before adding it to \(X\in\mathbb R^{B\times T\times d_{\text{model}}}\)?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(B\times T\times d_{\text{model}}\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(B\times h\times T\times T\)</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
+    <section class="quiz studio-card studio-retrieval" data-quiz data-success="Correct. Elementwise addition requires matching shapes." data-retry="Both branches meet at an elementwise plus sign."><h3>Retrieval check</h3><p class="studio-instruction">Answer once before reopening the code; use the feedback to correct your explanation.</p><p>What shape must an attention update have before adding it to \(X\in\mathbb R^{B\times T\times d_{\text{model}}}\)?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(B\times T\times d_{\text{model}}\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(B\times h\times T\times T\)</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
-    <section class="exercises">
-      <h2>Practice before moving on</h2>
+    <section class="exercises studio-card studio-practice">
+      <p class="studio-kicker">STAGE 4 · PROVE IT</p><h2>Practice studio · recall → build → verify</h2>
       <ol>
         <li>Add \((2,-1,4)\) and \((-0.5,2,1)\).</li>
         <li>If the learned update is the zero vector, what does a residual sublayer output?</li>
@@ -103,8 +104,22 @@ return hidden_states, present_key_value</code></pre></details>
         <li>Write the two residual equations of a pre-norm decoder block.</li>
         <li>Explain the phrase “learn a correction” using \(X+F(X)\).</li>
       </ol>
+      <aside class="engineering-challenge">
+        <p class="studio-kicker">BUILD CHALLENGE · RUN IT LOCALLY</p>
+        <h3>Engineering challenge · preserve the residual contract</h3>
+        <p>Write a pre-norm block skeleton with two residual adds. Add an assertion after each sublayer that the update has exactly the state shape.</p>
+        <details class="standard-answer"><summary>Standard answer · compare after your attempt</summary><pre><code class="language-python">residual = x
+attn_update = self.attn(self.norm1(x))
+assert attn_update.shape == residual.shape
+x = residual + attn_update
+residual = x
+mlp_update = self.mlp(self.norm2(x))
+assert mlp_update.shape == residual.shape
+return residual + mlp_update</code></pre><p>A sublayer proposes a correction; the identity state remains the object being updated.</p></details>
+      </aside>
       <details><summary>Check solutions</summary><ol><li>\((1.5,1,5)\).</li><li>\(X\), because \(X+0=X\).</li><li>\(2\times5\times8\).</li><li>The head and feature axes must be concatenated to recover model width, followed by \(W_O\) in standard attention.</li><li>\(Y=X+\operatorname{Attn}(\operatorname{Norm}(X))\); \(X^{(\ell+1)}=Y+\operatorname{FFN}(\operatorname{Norm}(Y))\).</li><li>\(F(X)\) specifies the change to add rather than an entirely new replacement state.</li></ol></details>
     </section>
+    </div>
 
     <p class="source"><strong>Primary sources:</strong> <a href="https://openaccess.thecvf.com/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf">He et al., Deep Residual Learning</a>; <a href="https://proceedings.mlr.press/v119/xiong20b.html">Xiong et al., pre-norm analysis</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can calculate residual updates and state their shape constraint.</label>

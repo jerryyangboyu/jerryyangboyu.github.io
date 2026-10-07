@@ -59,7 +59,8 @@
 
     <p>The two expanded branches must have matching \(d_{\text{ff}}\) widths for elementwise multiplication. The down projection restores \(d_{\text{model}}\) so the residual addition is valid.</p>
 
-    <section id="code-checkpoint" class="code-checkpoint">
+    <div class="practice-studio" aria-label="Practice studio">
+    <section id="code-checkpoint" class="code-checkpoint studio-card studio-code">
       <h2>Code checkpoint · SwiGLU in two lines</h2>
       <p>The gate and up projections expand to the same intermediate width. Their elementwise product is then projected back to model width.</p>
       <details><summary>Show the feed-forward computation</summary><pre><code class="language-python">def forward(self, x):
@@ -70,7 +71,7 @@
       <p class="code-prompt"><strong>Trace it:</strong> Which line restores the width required by the second residual addition?</p>
     </section>
 
-    <section class="code-checkpoint">
+    <section class="code-checkpoint studio-card studio-engineering">
       <h2>Engineering bridge · dense FFN first, MoE second</h2>
       <p>MiniMind keeps the dense SwiGLU as the default path. With <code>use_moe=True</code>, a router scores every flattened token, selects the top \(k\) experts, combines their dense FFN outputs, and records an auxiliary load-balancing loss. The selected experts still return one \(d_{\text{model}}\)-wide update per token.</p>
       <details><summary>Show the router's core contract</summary><pre><code class="language-python">self.mlp = FeedForward(config) if not config.use_moe else MOEFeedForward(config)
@@ -84,10 +85,10 @@ topk_weight, topk_idx = torch.topk(
       <p class="code-prompt"><strong>Engineering order:</strong> verify dense SwiGLU and residual shape invariants first; add routing only after a non-MoE block passes the full-versus-cached decode test.</p>
     </section>
 
-    <section class="quiz" data-quiz data-success="Correct. The two branches must align coordinate by coordinate for the Hadamard product." data-retry="The symbol ⊙ means elementwise multiplication."><h3>Retrieval check</h3><p>What must match before \(\operatorname{SiLU}(\mathbf g)\odot\mathbf u\)?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · their \(d_{\text{ff}}\) widths</button><button type="button" data-correct="false" aria-pressed="false">B · their token scores</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
+    <section class="quiz studio-card studio-retrieval" data-quiz data-success="Correct. The two branches must align coordinate by coordinate for the Hadamard product." data-retry="The symbol ⊙ means elementwise multiplication."><h3>Retrieval check</h3><p class="studio-instruction">Answer once before reopening the code; use the feedback to correct your explanation.</p><p>What must match before \(\operatorname{SiLU}(\mathbf g)\odot\mathbf u\)?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · their \(d_{\text{ff}}\) widths</button><button type="button" data-correct="false" aria-pressed="false">B · their token scores</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
-    <section class="exercises">
-      <h2>Practice before moving on</h2>
+    <section class="exercises studio-card studio-practice">
+      <p class="studio-kicker">STAGE 4 · PROVE IT</p><h2>Practice studio · recall → build → verify</h2>
       <ol>
         <li>Calculate \(\sigma(0)\) and \(\operatorname{SiLU}(0)\).</li>
         <li>Calculate \(\operatorname{SiLU}(1)\) to three decimals.</li>
@@ -96,8 +97,19 @@ topk_weight, topk_idx = torch.topk(
         <li>If \(d_{\text{model}}=4,d_{\text{ff}}=6\), state the shapes of \(W_{\text{gate}},W_{\text{up}},W_{\text{down}}\) for row-vector notation.</li>
         <li>Explain which sublayer mixes tokens and which transforms tokens independently.</li>
       </ol>
+      <aside class="engineering-challenge">
+        <p class="studio-kicker">BUILD CHALLENGE · RUN IT LOCALLY</p>
+        <h3>Engineering challenge · implement dense SwiGLU</h3>
+        <p>Write the dense path with row-vector weights `Wg`, `Wu`, and `Wd`. Test that both expanded branches have the same `Dff` width before the Hadamard product.</p>
+        <details class="standard-answer"><summary>Standard answer · compare after your attempt</summary><pre><code class="language-python">gate = F.silu(self.gate_proj(x))
+up = self.up_proj(x)
+assert gate.shape == up.shape
+gated = gate * up
+return self.down_proj(gated)</code></pre><p>The elementwise product is legal only after both projections agree on the intermediate feature axis.</p></details>
+      </aside>
       <details><summary>Check solutions</summary><ol><li>\(\sigma(0)=0.5\), so \(\operatorname{SiLU}(0)=0\).</li><li>\(1/(1+e^{-1})\approx0.731\).</li><li>\((2,-3)\).</li><li>\((1,-1)\begin{bmatrix}1&amp;1\\1&amp;-1\end{bmatrix}=(0,2)\).</li><li>\(W_{\text{gate}},W_{\text{up}}:4\times6\); \(W_{\text{down}}:6\times4\).</li><li>Self-attention mixes information across token positions; the FFN applies the same feature transformation independently to each token.</li></ol></details>
     </section>
+    </div>
 
     <p class="source"><strong>Primary sources:</strong> <a href="https://arxiv.org/abs/2002.05202">Shazeer, GLU Variants Improve Transformer</a>; <a href="https://arxiv.org/abs/2302.13971">Touvron et al., LLaMA</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can calculate gate, up, product, and down stages of SwiGLU.</label>

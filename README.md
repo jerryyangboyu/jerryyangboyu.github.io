@@ -66,6 +66,8 @@ Each Module 3 lesson includes a focused, syntax-highlighted PyTorch code checkpo
 
 The teaching model is adapted from MiniMind's `model/model_minimind.py`. It retains the core decoder path while omitting production features such as grouped-query attention, KV caching, Flash Attention, YaRN scaling, mixture-of-experts routing, and Hugging Face generation wrappers. Lesson 23 now includes an engineering bridge that maps those features to the exact MiniMind block contract and gives a staged implementation and verification order.
 
+Module 3 lessons end with a Practice studio: retrieval questions, a code contract, a runnable engineering challenge, and a standard answer to compare after the attempt.
+
 Run the reference model with:
 
 ```bash

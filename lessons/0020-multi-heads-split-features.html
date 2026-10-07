@@ -66,7 +66,8 @@
     </div>
     <p>The output projection lets coordinates from different heads contribute to the same model feature while restoring the \(d_{\text{model}}\)-wide representation expected by the residual path.</p>
 
-    <section id="code-checkpoint" class="code-checkpoint">
+    <div class="practice-studio" aria-label="Practice studio">
+    <section id="code-checkpoint" class="code-checkpoint studio-card studio-code">
       <h2>Code checkpoint · join every head</h2>
       <p>Attention produced one context tensor per head. Transpose restores token-major order, then reshape concatenates head features before the learned output projection.</p>
       <details><summary>Show head recombination</summary><pre><code class="language-python"># context begins as [B, H, T, Dh]
@@ -80,7 +81,7 @@ attention_output = out_proj(context)  # [B, T, D]</code></pre></details>
       <p class="code-prompt"><strong>Trace it:</strong> Why must the output projection return width \(D\) before the residual addition?</p>
     </section>
 
-    <section class="code-checkpoint">
+    <section class="code-checkpoint studio-card studio-engineering">
       <h2>Engineering bridge · GQA still returns model width</h2>
       <p>MiniMind's grouped-query attention stores K/V with H_kv heads, repeats them to match H query heads, and only then transposes into attention-major order. The output projection restores D, regardless of the K/V compression.</p>
       <details><summary>Show the layout around <code>repeat_kv</code></summary><pre><code class="language-python">xq = xq.view(bsz, seq_len, self.n_local_heads, self.head_dim)
@@ -96,10 +97,10 @@ output = output.transpose(1, 2).reshape(bsz, seq_len, -1)
 output = self.resid_dropout(self.o_proj(output))</code></pre></details>
       <p class="code-prompt"><strong>Invariant:</strong> H = H_kv * n_rep, and H * D_h = D before the residual addition.</p>
     </section>
-    <section class="quiz" data-quiz data-success="Correct. The split is along feature width; all heads retain every token." data-retry="Track T separately from d_model."><h3>Retrieval check</h3><p>With \(T=5,d_{\text{model}}=12,h=3\), what does one head receive?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · all 5 tokens with 4 features each</button><button type="button" data-correct="false" aria-pressed="false">B · one or two tokens with all 12 features</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
+    <section class="quiz studio-card studio-retrieval" data-quiz data-success="Correct. The split is along feature width; all heads retain every token." data-retry="Track T separately from d_model."><h3>Retrieval check</h3><p class="studio-instruction">Answer once before reopening the code; use the feedback to correct your explanation.</p><p>With \(T=5,d_{\text{model}}=12,h=3\), what does one head receive?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · all 5 tokens with 4 features each</button><button type="button" data-correct="false" aria-pressed="false">B · one or two tokens with all 12 features</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
-    <section class="exercises">
-      <h2>Practice before moving on</h2>
+    <section class="exercises studio-card studio-practice">
+      <p class="studio-kicker">STAGE 4 · PROVE IT</p><h2>Practice studio · recall → build → verify</h2>
       <ol>
         <li>Calculate \(d_h\) for \(d_{\text{model}}=24,h=6\).</li>
         <li>For \(B=2,T=7,d_{\text{model}}=24,h=6\), give the split Q shape.</li>
@@ -108,8 +109,19 @@ output = self.resid_dropout(self.o_proj(output))</code></pre></details>
         <li>Multiply \((2,-1,0,3)\) by the displayed \(W_O\).</li>
         <li>Correct this statement: “Head 1 reads the first half of the sentence and Head 2 reads the second half.”</li>
       </ol>
+      <aside class="engineering-challenge">
+        <p class="studio-kicker">BUILD CHALLENGE · RUN IT LOCALLY</p>
+        <h3>Engineering challenge · merge GQA heads back to model width</h3>
+        <p>Given Q heads `H`, KV heads `Hkv`, and `n_rep = H // Hkv`, repeat K/V, transpose to token-major order, flatten heads, then apply `o_proj`.</p>
+        <details class="standard-answer"><summary>Standard answer · compare after your attempt</summary><pre><code class="language-python">assert H % Hkv == 0
+key_states = repeat_kv(key_states, n_rep)
+context = context.transpose(1, 2).contiguous().view(B, T, H * Dh)
+out = o_proj(context)
+assert out.shape == (B, T, D)</code></pre><p>GQA compresses stored K/V heads, but the residual contract still ends at model width `D`.</p></details>
+      </aside>
       <details><summary>Check solutions</summary><ol><li>\(d_h=4\).</li><li>\(2\times6\times7\times4\).</li><li>\(7\times7\).</li><li>\((2,-1,0,3)\).</li><li>\((2,-1,2,2)\).</li><li>Both heads read all token positions; their learned projections and feature subspaces differ.</li></ol></details>
     </section>
+    </div>
 
     <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., Section 3.2.2</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can track all axes through heads, concatenation, and \(W_O\).</label>

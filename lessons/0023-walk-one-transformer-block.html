@@ -281,7 +281,8 @@ hidden_states = hidden_states + self.mlp(
       <article class="panel coral"><h3>Attention's exact job</h3><p>Use masked query-key comparisons to build probability weights, then blend value vectors from allowed positions.</p></article>
     </div>
 
-    <section id="code-checkpoint" class="code-checkpoint">
+    <div class="practice-studio" aria-label="Practice studio">
+    <section id="code-checkpoint" class="code-checkpoint studio-card studio-code">
       <h2>Code checkpoint · assemble the TransformerModel</h2>
       <p>The block pieces from Lessons 15–22 now form a decoder-only language model. Every block preserves \([B,T,D]\); the language-model head converts the final features into one logit per vocabulary item.</p>
       <details open><summary>Show the final assembly</summary><pre><code class="language-python">class TransformerModel(nn.Module):
@@ -304,7 +305,7 @@ hidden_states = hidden_states + self.mlp(
       <p class="code-prompt"><strong>Trace it:</strong> Starting from <code>input_ids</code>, name the final axis at each of the three comments.</p>
     </section>
 
-    <section class="code-checkpoint">
+    <section class="code-checkpoint studio-card studio-engineering">
       <h2>Engineering bridge · grow this into MiniMind</h2>
       <p>The course <code>TransformerModel</code> is intentionally readable. The full target at <code>model/model_minimind.py</code> in the MiniMind checkout keeps the same pre-norm block equation, then adds runtime contracts around it. Use the table as an implementation order; each row has a shape or numerical check that catches regressions early.</p>
       <table><thead><tr><th>Stage</th><th>MiniMind detail to add</th><th>Check before moving on</th></tr></thead><tbody>
@@ -330,10 +331,10 @@ return hidden_states, present_key_value</code></pre></details>
       <p class="code-prompt"><strong>Suggested build sequence:</strong> port the dense block, add GQA, add cache-aware decoding, verify Flash/fallback parity, then add MoE and the Hugging Face wrapper. Keep one small deterministic input fixed for every comparison.</p>
     </section>
 
-    <section class="quiz" data-quiz data-success="Correct. Position modifies comparisons before masking and softmax." data-retry="Trace Q and K from projection to score formation."><h3>Retrieval check</h3><p>Where does RoPE occur in this block?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · after Q/K projection and before query-key scores</button><button type="button" data-correct="false" aria-pressed="false">B · after weighted values and both residual additions</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
+    <section class="quiz studio-card studio-retrieval" data-quiz data-success="Correct. Position modifies comparisons before masking and softmax." data-retry="Trace Q and K from projection to score formation."><h3>Retrieval check</h3><p class="studio-instruction">Answer once before reopening the code; use the feedback to correct your explanation.</p><p>Where does RoPE occur in this block?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · after Q/K projection and before query-key scores</button><button type="button" data-correct="false" aria-pressed="false">B · after weighted values and both residual additions</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
-    <section class="exercises">
-      <h2>Capstone practice</h2>
+    <section class="exercises studio-card studio-practice">
+      <p class="studio-kicker">STAGE 4 · PROVE IT</p><h2>Capstone studio · narrate → build → verify</h2>
       <ol>
         <li>Without looking above, write the eight stages of the block in order.</li>
         <li>For \(B=2,T=5,d_{\text{model}}=12,h=3\), make a shape ledger for split Q, one head's score matrix, concatenated output, and final block output.</li>
@@ -342,8 +343,22 @@ return hidden_states, present_key_value</code></pre></details>
         <li>Name the two places where information is mixed across features and the place where it is mixed across tokens.</li>
         <li>Teach the block aloud in under two minutes without saying “it just learns it.” Name the input and output of every stage.</li>
       </ol>
+      <aside class="engineering-challenge">
+        <p class="studio-kicker">BUILD CHALLENGE · RUN IT LOCALLY</p>
+        <h3>Engineering challenge · add a shape ledger to the block</h3>
+        <p>Instrument `MiniMindBlock.forward` with assertions or logging for the input state, attention update, first residual, MLP update, and returned state. Then add one cached decode case where `Tq=1`.</p>
+        <details class="standard-answer"><summary>Standard answer · compare after your attempt</summary><pre><code class="language-python">assert hidden_states.ndim == 3
+residual = hidden_states
+hidden_states, present_key_value = self.self_attn(...)
+assert hidden_states.shape == residual.shape
+hidden_states = hidden_states + residual
+hidden_states = hidden_states + self.mlp(self.post_attention_layernorm(hidden_states))
+assert hidden_states.shape == residual.shape
+return hidden_states, present_key_value</code></pre><p>The block preserves `[B, T, D]`; only the cache is allowed to grow along the key/value token axis during decoding.</p></details>
+      </aside>
       <details><summary>Check solutions</summary><ol><li>Normalize; project Q/K/V; apply RoPE to Q/K; score and causally mask; softmax and blend V; concatenate heads and apply \(W_O\); first residual; normalize, SwiGLU, and second residual.</li><li>Split Q: \(2\times3\times5\times4\); one head score per batch: \(5\times5\); concatenated output: \(2\times5\times12\); final output: \(2\times5\times12\).</li><li>\(O=\begin{bmatrix}1&amp;1\\1&amp;0\end{bmatrix}\); \(Y=\begin{bmatrix}2&amp;2\\2&amp;-1\end{bmatrix}\).</li><li>It turns the rotated query-key dot product into a comparison that depends on relative displacement \(n-m\).</li><li>Projection/output matrices and the FFN mix features; attention's \(PV\) mixes information across allowed token positions.</li><li>Use the reference sheet to check omissions after speaking, not during the first attempt.</li></ol></details>
     </section>
+    </div>
 
     <p class="source"><strong>Primary sources:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al.</a>; <a href="https://arxiv.org/abs/2104.09864">Su et al., RoFormer</a>; <a href="https://arxiv.org/abs/2302.13971">Touvron et al., LLaMA</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can teach one complete RoPE Transformer block and defend every tensor shape.</label>

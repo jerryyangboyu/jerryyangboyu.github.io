@@ -70,7 +70,8 @@
     <div class="equation">\[Q'=\operatorname{RoPE}(Q),\qquad K'=\operatorname{RoPE}(K),\qquad V'=V.\]</div>
     <p>RoPE rotates adjacent pairs inside each head. With \(d_h=2\), each head above contains exactly one rotation plane. Every head still receives all \(T\) token positions.</p>
 
-    <section id="code-checkpoint" class="code-checkpoint">
+    <div class="practice-studio" aria-label="Practice studio">
+    <section id="code-checkpoint" class="code-checkpoint studio-card studio-code">
       <h2>Code checkpoint · project, split heads, rotate Q and K</h2>
       <p>Three linear maps create Q, K, and V. Reshaping exposes the head axis; RoPE then changes Q and K while V stays untouched.</p>
       <details><summary>Show projection and head splitting</summary><pre><code class="language-python">def split_heads(x):
@@ -86,7 +87,7 @@ k = apply_rope(k, rope_cos, rope_sin)</code></pre></details>
       <p class="code-prompt"><strong>Trace it:</strong> If <code>x</code> is <code>[2, 5, 12]</code> and there are 3 heads, what is each projected tensor's shape after <code>split_heads</code>?</p>
     </section>
 
-    <section class="code-checkpoint">
+    <section class="code-checkpoint studio-card studio-engineering">
       <h2>Engineering bridge · grouped-query attention</h2>
       <p>The teaching block gives Q, K, and V the same head count. MiniMind keeps more query heads than key/value heads, then repeats each K/V head so it can serve a small group of queries. This reduces the cached memory footprint without changing the residual width.</p>
       <div class="shape-line"><span class="shape-chip">Q: \(B\times T\times H\times D_h\)</span><span class="shape-arrow">→</span><span class="shape-chip">K/V: \(B\times T\times H_{\mathrm{kv}}\times D_h\)</span><span class="shape-arrow">→ repeat</span><span class="shape-chip">\(B\times T\times H\times D_h\)</span></div>
@@ -104,15 +105,15 @@ v = repeat_kv(v, self.n_rep).transpose(1, 2)</code></pre></details>
       <p class="code-prompt"><strong>Invariant:</strong> \(H\) must be divisible by \(H_{\mathrm{kv}}\). After repetition, Q, K, and V agree on the head axis before score formation.</p>
     </section>
 
-    <section class="quiz" data-quiz data-success="Correct. Heads partition feature width; every head keeps the token axis." data-retry="The reshape replaces one feature axis by head and head-feature axes.">
-      <h3>Retrieval check</h3>
+    <section class="quiz studio-card studio-retrieval" data-quiz data-success="Correct. Heads partition feature width; every head keeps the token axis." data-retry="The reshape replaces one feature axis by head and head-feature axes.">
+      <h3>Retrieval check</h3><p class="studio-instruction">Answer once before reopening the code; use the feedback to correct your explanation.</p>
       <p>What does \(d_{\text{model}}=8,h=2\) imply for \(d_h\)?</p>
       <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(d_h=4\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(d_h=2\)</button></div>
       <p class="feedback" data-feedback aria-live="polite"></p>
     </section>
 
-    <section class="exercises">
-      <h2>Practice before moving on</h2>
+    <section class="exercises studio-card studio-practice">
+      <p class="studio-kicker">STAGE 4 · PROVE IT</p><h2>Practice studio · recall → build → verify</h2>
       <ol>
         <li>For \(d_{\text{model}}=12,h=3\), calculate \(d_h\).</li>
         <li>Reshape \((1,2,3,4,5,6)\) into \(h=3\) feature chunks.</li>
@@ -121,8 +122,22 @@ v = repeat_kv(v, self.n_rep).transpose(1, 2)</code></pre></details>
         <li>Which tensors receive RoPE, and which does not?</li>
         <li>Explain why the projection weights mix features but do not mix token positions.</li>
       </ol>
+      <aside class="engineering-challenge">
+        <p class="studio-kicker">BUILD CHALLENGE · RUN IT LOCALLY</p>
+        <h3>Engineering challenge · split heads without losing tokens</h3>
+        <p>Implement the reshape from `[B, T, D]` to `[B, H, T, Dh]`, then apply RoPE to Q and K only. Add assertions that `D == H * Dh` and V remains untouched.</p>
+        <details class="standard-answer"><summary>Standard answer · compare after your attempt</summary><pre><code class="language-python">B, T, D = x.shape
+assert D % H == 0
+Dh = D // H
+q = q.view(B, T, H, Dh).transpose(1, 2)
+k = k.view(B, T, H, Dh).transpose(1, 2)
+v = v.view(B, T, H, Dh).transpose(1, 2)
+q, k = apply_rope(q, k, cos, sin)
+assert q.shape == k.shape == v.shape == (B, H, T, Dh)</code></pre><p>The reshape changes feature organization; it never assigns a head a subset of token positions.</p></details>
+      </aside>
       <details><summary>Check solutions</summary><ol><li>\(d_h=4\).</li><li>\((1,2),(3,4),(5,6)\).</li><li>Before: \(2\times5\times12\). After: \(2\times3\times5\times4\).</li><li>\((1,2,-1,0)\).</li><li>Q and K receive RoPE; V does not.</li><li>The same matrix multiplies each token row independently along the feature axis.</li></ol></details>
     </section>
+    </div>
 
     <p class="source"><strong>Primary source:</strong> <a href="https://papers.neurips.cc/paper/7181-attention-isall-you-need.pdf">Vaswani et al., Sections 3.2.1–3.2.2</a>; RoPE placement follows <a href="https://arxiv.org/html/2104.09864#S3.SS2">Su et al., Section 3.2</a>.</p>
     <label class="completion"><input type="checkbox" data-completion> I can project one token into Q/K/V and reshape features into heads.</label>
