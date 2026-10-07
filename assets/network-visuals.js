@@ -256,7 +256,7 @@
         title: 'MiniMindBlock.forward', index: 'model/model_minimind.py · block',
         summary: 'The exact MiniMind execution order: save residual, call self_attn on input_layernorm(hidden_states), add it back, call self.mlp on post_attention_layernorm, add the second update, and return the state with present_key_value.',
         equation: '\\(Y=X^{(\\ell)}+O_{\\mathrm{attn}},\\qquad X^{(\\ell+1)}=Y+\\operatorname{SwiGLU}(\\operatorname{Norm}(Y))\\)',
-        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '../reference/transformer-model-code.html',
+        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '#code-checkpoint',
         code: `residual = hidden_states
 hidden_states, present_key_value = self.self_attn(
     self.input_layernorm(hidden_states), position_embeddings,
@@ -271,7 +271,7 @@ hidden_states = hidden_states + self.mlp(
         title: 'Input state', index: 'residual stream',
         summary: 'The block receives one hidden vector per token. Every later operation must preserve the batch, token, and model axes.',
         equation: '\\(X^{(\\ell)}\\in\\mathbb{R}^{B\\times T\\times D}\\)',
-        source: 'MiniMind · model/model_minimind.py · MiniMindModel', href: '../reference/transformer-model-code.html',
+        source: 'MiniMind · model/model_minimind.py · MiniMindModel', href: '#code-checkpoint',
         code: `hidden_states = self.embed_tokens(input_ids)
 # shape: [batch, tokens, hidden_size]`
       },
@@ -279,7 +279,7 @@ hidden_states = hidden_states + self.mlp(
         title: 'Read a normalized copy', index: 'input_layernorm',
         summary: 'RMSNorm rescales the features of each token independently. The original hidden_states continue along the residual stream; attention receives the normalized copy.',
         equation: '\\(\\bar X=\\operatorname{RMSNorm}(X)\\)<br>\\(O_{\\mathrm{attn}}=\\operatorname{Attention}(\\bar X)\\)',
-        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '../reference/transformer-model-code.html#block',
+        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '#minimind-contract',
         code: `residual = hidden_states
 hidden_states, present_key_value = self.self_attn(
     self.input_layernorm(hidden_states), position_embeddings,
@@ -290,7 +290,7 @@ hidden_states, present_key_value = self.self_attn(
         title: 'Normalize the updated state', index: 'post_attention_layernorm',
         summary: 'The second RMSNorm reads Y, after the attention residual addition. Its parameters are separate from input_layernorm. The MLP still processes every token independently.',
         equation: '\\(U=\\operatorname{RMSNorm}(Y)\\)<br>\\(F=\\operatorname{MLP}(U)\\)',
-        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '../reference/transformer-model-code.html#block',
+        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '#minimind-contract',
         code: `hidden_states = hidden_states + self.mlp(
     self.post_attention_layernorm(hidden_states)
 )`
@@ -299,7 +299,7 @@ hidden_states, present_key_value = self.self_attn(
         title: 'Attention write', index: 'self_attn · mix tokens',
         summary: 'Attention is the cross-token branch: normalize each row, compare queries with keys, blend values, then project the joined heads back to D features.',
         equation: '\\(O_{\\mathrm{attn}}=\\operatorname{Concat}(O_1,\\ldots,O_H)W_O\\)',
-        source: 'MiniMind · model/model_minimind.py · Attention.forward', href: '../reference/transformer-model-code.html#attention',
+        source: 'MiniMind · model/model_minimind.py · Attention.forward', href: '#code-checkpoint',
         code: `xq, xk, xv = self.q_proj(x), self.k_proj(x), self.v_proj(x)
 output = self.o_proj(attn_output)
 # returns [batch, tokens, hidden_size]`
@@ -308,7 +308,7 @@ output = self.o_proj(attn_output)
         title: 'RoPE on Q and K', index: 'encode position',
         summary: 'Rotary position embeddings rotate query and key pairs by token position. Values keep their content coordinates; only comparisons acquire relative position information.',
         equation: '\\(Q^{\\prime}=\\operatorname{RoPE}(Q),\\qquad K^{\\prime}=\\operatorname{RoPE}(K)\\)',
-        source: 'MiniMind · model/model_minimind.py · rotary embedding', href: '../reference/transformer-model-code.html#rope',
+        source: 'MiniMind · model/model_minimind.py · rotary embedding', href: '#code-checkpoint',
         code: `xq, xk = apply_rotary_pos_emb(
     xq, xk, cos, sin
 )
@@ -318,7 +318,7 @@ output = self.o_proj(attn_output)
         title: 'Causal mask', index: 'compare and mask',
         summary: 'Scaled query-key scores become probabilities only after the future-token entries are set to −∞. The triangular pattern is the causal contract.',
         equation: '\\(P=\\operatorname{softmax}\\!\\left(\\frac{Q^{\\prime}(K^{\\prime})^{\\mathsf T}}{\\sqrt{d_h}}+M_{\\mathrm{causal}}\\right)\\)',
-        source: 'MiniMind · model/model_minimind.py · score path', href: '../reference/transformer-model-code.html#attention',
+        source: 'MiniMind · model/model_minimind.py · score path', href: '#code-checkpoint',
         code: `scores = torch.matmul(xq, xk.transpose(-2, -1)) * scale
 scores = scores + causal_mask
 probs = F.softmax(scores, dim=-1, dtype=torch.float32).type_as(xq)`
@@ -327,7 +327,7 @@ probs = F.softmax(scores, dim=-1, dtype=torch.float32).type_as(xq)`
         title: 'First residual write', index: 'preserve the stream',
         summary: 'The attention result is an update, not a replacement. Adding it to the original stream keeps an identity route for optimization and information flow.',
         equation: '\\(Y=X^{(\\ell)}+O_{\\mathrm{attn}}\\)',
-        source: 'MiniMind · model/model_minimind.py · residual path', href: '../reference/transformer-model-code.html#block',
+        source: 'MiniMind · model/model_minimind.py · residual path', href: '#minimind-contract',
         code: `residual = hidden_states
 hidden_states = self.self_attn(normed_states, ...)[0]
 hidden_states += residual
@@ -337,7 +337,7 @@ hidden_states += residual
         title: 'SwiGLU write', index: 'self.mlp · mix features per token',
         summary: 'The feed-forward branch works independently on each token row. Its gated expansion mixes features, contracts back to D, and writes a second correction.',
         equation: '\\(U=\\operatorname{RMSNorm}(Y)\\)<br>\\(F=\\left(\\operatorname{SiLU}(UW_g)\\odot UW_u\\right)W_d\\)',
-        source: 'MiniMind · model/model_minimind.py · MLP path', href: '../reference/transformer-model-code.html#mlp',
+        source: 'MiniMind · model/model_minimind.py · MLP path', href: '#code-checkpoint',
         code: `hidden_states = hidden_states + self.mlp(
     self.post_attention_layernorm(hidden_states)
 )
@@ -347,7 +347,7 @@ hidden_states += residual
         title: 'Second residual write', index: 'block output',
         summary: 'The second update completes the block. The output keeps the same [B, T, D] shape and becomes the input to the next decoder block.',
         equation: '\\(X^{(\\ell+1)}=Y+F\\)',
-        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '../reference/transformer-model-code.html#block',
+        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '#minimind-contract',
         code: `hidden_states = hidden_states + self.mlp(
     self.post_attention_layernorm(hidden_states)
 )

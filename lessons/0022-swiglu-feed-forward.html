@@ -59,7 +59,7 @@
 
     <p>The two expanded branches must have matching \(d_{\text{ff}}\) widths for elementwise multiplication. The down projection restores \(d_{\text{model}}\) so the residual addition is valid.</p>
 
-    <section class="code-checkpoint">
+    <section id="code-checkpoint" class="code-checkpoint">
       <h2>Code checkpoint · SwiGLU in two lines</h2>
       <p>The gate and up projections expand to the same intermediate width. Their elementwise product is then projected back to model width.</p>
       <details><summary>Show the feed-forward computation</summary><pre><code class="language-python">def forward(self, x):

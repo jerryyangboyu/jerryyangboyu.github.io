@@ -74,7 +74,7 @@
     </div>
     <p>LayerNorm vs RMSNorm asks <em>what computation?</em> Pre-LN vs Post-LN asks <em>where is it placed?</em></p>
 
-    <section class="code-checkpoint">
+    <section id="code-checkpoint" class="code-checkpoint">
       <h2>Code checkpoint · RMSNorm over the last axis</h2>
       <p>MiniMind uses RMSNorm. Notice that <code>mean(dim=-1)</code> reduces only the feature axis, independently for every batch item and token.</p>
       <details><summary>Show the RMSNorm module</summary><pre><code class="language-python">class RMSNorm(nn.Module):

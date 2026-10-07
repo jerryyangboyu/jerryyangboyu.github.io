@@ -70,7 +70,7 @@
     <div class="equation">\[Q'=\operatorname{RoPE}(Q),\qquad K'=\operatorname{RoPE}(K),\qquad V'=V.\]</div>
     <p>RoPE rotates adjacent pairs inside each head. With \(d_h=2\), each head above contains exactly one rotation plane. Every head still receives all \(T\) token positions.</p>
 
-    <section class="code-checkpoint">
+    <section id="code-checkpoint" class="code-checkpoint">
       <h2>Code checkpoint · project, split heads, rotate Q and K</h2>
       <p>Three linear maps create Q, K, and V. Reshaping exposes the head axis; RoPE then changes Q and K while V stays untouched.</p>
       <details><summary>Show projection and head splitting</summary><pre><code class="language-python">def split_heads(x):

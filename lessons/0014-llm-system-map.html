@@ -11,7 +11,7 @@
   <script defer src="../assets/code-highlight.js"></script>
 </head>
 <body data-lesson="0014">
-  <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/transformer-model-code.html">Model code</a></header>
+  <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="0015-hidden-states-and-shapes.html#code-checkpoint">Module 3 code trail</a></header>
   <main>
     <section class="hero">
       <p class="eyebrow">Lesson 14 of 23 · LLM preliminaries capstone</p>
@@ -71,7 +71,7 @@
 
     <section class="code-checkpoint">
       <h2>Code checkpoint · the full model in five operations</h2>
-      <p>This is the outer structure implemented by the course's <a href="../reference/transformer-model-code.html"><code>TransformerModel</code></a>. Module 3 will replace the block placeholder with its complete implementation.</p>
+      <p>This is the outer structure completed by the code checkpoints in Module 3. Lesson 23 assembles the pieces and then maps the readable block toward MiniMind's production contract.</p>
       <details><summary>Show the model-level forward pass</summary><pre><code class="language-python">def forward(self, token_ids):
     x = self.token_embedding(token_ids)  # [B, T] -> [B, T, D]
 

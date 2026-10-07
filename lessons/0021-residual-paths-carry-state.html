@@ -61,7 +61,7 @@
 
     <div class="callout"><strong>Precise intuition:</strong> the identity path provides a direct route for the current state and for gradients. It does not guarantee that every original fact survives all later computations unchanged.</div>
 
-    <section class="code-checkpoint">
+    <section id="code-checkpoint" class="code-checkpoint">
       <h2>Code checkpoint · the complete pre-norm block skeleton</h2>
       <p>The identity path is visible in the repeated <code>x + ...</code> form. Each sublayer receives a normalized view, but its update is added to the unnormalized running state.</p>
       <details><summary>Show both residual updates</summary><pre><code class="language-python">class TransformerBlock(nn.Module):

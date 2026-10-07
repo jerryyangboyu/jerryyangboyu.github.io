@@ -63,7 +63,7 @@
 
     <div class="callout"><strong>Keep the roles separate:</strong> query-key scores answer “how much?”; values answer “what content is carried into the output?” RoPE changes the former by rotating Q and K, while V stays unrotated.</div>
 
-    <section class="code-checkpoint">
+    <section id="code-checkpoint" class="code-checkpoint">
       <h2>Code checkpoint · probabilities blend values</h2>
       <p>Softmax acts across the key axis. The following matrix multiplication replaces that key axis with the value feature axis.</p>
       <details><summary>Show softmax and weighted values</summary><pre><code class="language-python">weights = F.softmax(scores.float(), dim=-1).to(dtype=q.dtype)

@@ -58,7 +58,7 @@
 
     <div class="callout"><strong>Order matters:</strong> masking after softmax would assign positive probability to future tokens first. Adding \(-\infty\) before softmax makes \(e^{-\infty}=0\), so forbidden weights are exactly zero in the mathematical model.</div>
 
-    <section class="code-checkpoint">
+    <section id="code-checkpoint" class="code-checkpoint">
       <h2>Code checkpoint · mask scores before softmax</h2>
       <p>The upper triangle represents future key positions. Replacing those scores with \(-\infty\) guarantees zero probability after softmax.</p>
       <details><summary>Show score scaling and the causal mask</summary><pre><code class="language-python">scores = q @ k.transpose(-2, -1) / math.sqrt(head_dim)

@@ -59,7 +59,7 @@ Each Module 3 lesson includes a focused, syntax-highlighted PyTorch code checkpo
 
 ## Reference Implementation
 
-- [Annotated implementation](https://jerryyangboyu.github.io/reference/transformer-model-code.html)
+- [Inline implementation checkpoints](https://jerryyangboyu.github.io/lessons/0023-walk-one-transformer-block.html)
 - [Complete Python source](reference/transformer_model.py)
 - [Walk Through a Transformer Block in Lesson 23](https://jerryyangboyu.github.io/lessons/0023-walk-one-transformer-block.html#block-visual)
 - [Transformer block formula sheet](https://jerryyangboyu.github.io/reference/transformer-block-reference.html)

@@ -28,7 +28,7 @@
   }[id];
   root.className = 'diagram study-atlas';
   root.id = 'lesson-visual';
-  root.innerHTML = `<header class="study-heading"><p class="eyebrow">INSIDE THE TRANSFORMER · ${String(id).padStart(2,'0')}</p><h2>${spec[0]}</h2><p>${spec[1]}</p></header><div class="study-controls"></div><div class="study-canvas"></div><div class="study-equation">${math(spec[2])}</div><footer class="study-footer"><p aria-live="polite" data-study-readout></p><a href="../reference/transformer-model-code.html#${spec[3]}">Follow the implementation ↗</a></footer>`;
+  root.innerHTML = `<header class="study-heading"><p class="eyebrow">INSIDE THE TRANSFORMER · ${String(id).padStart(2,'0')}</p><h2>${spec[0]}</h2><p>${spec[1]}</p></header><div class="study-controls"></div><div class="study-canvas"></div><div class="study-equation">${math(spec[2])}</div><footer class="study-footer"><p aria-live="polite" data-study-readout></p><a href="#code-checkpoint">Read this lesson's code ↓</a></footer>`;
   const controls = root.querySelector('.study-controls');
   const canvas = root.querySelector('.study-canvas');
   const readout = root.querySelector('[data-study-readout]');
