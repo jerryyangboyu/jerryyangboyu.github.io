@@ -275,12 +275,8 @@ hidden_states = hidden_states + self.mlp(
       <p>The chosen \(F\) stands in for the SwiGLU calculation from Lesson 22; every attention-stage number above is calculated explicitly.</p>
     </section>
 
-    <section class="teachback-intro" aria-labelledby="teachback-title">
-      <p class="learning-kicker">TEACH-BACK CHECKPOINTS</p>
-      <h2 id="teachback-title">Make the block explainable before you make it executable.</h2>
-      <p>A reliable implementation follows a reliable explanation. The studio below makes you retrieve the block contract, repair one missing line, compare against a canonical answer, and transfer the idea to MiniMind. The answer stays closed until you have committed a model.</p>
-      <div class="teachback-prompts"><span><b>Token mixing</b><small>Where can position \(j\) affect position \(i\)?</small></span><span><b>Feature mixing</b><small>Which projections change the representation width?</small></span><span><b>State contract</b><small>What shape and cache leave the block?</small></span></div>
-    </section>
+    <h2>Teach-back checkpoints</h2>
+    <p>Before moving on, explain the block without looking at the implementation. Where can one token affect another? Which operations mix features inside one token? What shape leaves the block, and what shape is kept in the attention cache?</p>
 
     <div class="practice-studio" aria-label="Practice studio">
     <section id="code-checkpoint" class="code-checkpoint studio-card studio-code">
