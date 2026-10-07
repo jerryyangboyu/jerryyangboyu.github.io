@@ -275,11 +275,12 @@ hidden_states = hidden_states + self.mlp(
       <p>The chosen \(F\) stands in for the SwiGLU calculation from Lesson 22; every attention-stage number above is calculated explicitly.</p>
     </section>
 
-    <h2>Teach-back checkpoints</h2>
-    <div class="two-col">
-      <article class="panel teal"><h3>RoPE's exact job</h3><p>Rotate Q and K pairs by position-dependent phases so \(q_m'^{\mathsf T}k_n'=q_m^{\mathsf T}R_{n-m}k_n\). It does not rotate V.</p></article>
-      <article class="panel coral"><h3>Attention's exact job</h3><p>Use masked query-key comparisons to build probability weights, then blend value vectors from allowed positions.</p></article>
-    </div>
+    <section class="teachback-intro" aria-labelledby="teachback-title">
+      <p class="learning-kicker">TEACH-BACK CHECKPOINTS</p>
+      <h2 id="teachback-title">Make the block explainable before you make it executable.</h2>
+      <p>A reliable implementation follows a reliable explanation. The studio below makes you retrieve the block contract, repair one missing line, compare against a canonical answer, and transfer the idea to MiniMind. The answer stays closed until you have committed a model.</p>
+      <div class="teachback-prompts"><span><b>Token mixing</b><small>Where can position \(j\) affect position \(i\)?</small></span><span><b>Feature mixing</b><small>Which projections change the representation width?</small></span><span><b>State contract</b><small>What shape and cache leave the block?</small></span></div>
+    </section>
 
     <div class="practice-studio" aria-label="Practice studio">
     <section id="code-checkpoint" class="code-checkpoint studio-card studio-code">
@@ -366,6 +367,6 @@ return hidden_states, present_key_value</code></pre><p>The block preserves `[B, 
     <nav class="lesson-nav"><a href="0022-swiglu-feed-forward.html">← SwiGLU</a><a href="index.html">Return to course map →</a></nav>
   </main>
   <footer class="site-footer">Lesson 23 · Complete Transformer block capstone</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=block-atlas1"></script>
+  <script src="../assets/course.js"></script><script src="../assets/learning-studio.js?v=learning-loop1"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=block-atlas1"></script>
 </body>
 </html>

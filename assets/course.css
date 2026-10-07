@@ -444,9 +444,7 @@ th { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; }
 
 /* Module 3 practice studio: recall the idea, read the contract, then build it. */
 .practice-studio {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 22px;
+  display: block;
   margin: 42px 0;
 }
 .practice-studio .studio-retrieval,
@@ -495,6 +493,40 @@ th { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; }
 .studio-practice > details:not(.standard-answer) { margin-top: 22px; }
 .studio-practice > ol { margin-bottom: 0; }
 .studio-practice > ol li::marker { color: var(--coral); font-weight: 700; }
+
+/* Active learning workbench: one visible loop instead of four passive cards. */
+.teachback-intro {
+  margin: 48px 0 24px;
+  padding: 28px 0 24px;
+  border-block: 1px solid var(--rule);
+}
+.teachback-intro h2 { margin: 0 0 12px; max-width: 720px; }
+.teachback-intro > p:not(.learning-kicker) { max-width: 760px; color: var(--muted); }
+.teachback-prompts {
+  margin-top: 22px;
+}
+.teachback-prompts span { display: block; max-width: 820px; padding: 10px 0; border-top: 1px solid var(--rule); }
+.teachback-prompts b { display: block; font-size: .92rem; }
+.teachback-prompts small { display: block; margin-top: 4px; color: var(--muted); line-height: 1.45; }
+.studio-reference { grid-column: 1 / -1; margin: 0 0 16px; border: 0; border-top: 1px solid var(--rule); border-radius: 0; background: transparent; }
+.studio-reference summary { padding: 16px 0 10px; color: var(--muted); font-size: .88rem; }
+.studio-reference > .studio-card { margin: 12px 0; }
+
+/* The learning path is deliberately linear and book-like: content first, chrome second. */
+.learning-sequence { grid-column: 1 / -1; margin: 34px 0 12px; }
+.learning-kicker, .part-number { margin: 0 0 8px; color: var(--coral); font: 600 .7rem/1.4 'Geist Mono', monospace; letter-spacing: .1em; }
+.learning-sequence > h2 { margin: 0 0 10px; }
+.learning-purpose { margin: 0 0 24px; color: var(--muted); }
+.learning-part { padding: 24px 0 28px; border-top: 1px solid var(--rule); }
+.learning-part h3 { max-width: 820px; margin: 0 0 12px; font-size: 1.15rem; }
+.learning-part p:not(.part-number) { max-width: 820px; }
+.learning-part pre { max-width: 900px; margin: 18px 0 0; padding: 18px; overflow-x: auto; border-left: 3px solid var(--teal); background: var(--paper); color: var(--ink); font: .82rem/1.65 'Geist Mono', monospace; }
+.learning-part details { max-width: 820px; margin-top: 18px; border: 0; border-top: 1px dashed var(--rule); border-radius: 0; background: transparent; }
+.learning-part summary { padding: 12px 0 4px; color: var(--teal); font-size: .9rem; }
+.learning-part details > p, .learning-part details > ol { margin-top: 0; padding-left: 0; }
+.learning-part ol { max-width: 820px; margin-top: 8px; padding-left: 24px; }
+.learning-part li { margin: 8px 0; padding-left: 4px; }
+.answer-note { color: var(--muted); font-size: .88rem; }
 @media (max-width: 820px) {
   .practice-studio { display: block; margin: 28px 0; }
   .studio-card { margin: 18px 0; padding: 20px; }
