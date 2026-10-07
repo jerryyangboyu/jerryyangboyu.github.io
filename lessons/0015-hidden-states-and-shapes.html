@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 15: Hidden States and Tensor Shapes</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14">
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=atlas-series1">
+  <link rel="stylesheet" href="../assets/diagram-atlas.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -22,6 +22,8 @@
 
     <div class="goal"><strong>Mission link:</strong> nearly every confusion in a Transformer block becomes easier once you know which axis is batch, token position, or feature.</div>
 
+    <section id="lesson-visual" class="diagram" aria-label="Interactive lesson diagram"><noscript>Enable JavaScript to explore this diagram. The formulas and worked example below remain available.</noscript></section>
+
     <h2>Three axes, three jobs</h2>
     <div class="equation">\[X^{(\ell)}\in\mathbb R^{B\times T\times d_{\text{model}}}.\]</div>
     <div class="three-col">
@@ -36,17 +38,7 @@
     <p>Using one-based teaching labels, the slice \(X^{(\ell)}[1,2,:]\) is one six-number vector: batch item 1, token position 2, every feature. In PyTorch's zero-based syntax, the same slice is <code>x[0, 1, :]</code>.</p>
     <div class="equation">\[X^{(\ell)}[1,2,:]=\begin{bmatrix}0.1&amp;0.8&amp;-0.3&amp;1.2&amp;0.2&amp;0.4\end{bmatrix}.\]</div>
 
-    <section class="diagram nn-viz" data-tensor-viz>
-      <div class="viz-header">
-        <h3>Explore a \(2\times4\times6\) hidden-state tensor</h3>
-        <div class="viz-actions" aria-label="Choose batch item"><button type="button" data-batch="0" aria-pressed="true">Batch 1</button><button type="button" data-batch="1" aria-pressed="false">Batch 2</button></div>
-      </div>
-      <div class="viz-body">
-        <div class="tensor-axis-labels"><span>Token ↓</span><span>Feature coordinates →</span></div>
-        <div class="tensor-grid" data-tensor-grid></div>
-      </div>
-      <p class="viz-caption" data-tensor-readout></p>
-    </section>
+
     <p class="small">The interactive labels use one-based human numbering; translate to zero-based indices when writing a tensor slice in code.</p>
 
     <h2>The block preserves the outer shape</h2>
@@ -110,6 +102,6 @@ hidden_states = self.dropout(self.embed_tokens(input_ids))
     <nav class="lesson-nav"><a href="0014-llm-system-map.html">← LLM system map</a><a href="0016-normalize-each-token.html">Next: Normalization →</a></nav>
   </main>
   <footer class="site-footer">Lesson 15 · Hidden states and tensor shapes</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/module3-atlas.js?v=1"></script>
 </body>
 </html>

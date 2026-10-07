@@ -27,8 +27,8 @@
       <div class="table-scroll"><table>
         <thead><tr><th>Lesson</th><th>Code element</th><th>Shape contract</th></tr></thead>
         <tbody>
-          <tr><td>15 · Hidden states</td><td><code>TransformerConfig</code>, <code>token_embedding</code></td><td>\([B,T]\rightarrow[B,T,D]\)</td></tr>
-          <tr><td>16 · Normalization</td><td><code>RMSNorm</code></td><td>\([B,T,D]\rightarrow[B,T,D]\)</td></tr>
+          <tr><td id="embedding">15 · Hidden states</td><td><code>TransformerConfig</code>, <code>token_embedding</code></td><td>\([B,T]\rightarrow[B,T,D]\)</td></tr>
+          <tr><td id="norm">16 · Normalization</td><td><code>RMSNorm</code></td><td>\([B,T,D]\rightarrow[B,T,D]\)</td></tr>
           <tr><td id="rope">17 · Q/K/V and position</td><td><code>split_heads</code>, <code>precompute_rope</code>, <code>apply_rope</code></td><td>\([B,T,D]\rightarrow[B,H,T,D_h]\)</td></tr>
           <tr><td id="mask">18 · Causal mask</td><td>scaled scores and <code>masked_fill</code></td><td>\([B,H,T,D_h]\rightarrow[B,H,T,T]\)</td></tr>
           <tr><td id="attention">19 · Weighted values</td><td><code>softmax(scores) @ v</code></td><td>\([B,H,T,T]\rightarrow[B,H,T,D_h]\)</td></tr>

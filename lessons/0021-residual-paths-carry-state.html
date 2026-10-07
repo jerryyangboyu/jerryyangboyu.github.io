@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 21: Residual Paths Carry State</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=atlas-series1"><link rel="stylesheet" href="../assets/diagram-atlas.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -14,6 +14,8 @@
     <section class="hero"><p class="eyebrow">Lesson 21 of 23 · Transformer block</p><h1>Learn an update, then add it to the state.</h1><p class="lede">Your win: calculate both residual additions in a pre-norm block and explain their shape requirement.</p><div class="lesson-meta"><span>12 minutes</span><span>Needs: vector addition</span><span>Outcome: read residual equations</span></div></section>
 
     <div class="goal"><strong>Mission link:</strong> attention and the feed-forward network do not replace the hidden state directly; each produces an update added to its input.</div>
+
+    <section id="lesson-visual" class="diagram" aria-label="Interactive lesson diagram"><noscript>Enable JavaScript to explore this diagram. The formulas and worked example below remain available.</noscript></section>
 
     <h2>The identity route and the learned route meet</h2>
     <div class="equation">
@@ -51,21 +53,7 @@
       </div>
     </section>
 
-    <section class="diagram nn-viz" data-residual-viz>
-      <div class="viz-header">
-        <h3>Scale the learned update while the identity path stays fixed</h3>
-        <output class="readout">update scale = <strong data-update-scale-readout>1.0</strong></output>
-      </div>
-      <div class="controls"><label>Learned-update strength<input type="range" min="0" max="1.5" step="0.1" value="1" data-update-scale></label></div>
-      <div class="viz-body residual-flow">
-        <div class="vector-node"><strong>Identity \(X\)</strong><div class="vector-cells" data-residual-x></div></div>
-        <span class="math-join">+</span>
-        <div class="vector-node"><strong>Update \(F\)</strong><div class="vector-cells" data-residual-update></div></div>
-        <span class="math-join">=</span>
-        <div class="vector-node"><strong>New state \(Y\)</strong><div class="vector-cells" data-residual-output></div></div>
-      </div>
-      <p class="viz-caption" data-residual-readout></p>
-    </section>
+
 
     <h2>Addition forces the output width</h2>
     <div class="shape-line"><span class="shape-chip">\(X:B\times T\times d_{\text{model}}\)</span><span class="shape-arrow">+</span><span class="shape-chip">\(F:B\times T\times d_{\text{model}}\)</span><span class="shape-arrow">=</span><span class="shape-chip">\(Y:B\times T\times d_{\text{model}}\)</span></div>
@@ -123,6 +111,6 @@ return hidden_states, present_key_value</code></pre></details>
     <nav class="lesson-nav"><a href="0020-multi-heads-split-features.html">← Multiple heads</a><a href="0022-swiglu-feed-forward.html">Next: SwiGLU →</a></nav>
   </main>
   <footer class="site-footer">Lesson 21 · Residual paths carry state</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/module3-atlas.js?v=1"></script>
 </body>
 </html>

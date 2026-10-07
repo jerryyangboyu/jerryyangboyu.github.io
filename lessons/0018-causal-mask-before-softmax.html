@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 18: Mask the Future Before Softmax</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14">
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=atlas-series1">
+  <link rel="stylesheet" href="../assets/diagram-atlas.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -21,6 +21,8 @@
     </section>
 
     <div class="goal"><strong>Mission link:</strong> RoPE changes \(Q\) and \(K\); causal attention then compares \(Q'\) with \(K'\) without allowing a token to read later positions.</div>
+
+    <section id="lesson-visual" class="diagram" aria-label="Interactive lesson diagram"><noscript>Enable JavaScript to explore this diagram. The formulas and worked example below remain available.</noscript></section>
 
     <h2>Scores have one row per query</h2>
     <div class="equation">
@@ -52,12 +54,7 @@
     </div>
     <p>At query position \(i=3\), raw scores \((0.7,1.1,0.2,2.0)\) become \((0.7,1.1,0.2,-\infty)\). The tempting future score \(2.0\) is removed before normalization.</p>
 
-    <section class="diagram" data-attention-lab>
-      <h3>Explore which keys are visible</h3>
-      <div class="controls"><label>Query position \(i\)<input type="range" min="1" max="4" step="1" value="3" data-query-position></label><output class="readout">\(i=\)<strong data-position-readout>3</strong></output></div>
-      <table><thead><tr><th>Key</th><th>Raw score</th><th>After mask</th><th>Softmax weight</th><th>Value</th></tr></thead><tbody data-attention-rows></tbody></table>
-      <p>Weighted output: <strong data-attention-output></strong></p>
-    </section>
+
 
     <div class="callout"><strong>Order matters:</strong> masking after softmax would assign positive probability to future tokens first. Adding \(-\infty\) before softmax makes \(e^{-\infty}=0\), so forbidden weights are exactly zero in the mathematical model.</div>
 
@@ -118,6 +115,6 @@ else:
     <nav class="lesson-nav"><a href="0017-project-qkv-and-split-heads.html">← Q, K, V</a><a href="0019-softmax-and-weighted-values.html">Next: Softmax and values →</a></nav>
   </main>
   <footer class="site-footer">Lesson 18 · Mask the future before softmax</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/attention-lab.js?v=diagram4"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/module3-atlas.js?v=1"></script>
 </body>
 </html>

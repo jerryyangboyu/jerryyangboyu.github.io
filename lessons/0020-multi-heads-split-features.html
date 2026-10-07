@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 20: Multi-Head Attention Splits Features</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=atlas-series1"><link rel="stylesheet" href="../assets/diagram-atlas.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -15,21 +15,16 @@
 
     <div class="goal"><strong>Mission link:</strong> every head applies RoPE and causal attention to the full sequence; heads differ in learned feature projections.</div>
 
+    <section id="lesson-visual" class="diagram" aria-label="Interactive lesson diagram"><noscript>Enable JavaScript to explore this diagram. The formulas and worked example below remain available.</noscript></section>
+
     <h2>Every head sees all \(T\) positions</h2>
     <p>For \(d_{\text{model}}=h\,d_h\), the feature width is reorganized into \(h\) heads:</p>
     <div class="shape-line"><span class="shape-chip">\(B\times T\times d_{\text{model}}\)</span><span class="shape-arrow">→</span><span class="shape-chip">\(B\times h\times T\times d_h\)</span></div>
     <p>The \(T\) axis is unchanged. A head is not assigned one word or one sentence segment. Each head forms its own \(T\times T\) attention matrix over the same token sequence.</p>
 
-    <section class="diagram nn-viz" data-head-viz>
-      <div class="viz-header"><h3>Choose a query token in either head</h3><span class="small">Rows fade except the selected query</span></div>
-      <div class="viz-body head-visuals" data-head-visuals></div>
-      <p class="viz-caption" data-head-readout></p>
-    </section>
 
-    <figure class="course-figure">
-      <img loading="lazy" src="../assets/course-visuals/multi-head-attention.webp" width="1440" height="1080" alt="Multi-head attention showing shared token positions, separate feature subspaces, and concatenation">
-      <figcaption>Every head sees the full token sequence. Heads differ by their learned feature projections, then their outputs are concatenated along the feature axis and mixed by \(W_O\).</figcaption>
-    </figure>
+
+    <p>Every head sees the full token sequence. Heads differ by their learned feature projections, then their outputs are concatenated along the feature axis and mixed by \(W_O\).</p>
 
     <section class="worked-example">
       <h3>Numbers substituted: \(T=3,d_{\text{model}}=8,h=2\)</h3>
@@ -121,6 +116,6 @@ output = self.resid_dropout(self.o_proj(output))</code></pre></details>
     <nav class="lesson-nav"><a href="0019-softmax-and-weighted-values.html">← Softmax and values</a><a href="0021-residual-paths-carry-state.html">Next: Residual paths →</a></nav>
   </main>
   <footer class="site-footer">Lesson 20 · Multi-head attention splits features</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/module3-atlas.js?v=1"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 19: Softmax and Weighted Values</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=atlas-series1"><link rel="stylesheet" href="../assets/diagram-atlas.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -14,6 +14,8 @@
     <section class="hero"><p class="eyebrow">Lesson 19 of 23 · Transformer block</p><h1>Turn comparisons into a blend.</h1><p class="lede">Your win: calculate softmax probabilities from masked scores and use them to form a weighted sum of value vectors.</p><div class="lesson-meta"><span>15 minutes</span><span>Needs: exponentials</span><span>Outcome: calculate one attention output</span></div></section>
 
     <div class="goal"><strong>Mission link:</strong> \(Q'\) and \(K'\) decide the weights; the weights select and blend information carried by \(V\).</div>
+
+    <section id="lesson-visual" class="diagram" aria-label="Interactive lesson diagram"><noscript>Enable JavaScript to explore this diagram. The formulas and worked example below remain available.</noscript></section>
 
     <h2>Softmax normalizes an entire score row</h2>
     <div class="equation">
@@ -57,12 +59,7 @@
       \]
     </div>
 
-    <section class="diagram" data-attention-lab>
-      <h3>Move the query and watch the distribution</h3>
-      <div class="controls"><label>Query position \(i\)<input type="range" min="1" max="4" step="1" value="3" data-query-position></label><output class="readout">\(i=\)<strong data-position-readout>3</strong></output></div>
-      <table><thead><tr><th>Key</th><th>Raw score</th><th>After mask</th><th>Softmax weight</th><th>Value</th></tr></thead><tbody data-attention-rows></tbody></table>
-      <p>Weighted output: <strong data-attention-output></strong></p>
-    </section>
+
 
     <div class="callout"><strong>Keep the roles separate:</strong> query-key scores answer “how much?”; values answer “what content is carried into the output?” RoPE changes the former by rotating Q and K, while V stays unrotated.</div>
 
@@ -110,6 +107,6 @@ output = self.resid_dropout(self.o_proj(context))  # [B, Tq, D]</code></pre></de
     <nav class="lesson-nav"><a href="0018-causal-mask-before-softmax.html">← Causal mask</a><a href="0020-multi-heads-split-features.html">Next: Multiple heads →</a></nav>
   </main>
   <footer class="site-footer">Lesson 19 · Softmax and weighted values</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/attention-lab.js?v=diagram4"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/module3-atlas.js?v=1"></script>
 </body>
 </html>

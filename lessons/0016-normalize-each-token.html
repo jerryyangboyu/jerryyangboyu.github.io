@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 16: Normalize Each Token</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14">
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=atlas-series1">
+  <link rel="stylesheet" href="../assets/diagram-atlas.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -21,6 +21,8 @@
     </section>
 
     <div class="goal"><strong>Mission link:</strong> the depicted block is pre-norm: it normalizes the current hidden state before attention and before the feed-forward sublayer.</div>
+
+    <section id="lesson-visual" class="diagram" aria-label="Interactive lesson diagram"><noscript>Enable JavaScript to explore this diagram. The formulas and worked example below remain available.</noscript></section>
 
     <h2>LayerNorm</h2>
     <p>For one token vector \(\mathbf x\in\mathbb R^d\), calculate statistics across its \(d\) features:</p>
@@ -51,17 +53,7 @@
       </div>
     </section>
 
-    <section class="diagram nn-viz" data-norm-viz>
-      <div class="viz-header">
-        <h3>Compare the same token before and after normalization</h3>
-        <div class="viz-actions" aria-label="Choose normalization"><button type="button" data-norm-mode="layer" aria-pressed="true">LayerNorm</button><button type="button" data-norm-mode="rms" aria-pressed="false">RMSNorm</button></div>
-      </div>
-      <div class="viz-body vector-compare">
-        <div class="vector-plot"><h4>Input \((1,2,3)\)</h4><div class="value-bars" data-norm-before></div></div>
-        <div class="vector-plot"><h4>Normalized features</h4><div class="value-bars" data-norm-after></div></div>
-      </div>
-      <p class="viz-caption" data-norm-readout></p>
-    </section>
+
 
     <h2>RMSNorm: scale without centering</h2>
     <div class="equation">
@@ -73,10 +65,7 @@
     </div>
     <p>For \((1,2,3)\), \(\operatorname{RMS}=\sqrt{14/3}\approx2.160\), so the unscaled output is approximately \((0.463,0.926,1.389)\). Unlike LayerNorm, its mean is not forced to zero.</p>
 
-    <figure class="course-figure">
-      <img loading="lazy" src="../assets/course-visuals/rmsnorm.webp" width="1440" height="1080" alt="RMSNorm workflow from a token vector through root mean square scaling">
-      <figcaption>RMSNorm rescales each token across its feature axis. The batch and sequence axes stay separate, and the output keeps the same \([B,T,D]\) shape.</figcaption>
-    </figure>
+    <p>RMSNorm rescales each token across its feature axis. The batch and sequence axes stay separate, and the output keeps the same \([B,T,D]\) shape.</p>
 
     <h2>Placement is a separate choice</h2>
     <div class="two-col">
@@ -143,6 +132,6 @@ hidden_states = hidden_states + self.mlp(
     <nav class="lesson-nav"><a href="0015-hidden-states-and-shapes.html">← Tensor shapes</a><a href="0017-project-qkv-and-split-heads.html">Next: Q, K, V →</a></nav>
   </main>
   <footer class="site-footer">Lesson 16 · Normalize each token</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/module3-atlas.js?v=1"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 22: SwiGLU Feed-Forward Sublayer</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=atlas-series1"><link rel="stylesheet" href="../assets/diagram-atlas.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -14,6 +14,8 @@
     <section class="hero"><p class="eyebrow">Lesson 22 of 23 · Transformer block</p><h1>Expand, gate, multiply, project back.</h1><p class="lede">Your win: calculate every branch of a small SwiGLU feed-forward network with actual matrices.</p><div class="lesson-meta"><span>15 minutes</span><span>Needs: matrix multiplication</span><span>Outcome: calculate SwiGLU</span></div></section>
 
     <div class="goal"><strong>Mission link:</strong> after attention mixes information across tokens, the feed-forward sublayer transforms each token independently across features.</div>
+
+    <section id="lesson-visual" class="diagram" aria-label="Interactive lesson diagram"><noscript>Enable JavaScript to explore this diagram. The formulas and worked example below remain available.</noscript></section>
 
     <h2>Two parallel projections form a gated hidden vector</h2>
     <div class="equation">
@@ -50,42 +52,12 @@
       <p>Therefore \(\operatorname{SwiGLU}(1,-1)\approx(0,1.076)\) for these toy weights.</p>
     </section>
 
-    <section class="diagram nn-viz" data-swiglu-viz>
-      <div class="viz-header"><h3>Trace two numbers through both SwiGLU branches</h3><output class="readout">\(x=\)<strong data-swiglu-input></strong></output></div>
-      <div class="controls">
-        <label>\(x_1\)<input type="range" min="-2" max="2" step="0.1" value="1" data-swiglu-x1></label>
-        <label>\(x_2\)<input type="range" min="-2" max="2" step="0.1" value="-1" data-swiglu-x2></label>
-      </div>
-      <div class="viz-body swiglu-flow">
-        <div class="swiglu-graph" aria-label="SwiGLU branch and merge flow">
-          <div class="swiglu-input-node"><span>INPUT</span><strong>\(x\)</strong><small>one token row</small></div>
-          <div class="swiglu-split" aria-hidden="true"><span></span><i>split</i><span></span></div>
-          <div class="swiglu-branch swiglu-gate-branch">
-            <p class="swiglu-branch-label">GATE PATH</p>
-            <div class="swiglu-node"><strong>Gate projection</strong><span class="swiglu-formula">\(xW_g\)</span><div class="pair-values" data-swiglu-gate></div></div>
-            <div class="swiglu-arrow" aria-hidden="true">↓</div>
-            <div class="swiglu-node"><strong>SiLU</strong><span class="swiglu-formula">\(\operatorname{SiLU}(g)\)</span><div class="pair-values" data-swiglu-silu></div></div>
-          </div>
-          <div class="swiglu-branch swiglu-up-branch">
-            <p class="swiglu-branch-label">UP PATH</p>
-            <div class="swiglu-node"><strong>Up projection</strong><span class="swiglu-formula">\(xW_u\)</span><div class="pair-values" data-swiglu-up></div></div>
-          </div>
-          <div class="swiglu-merge" aria-hidden="true"><span>⊙</span><small>coordinate-wise product</small></div>
-          <div class="swiglu-node swiglu-product-node"><strong>Gated hidden state</strong><span class="swiglu-formula">\(\operatorname{SiLU}(g)\odot u\)</span><div class="pair-values" data-swiglu-product></div></div>
-          <div class="swiglu-arrow swiglu-output-arrow" aria-hidden="true">↓</div>
-          <div class="swiglu-node swiglu-output-node"><strong>Down projection</strong><span class="swiglu-formula">\(zW_d\)</span><div class="pair-values" data-swiglu-output></div></div>
-        </div>
-      </div>
-      <p class="viz-caption">The two middle branches have matching widths so their coordinates can multiply one by one.</p>
-    </section>
+
 
     <h2>Why “gate”?</h2>
     <p>The SiLU branch scales each coordinate of the up branch through elementwise multiplication. A gate near zero suppresses that coordinate; a larger signed gate allows or reverses more of it. The final down projection mixes the gated hidden coordinates back into model width.</p>
 
-    <figure class="course-figure">
-      <img loading="lazy" src="../assets/course-visuals/gated-mlp.webp" width="1440" height="1080" alt="Gated feed-forward network with gate, up, elementwise product, and down projection paths">
-      <figcaption>The two expanded branches must have matching \(d_{\text{ff}}\) widths for elementwise multiplication. The down projection restores \(d_{\text{model}}\) so the residual addition is valid.</figcaption>
-    </figure>
+    <p>The two expanded branches must have matching \(d_{\text{ff}}\) widths for elementwise multiplication. The down projection restores \(d_{\text{model}}\) so the residual addition is valid.</p>
 
     <section class="code-checkpoint">
       <h2>Code checkpoint · SwiGLU in two lines</h2>
@@ -132,6 +104,6 @@ topk_weight, topk_idx = torch.topk(
     <nav class="lesson-nav"><a href="0021-residual-paths-carry-state.html">← Residual paths</a><a href="0023-walk-one-transformer-block.html">Next: Complete block →</a></nav>
   </main>
   <footer class="site-footer">Lesson 22 · SwiGLU feed-forward sublayer</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/module3-atlas.js?v=1"></script>
 </body>
 </html>

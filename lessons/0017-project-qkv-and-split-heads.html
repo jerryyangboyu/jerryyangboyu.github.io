@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 17: Project Q, K, V and Split Heads</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14">
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=atlas-series1">
+  <link rel="stylesheet" href="../assets/diagram-atlas.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -22,6 +22,8 @@
 
     <div class="goal"><strong>Mission link:</strong> RoPE is applied after the Q/K projections and after head structure is known, but before query-key scores are formed.</div>
 
+    <section id="lesson-visual" class="diagram" aria-label="Interactive lesson diagram"><noscript>Enable JavaScript to explore this diagram. The formulas and worked example below remain available.</noscript></section>
+
     <h2>Three learned linear projections</h2>
     <div class="equation">
       \[
@@ -31,17 +33,7 @@
     <p>In ordinary multi-head attention, each projection has total output width \(h\,d_h=d_{\text{model}}\). Before reshaping:</p>
     <div class="shape-line"><span class="shape-chip">\(B\times T\times d_{\text{model}}\)</span><span class="shape-arrow">→</span><span class="shape-chip">linear projection</span><span class="shape-arrow">→</span><span class="shape-chip">\(B\times T\times(hd_h)\)</span><span class="shape-arrow">→</span><span class="shape-chip">\(B\times h\times T\times d_h\)</span></div>
 
-    <section class="diagram nn-viz" data-projection-viz>
-      <div class="viz-header">
-        <h3>Watch one token branch into Q, K, and V</h3>
-        <div class="viz-actions" aria-label="Choose feature view"><button type="button" data-projection-mode="flat" aria-pressed="true">Projected features</button><button type="button" data-projection-mode="split" aria-pressed="false">Split into heads</button></div>
-      </div>
-      <div class="viz-body projection-flow">
-        <div class="projection-input"><span class="projection-label">\(\bar x\)</span><div class="feature-strip"><span class="feature-cell">1</span><span class="feature-cell">2</span><span class="feature-cell">0</span><span class="feature-cell">−1</span></div></div>
-        <div data-projection-rows></div>
-      </div>
-      <p class="viz-caption" data-projection-readout></p>
-    </section>
+
 
     <section class="worked-example">
       <h3>Numbers substituted: \(d_{\text{model}}=4,h=2,d_h=2\)</h3>
@@ -138,6 +130,6 @@ v = repeat_kv(v, self.n_rep).transpose(1, 2)</code></pre></details>
     <nav class="lesson-nav"><a href="0016-normalize-each-token.html">← Normalization</a><a href="0018-causal-mask-before-softmax.html">Next: Causal mask →</a></nav>
   </main>
   <footer class="site-footer">Lesson 17 · Project Q, K, V and split heads</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/module3-atlas.js?v=1"></script>
 </body>
 </html>

@@ -278,7 +278,7 @@ hidden_states = hidden_states + self.mlp(
       norm1: {
         title: 'Read a normalized copy', index: 'input_layernorm',
         summary: 'RMSNorm rescales the features of each token independently. The original hidden_states continue along the residual stream; attention receives the normalized copy.',
-        equation: '\\(\\bar X=\\operatorname{RMSNorm}(X),\\qquad O_{\\mathrm{attn}}=\\operatorname{Attention}(\\bar X)\\)',
+        equation: '\\(\\bar X=\\operatorname{RMSNorm}(X)\\)<br>\\(O_{\\mathrm{attn}}=\\operatorname{Attention}(\\bar X)\\)',
         source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '../reference/transformer-model-code.html#block',
         code: `residual = hidden_states
 hidden_states, present_key_value = self.self_attn(
@@ -289,7 +289,7 @@ hidden_states, present_key_value = self.self_attn(
       norm2: {
         title: 'Normalize the updated state', index: 'post_attention_layernorm',
         summary: 'The second RMSNorm reads Y, after the attention residual addition. Its parameters are separate from input_layernorm. The MLP still processes every token independently.',
-        equation: '\\(U=\\operatorname{RMSNorm}(Y),\\qquad F=\\operatorname{MLP}(U)\\)',
+        equation: '\\(U=\\operatorname{RMSNorm}(Y)\\)<br>\\(F=\\operatorname{MLP}(U)\\)',
         source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '../reference/transformer-model-code.html#block',
         code: `hidden_states = hidden_states + self.mlp(
     self.post_attention_layernorm(hidden_states)
