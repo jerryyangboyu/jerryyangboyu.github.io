@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=block-atlas1"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -18,179 +18,176 @@
 
     <div class="goal"><strong>Final mission:</strong> start with \(X^{(\ell)}\), finish with \(X^{(\ell+1)}\), and explain exactly where position, comparison, probability, content, and residual updates enter.</div>
 
-    <figure id="block-visual" class="course-figure course-figure-diagram flowchart-figure" data-block-explorer>
+    <figure id="block-visual" class="course-figure course-figure-diagram flowchart-figure block-atlas" data-block-explorer>
+      <header class="atlas-heading">
+        <p class="eyebrow">MINIMINDBLOCK.FORWARD · THE BIG PICTURE</p>
+        <h2>Two updates. One continuous state.</h2>
+        <p>Attention shares information across tokens. The MLP reshapes features within each token.</p>
+      </header>
       <div class="diagram-wrap">
-        <svg viewBox="0 0 1200 876" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="0023-walk-one-transformer-block-title 0023-walk-one-transformer-block-desc">
-          <title id="0023-walk-one-transformer-block-title">MiniMindBlock.forward · one complete pre-norm decoder block</title>
-          <desc id="0023-walk-one-transformer-block-desc">An implementation map of MiniMindBlock.forward in model/model_minimind.py. The hidden_states residual stream enters input_layernorm and self_attn, adds the attention result back into the stream, then passes through post_attention_layernorm and self.mlp before returning hidden_states and present_key_value.</desc>
-          <defs>
-            <marker id="transformer-stream-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-              <polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/>
-            </marker>
-            <marker id="transformer-write-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-              <polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/>
-            </marker>
-            <marker id="transformer-carry-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-              <polygon points="0 0, 8 3, 0 6" fill="#7a8399"/>
-            </marker>
-          </defs>
-
-          <rect width="1200" height="876" fill="#f5f5f5"/>
-          <text x="40" y="32" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" font-weight="500" letter-spacing="0.16em">MINIMIND · MODEL/MODEL_MINIMIND.PY</text>
-          <text x="40" y="68" fill="#2d3142" font-size="24" font-family="'Instrument Serif', Georgia, serif" font-weight="400">MiniMindBlock.forward</text>
-          <text x="40" y="92" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">pre-norm decoder block · hidden_states [B, T, D] → hidden_states [B, T, D]</text>
-          <rect x="858" y="22" width="282" height="70" rx="8" fill="rgba(8,126,120,0.06)" stroke="#087e78" stroke-width="1"/>
-          <text x="878" y="43" fill="#087e78" font-size="8" font-family="'Geist Mono', monospace" font-weight="600" letter-spacing="0.12em">CODE CONTRACT</text>
-          <text x="878" y="62" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">return hidden_states, present_key_value</text>
-          <text x="878" y="78" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">same shape · cache-aware attention</text>
-
-          <!-- The residual stream is the visual spine. -->
-          <!-- The trunk pauses at each merge node so the circle reads as a unit, not a line crossing it. -->
-          <line x1="220" y1="196" x2="220" y2="314" stroke="#7a8399" stroke-width="3"/>
-          <line x1="220" y1="406" x2="220" y2="614" stroke="#7a8399" stroke-width="3"/>
-          <line x1="220" y1="706" x2="220" y2="744" stroke="#7a8399" stroke-width="3" marker-end="url(#transformer-stream-arrow)"/>
-          <text x="76" y="264" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" font-weight="500" letter-spacing="0.12em">hidden_states</text>
-
-          <!-- Each sublayer reads from the trunk; the trunk itself carries identity. -->
-          <path d="M220 224 H452" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
-          <circle cx="220" cy="224" r="3" fill="#4f5d75"/>
-          <path d="M220 540 H452" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
-          <circle cx="220" cy="540" r="3" fill="#4f5d75"/>
-
-          <!-- Attention reads the stream and writes the first correction. -->
-          <rect x="420" y="120" width="720" height="216" rx="16" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.16)" stroke-width="0.8"/>
-          <text x="452" y="148" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" font-weight="500" letter-spacing="0.14em">self.self_attn(...)</text>
-          <text x="452" y="168" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">input_layernorm → Q/K/V → causal attention → O_attn</text>
-
-          <!-- Attention branch connectors. -->
-          <line x1="580" y1="224" x2="616" y2="224" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
-          <line x1="792" y1="224" x2="816" y2="224" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
-          <line x1="896" y1="224" x2="932" y2="224" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
-          <path d="M1016 252 V356 H264" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#transformer-write-arrow)"/>
-          <rect x="640" y="340" width="80" height="16" rx="4" fill="#f5f5f5"/>
-          <text x="680" y="351" fill="#eb6c36" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">hidden_states += residual</text>
-
-          <g data-stage-node="attention" tabindex="0" aria-label="Attention: RMSNorm per token" role="button">
-            <rect x="452" y="196" width="128" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
-            <text x="516" y="222" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">input_layernorm</text>
-            <text x="516" y="240" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">RMSNorm(hidden_states)</text>
-          </g>
-
-          <g data-stage-node="rope" tabindex="0" aria-label="RoPE: Q K V projection and rotation" role="button">
-            <path d="M628 196 H780 L792 252 H640 Z" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
-            <text x="710" y="222" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">q_proj · k_proj · v_proj</text>
-            <text x="710" y="240" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">RoPE(Q, K) · V unchanged</text>
-          </g>
-
-          <g data-stage-node="mask" tabindex="0" aria-label="Causal mask and attention probabilities" role="button">
-            <rect x="816" y="196" width="80" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
-            <rect x="824" y="204" width="16" height="12" fill="#4f5d75" opacity="0.80"/>
-            <rect x="840" y="204" width="16" height="12" fill="#ececec"/>
-            <rect x="856" y="204" width="16" height="12" fill="#ececec"/>
-            <rect x="872" y="204" width="16" height="12" fill="#ececec"/>
-            <rect x="824" y="216" width="16" height="12" fill="#4f5d75" opacity="0.40"/>
-            <rect x="840" y="216" width="16" height="12" fill="#4f5d75" opacity="0.70"/>
-            <rect x="856" y="216" width="16" height="12" fill="#ececec"/>
-            <rect x="872" y="216" width="16" height="12" fill="#ececec"/>
-            <rect x="824" y="228" width="16" height="12" fill="#4f5d75" opacity="0.22"/>
-            <rect x="840" y="228" width="16" height="12" fill="#4f5d75" opacity="0.44"/>
-            <rect x="856" y="228" width="16" height="12" fill="#4f5d75" opacity="0.62"/>
-            <rect x="872" y="228" width="16" height="12" fill="#ececec"/>
-            <rect x="824" y="240" width="16" height="12" fill="#4f5d75" opacity="0.14"/>
-            <rect x="840" y="240" width="16" height="12" fill="#4f5d75" opacity="0.28"/>
-            <rect x="856" y="240" width="16" height="12" fill="#4f5d75" opacity="0.44"/>
-            <rect x="872" y="240" width="16" height="12" fill="#4f5d75" opacity="0.58"/>
-            <text x="856" y="272" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">scores + mask → P</text>
-          </g>
-
-          <g data-stage-node="attention" tabindex="0" aria-label="Attention: weighted values and output projection" role="button">
-            <rect x="932" y="196" width="168" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
-            <text x="1016" y="222" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">self_attn output</text>
-            <text x="1016" y="240" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">weighted V · o_proj → O_attn</text>
-          </g>
-
-          <foreignObject x="648" y="280" width="350" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="svg-math">\(O_{\mathrm{attn}}\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
-          <g aria-label="Attention token positions" role="group">
-            <rect x="452" y="276" width="32" height="20" rx="10" fill="#ececec"/><text x="468" y="290" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">t₀</text>
-            <rect x="492" y="276" width="32" height="20" rx="10" fill="#ececec"/><text x="508" y="290" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">t₁</text>
-            <rect x="532" y="276" width="32" height="20" rx="10" fill="#ececec"/><text x="548" y="290" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">t₂</text>
-            <rect x="572" y="276" width="32" height="20" rx="10" fill="#ececec"/><text x="588" y="290" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">t₃</text>
-          </g>
-
-          <!-- First residual addition on the stream. -->
-          <g data-stage-node="residual1" tabindex="0" aria-label="First residual addition" role="button">
-            <circle cx="220" cy="360" r="44" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1.2"/>
-            <text x="220" y="366" fill="#2d3142" font-size="22" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">+</text>
-            <rect x="110" y="408" width="220" height="32" fill="#f5f5f5"/>
-            <foreignObject x="110" y="408" width="220" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="svg-math" style="text-align:center">\(Y=X^{(\ell)}+O_{\mathrm{attn}}\)</div></foreignObject>
-          </g>
-
-          <!-- Feed-forward reads one token at a time and writes the second correction. -->
-          <rect x="420" y="448" width="720" height="168" rx="16" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.16)" stroke-width="0.8"/>
-          <text x="452" y="476" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" font-weight="500" letter-spacing="0.14em">self.mlp(...)</text>
-          <text x="452" y="496" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">post_attention_layernorm → SwiGLU → down_proj</text>
-
-          <line x1="580" y1="540" x2="616" y2="540" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
-          <line x1="792" y1="540" x2="828" y2="540" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
-          <path d="M1052 568 V646 H264" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#transformer-write-arrow)"/>
-          <rect x="640" y="630" width="80" height="16" rx="4" fill="#f5f5f5"/>
-          <text x="680" y="641" fill="#eb6c36" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">hidden_states += self.mlp(...)</text>
-
-          <g data-stage-node="ffn" tabindex="0" aria-label="Feed-forward: normalize the residual state" role="button">
-            <rect x="452" y="512" width="128" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
-            <text x="516" y="534" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace" font-weight="600" text-anchor="middle">post_attention_</text>
-            <text x="516" y="548" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace" font-weight="600" text-anchor="middle">layernorm</text>
-          </g>
-
-          <g data-stage-node="ffn" tabindex="0" aria-label="Feed-forward: SwiGLU transformation" role="button">
-            <rect x="616" y="512" width="176" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
-            <text x="704" y="538" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">self.mlp</text>
-            <text x="704" y="556" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">SwiGLU · gate · up · down</text>
-          </g>
-
-          <g data-stage-node="ffn" tabindex="0" aria-label="Feed-forward: per-token outputs" role="button">
-            <rect x="828" y="512" width="224" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
-            <rect x="844" y="530" width="32" height="20" rx="10" fill="#ececec"/><text x="860" y="544" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">F₀</text>
-            <rect x="888" y="530" width="32" height="20" rx="10" fill="#ececec"/><text x="904" y="544" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">F₁</text>
-            <rect x="932" y="530" width="32" height="20" rx="10" fill="#ececec"/><text x="948" y="544" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">F₂</text>
-            <rect x="976" y="530" width="32" height="20" rx="10" fill="#ececec"/><text x="992" y="544" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">F₃</text>
-          </g>
-
-          <text x="452" y="600" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.06em">MLP UPDATE · F [B, T, D]</text>
-
-          <!-- Final state after the second residual addition. -->
-          <g data-stage-node="residual2" tabindex="0" aria-label="Second residual addition" role="button">
-            <circle cx="220" cy="660" r="44" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1.2"/>
-            <text x="220" y="666" fill="#2d3142" font-size="22" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">+</text>
-            <rect x="110" y="708" width="220" height="32" fill="#f5f5f5"/>
-            <foreignObject x="110" y="708" width="220" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="svg-math" style="text-align:center">\(X^{(\ell+1)}=Y+F\)</div></foreignObject>
-          </g>
-
-          <g data-stage-node="input" tabindex="0" aria-label="Input residual state" role="button">
-            <rect x="72" y="132" width="296" height="64" rx="32" fill="rgba(45,49,66,0.03)" stroke="#7a8399" stroke-width="1.2"/>
-            <text x="220" y="158" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" font-weight="500" text-anchor="middle" letter-spacing="0.12em">INPUT · hidden_states</text>
-            <text x="220" y="182" fill="#2d3142" font-size="16" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">[B, T, D]</text>
-          </g>
-
-          <g data-stage-node="residual2" tabindex="0" aria-label="Output residual state" role="button">
-            <rect x="72" y="760" width="296" height="64" rx="32" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
-            <text x="220" y="786" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" font-weight="500" text-anchor="middle" letter-spacing="0.12em">RETURN · hidden_states</text>
-            <text x="220" y="810" fill="#2d3142" font-size="14" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">[B, T, D] · with KV cache</text>
-          </g>
-
-          <line x1="40" y1="840" x2="1140" y2="840" stroke="rgba(45,49,66,0.14)" stroke-width="0.8"/>
-          <line x1="56" y1="860" x2="96" y2="860" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
-          <text x="108" y="864" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.06em">hidden_states stream</text>
-          <line x1="300" y1="860" x2="340" y2="860" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
-          <text x="352" y="864" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.06em">SUBLAYER INPUT</text>
-          <circle cx="592" cy="860" r="6" fill="#eb6c36"/>
-          <text x="608" y="864" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.06em">LEARNED WRITE</text>
+        <svg class="block-atlas-svg" viewBox="0 0 1040 800" xmlns="http://www.w3.org/2000/svg" role="group" aria-labelledby="block-atlas-title block-atlas-desc">
+        <title id="block-atlas-title">MiniMindBlock: mix tokens, then mix features</title>
+        <desc id="block-atlas-desc">A residual stream receives two updates. After RMSNorm, causal attention mixes earlier tokens. After a second RMSNorm, the MLP transforms each token independently. Both updates preserve shape.</desc>
+        <defs>
+        <marker id="atlas-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6Z" fill="var(--muted)"/></marker>
+        <marker id="atlas-write" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6Z" fill="var(--coral)"/></marker>
+        </defs>
+        <path d="M100 112 V324 M100 364 V648 M100 688 V740" class="atlas-ribbon" />
+        <path d="M100 112 V324 M100 364 V648 M100 688 V740" class="atlas-spine" marker-end="url(#atlas-arrow)"/>
+        <text x="28" y="32" class="atlas-kicker" text-anchor="start">RESIDUAL STREAM</text>
+        <path d="M100 128 H294" class="atlas-wire" marker-end="url(#atlas-arrow)"/>
+        <circle cx="100" cy="128" r="4" class="atlas-junction"/>
+        <path d="M100 436 H294" class="atlas-wire" marker-end="url(#atlas-arrow)"/>
+        <circle cx="100" cy="436" r="4" class="atlas-junction"/>
+        <path d="M480 312 V336 Q480 344 472 344 H120" class="atlas-return" marker-end="url(#atlas-write)"/>
+        <path d="M480 640 V660 Q480 668 472 668 H120" class="atlas-return" marker-end="url(#atlas-write)"/>
+        <text x="128" y="228" class="atlas-note" text-anchor="start">Carry X</text>
+        <text x="128" y="540" class="atlas-note" text-anchor="start">Carry Y</text>
+        <g data-stage-node="input" tabindex="0" role="button" aria-label="Inspect block input">
+        <rect class="atlas-hit" x="20" y="44" width="220" height="64"/>
+        <text x="28" y="62" class="atlas-code" text-anchor="start">hidden_states</text>
+        <foreignObject x="28" y="70" width="224" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math">\(X^{(\ell)}\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
+        </g>
+        <g data-stage-node="norm1" tabindex="0" role="button" aria-label="Inspect input RMSNorm">
+        <rect class="atlas-hit" x="288" y="84" width="384" height="60"/>
+        <text x="300" y="112" class="atlas-op" text-anchor="start">RMSNorm</text>
+        <text x="428" y="112" class="atlas-code" text-anchor="start">input_layernorm ↗</text>
+        <path d="M300 128 H660" class="atlas-norm" />
+        </g>
+        <g data-stage-node="norm2" tabindex="0" role="button" aria-label="Inspect post-attention RMSNorm">
+        <rect class="atlas-hit" x="288" y="392" width="384" height="60"/>
+        <text x="300" y="420" class="atlas-op" text-anchor="start">RMSNorm</text>
+        <text x="428" y="420" class="atlas-code" text-anchor="start">post_attention_layernorm ↗</text>
+        <path d="M300 436 H660" class="atlas-norm" />
+        </g>
+        <g data-stage-node="attention" tabindex="0" role="button" aria-label="Inspect cross-token attention">
+        <rect class="atlas-hit" x="296" y="148" width="380" height="172"/>
+        <path d="M330 128 V142 M330 169 V174" class="atlas-wire atlas-quiet" />
+        <path d="M330 194 C330 226 330 232 330 266" class="atlas-affinity" stroke-width="1"/>
+        <path d="M430 128 V142 M430 169 V174" class="atlas-wire atlas-quiet" />
+        <path d="M330 194 C330 226 430 232 430 266" class="atlas-affinity" stroke-width="1"/>
+        <path d="M430 194 C430 226 430 232 430 266" class="atlas-affinity" stroke-width="1"/>
+        <path d="M530 128 V142 M530 169 V174" class="atlas-wire atlas-quiet" />
+        <path d="M330 194 C330 226 530 232 530 266" class="atlas-affinity is-emphasis" stroke-width="1.8"/>
+        <path d="M430 194 C430 226 530 232 530 266" class="atlas-affinity is-emphasis" stroke-width="3.2"/>
+        <path d="M530 194 C530 226 530 232 530 266" class="atlas-affinity is-emphasis" stroke-width="2.2"/>
+        <path d="M630 128 V142 M630 169 V174" class="atlas-wire atlas-quiet" />
+        <path d="M330 194 C330 226 630 232 630 266" class="atlas-affinity" stroke-width="1"/>
+        <path d="M430 194 C430 226 630 232 630 266" class="atlas-affinity" stroke-width="1"/>
+        <path d="M530 194 C530 226 630 232 630 266" class="atlas-affinity" stroke-width="1"/>
+        <path d="M630 194 C630 226 630 232 630 266" class="atlas-affinity" stroke-width="1"/>
+        <text x="330" y="164" class="atlas-token" text-anchor="middle">The</text>
+        <circle cx="330" cy="184" r="10" class="atlas-token-dot"/>
+        <circle cx="330" cy="276" r="10" class="atlas-token-dot"/>
+        <text x="430" y="164" class="atlas-token" text-anchor="middle">cat</text>
+        <circle cx="430" cy="184" r="10" class="atlas-token-dot"/>
+        <circle cx="430" cy="276" r="10" class="atlas-token-dot"/>
+        <text x="530" y="164" class="atlas-token" text-anchor="middle">sat</text>
+        <circle cx="530" cy="184" r="10" class="atlas-token-dot"/>
+        <circle cx="530" cy="276" r="10" class="atlas-token-dot is-emphasis"/>
+        <text x="630" y="164" class="atlas-token" text-anchor="middle">.</text>
+        <circle cx="630" cy="184" r="10" class="atlas-token-dot"/>
+        <circle cx="630" cy="276" r="10" class="atlas-token-dot"/>
+        <text x="530" y="302" class="atlas-code" text-anchor="middle">query: sat</text>
+        <path d="M320 304 V308 Q320 312 324 312 H636 Q640 312 640 308 V304" class="atlas-bracket" />
+        </g>
+        <text x="264" y="332" class="atlas-code" text-anchor="start">join heads · o_proj</text>
+        <g data-stage-node="attention" tabindex="0" role="button" aria-label="Inspect attention implementation">
+        <rect class="atlas-hit" x="716" y="168" width="300" height="96"/>
+        <text x="728" y="204" class="atlas-headline" text-anchor="start">Mix tokens.</text>
+        <text x="728" y="234" class="atlas-note" text-anchor="start">Read earlier positions and itself.</text>
+        <text x="728" y="256" class="atlas-note" text-anchor="start">Shown: one head, four tokens.</text>
+        </g>
+        <g data-stage-node="rope" tabindex="0" role="button" aria-label="Inspect Q/K projections + RoPE">
+        <rect class="atlas-hit" x="716" y="274" width="284" height="32"/>
+        <text x="728" y="296" class="atlas-link" text-anchor="start">Q/K projections + RoPE ↗</text>
+        </g>
+        <g data-stage-node="mask" tabindex="0" role="button" aria-label="Inspect Why no future connections?">
+        <rect class="atlas-hit" x="716" y="310" width="284" height="32"/>
+        <text x="728" y="332" class="atlas-link" text-anchor="start">Why no future connections? ↗</text>
+        </g>
+        <g data-stage-node="ffn" tabindex="0" role="button" aria-label="Inspect independent per-token feed-forward transformations">
+        <rect class="atlas-hit" x="288" y="456" width="388" height="190"/>
+        <path d="M330 436 V484" class="atlas-wire atlas-quiet" />
+        <path d="M330 504 C330 532 302 524 302 552 V572 C302 600 330 596 330 614" class="atlas-feature" />
+        <circle cx="302" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M330 504 C330 532 316 524 316 552 V572 C316 600 330 596 330 614" class="atlas-feature" />
+        <circle cx="316" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M330 504 C330 532 330 524 330 552 V572 C330 600 330 596 330 614" class="atlas-feature" />
+        <circle cx="330" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M330 504 C330 532 344 524 344 552 V572 C344 600 330 596 330 614" class="atlas-feature" />
+        <circle cx="344" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M330 504 C330 532 358 524 358 552 V572 C358 600 330 596 330 614" class="atlas-feature" />
+        <circle cx="358" cy="562" r="3" class="atlas-feature-dot"/>
+        <circle cx="330" cy="494" r="10" class="atlas-token-dot"/>
+        <circle cx="330" cy="624" r="10" class="atlas-token-dot"/>
+        <path d="M430 436 V484" class="atlas-wire atlas-quiet" />
+        <path d="M430 504 C430 532 402 524 402 552 V572 C402 600 430 596 430 614" class="atlas-feature" />
+        <circle cx="402" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M430 504 C430 532 416 524 416 552 V572 C416 600 430 596 430 614" class="atlas-feature" />
+        <circle cx="416" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M430 504 C430 532 430 524 430 552 V572 C430 600 430 596 430 614" class="atlas-feature" />
+        <circle cx="430" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M430 504 C430 532 444 524 444 552 V572 C444 600 430 596 430 614" class="atlas-feature" />
+        <circle cx="444" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M430 504 C430 532 458 524 458 552 V572 C458 600 430 596 430 614" class="atlas-feature" />
+        <circle cx="458" cy="562" r="3" class="atlas-feature-dot"/>
+        <circle cx="430" cy="494" r="10" class="atlas-token-dot"/>
+        <circle cx="430" cy="624" r="10" class="atlas-token-dot"/>
+        <path d="M530 436 V484" class="atlas-wire atlas-quiet" />
+        <path d="M530 504 C530 532 502 524 502 552 V572 C502 600 530 596 530 614" class="atlas-feature" />
+        <circle cx="502" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M530 504 C530 532 516 524 516 552 V572 C516 600 530 596 530 614" class="atlas-feature" />
+        <circle cx="516" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M530 504 C530 532 530 524 530 552 V572 C530 600 530 596 530 614" class="atlas-feature" />
+        <circle cx="530" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M530 504 C530 532 544 524 544 552 V572 C544 600 530 596 530 614" class="atlas-feature" />
+        <circle cx="544" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M530 504 C530 532 558 524 558 552 V572 C558 600 530 596 530 614" class="atlas-feature" />
+        <circle cx="558" cy="562" r="3" class="atlas-feature-dot"/>
+        <circle cx="530" cy="494" r="10" class="atlas-token-dot"/>
+        <circle cx="530" cy="624" r="10" class="atlas-token-dot"/>
+        <path d="M630 436 V484" class="atlas-wire atlas-quiet" />
+        <path d="M630 504 C630 532 602 524 602 552 V572 C602 600 630 596 630 614" class="atlas-feature" />
+        <circle cx="602" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M630 504 C630 532 616 524 616 552 V572 C616 600 630 596 630 614" class="atlas-feature" />
+        <circle cx="616" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M630 504 C630 532 630 524 630 552 V572 C630 600 630 596 630 614" class="atlas-feature" />
+        <circle cx="630" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M630 504 C630 532 644 524 644 552 V572 C644 600 630 596 630 614" class="atlas-feature" />
+        <circle cx="644" cy="562" r="3" class="atlas-feature-dot"/>
+        <path d="M630 504 C630 532 658 524 658 552 V572 C658 600 630 596 630 614" class="atlas-feature" />
+        <circle cx="658" cy="562" r="3" class="atlas-feature-dot"/>
+        <circle cx="630" cy="494" r="10" class="atlas-token-dot"/>
+        <circle cx="630" cy="624" r="10" class="atlas-token-dot"/>
+        <path d="M320 636 V640 H640 V636" class="atlas-bracket" />
+        </g>
+        <text x="274" y="656" class="atlas-code" text-anchor="start">expand · gate · project back</text>
+        <g data-stage-node="ffn" tabindex="0" role="button" aria-label="Inspect feed-forward implementation">
+        <rect class="atlas-hit" x="716" y="480" width="300" height="144"/>
+        <text x="728" y="516" class="atlas-headline" text-anchor="start">Mix features.</text>
+        <text x="728" y="548" class="atlas-note" text-anchor="start">Each token stays in its own lane.</text>
+        <text x="728" y="570" class="atlas-note" text-anchor="start">The same MLP acts on every row.</text>
+        <text x="728" y="608" class="atlas-link" text-anchor="start">SwiGLU · self.mlp ↗</text>
+        </g>
+        <g data-stage-node="residual1" tabindex="0" role="button" aria-label="Inspect first residual addition">
+        <circle cx="100" cy="344" r="20" class="atlas-merge"/>
+        <text x="100" y="351" class="atlas-plus" text-anchor="middle">+</text>
+        <foreignObject x="140" y="352" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math">\(Y=X^{(\ell)}+O_{\mathrm{attn}}\)</div></foreignObject>
+        </g>
+        <g data-stage-node="residual2" tabindex="0" role="button" aria-label="Inspect second residual addition and return">
+        <circle cx="100" cy="668" r="20" class="atlas-merge"/>
+        <text x="100" y="675" class="atlas-plus" text-anchor="middle">+</text>
+        <foreignObject x="140" y="676" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math">\(X^{(\ell+1)}=Y+F\)</div></foreignObject>
+        </g>
+        <text x="140" y="744" class="atlas-op" text-anchor="start">Same shape. Richer state.</text>
+        <text x="728" y="708" class="atlas-code" text-anchor="start">return hidden_states,</text>
+        <text x="728" y="726" class="atlas-code" text-anchor="start">present_key_value</text>
+        <path d="M28 764 H1012" class="atlas-rule" />
+        <text x="28" y="788" class="atlas-code" text-anchor="start">Read top → bottom</text>
+        <text x="300" y="788" class="atlas-code" text-anchor="start">Curves show information mixing</text>
+        <text x="728" y="788" class="atlas-code" text-anchor="start">Click a part to inspect its code ↗</text>
         </svg>
-        <div class="diagram-equations" aria-label="Math for the complete Transformer block">
-          <div class="diagram-equation"><span>ATTENTION WRITE</span><div>\(O_{\mathrm{attn}}=\operatorname{Concat}(O_1,\ldots,O_H)W_O\)</div></div>
-          <div class="diagram-equation"><span>CAUSAL PROBABILITIES</span><div>\(P=\operatorname{softmax}\!\left(\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}}+M_{\mathrm{causal}}\right)\)</div></div>
-          <div class="diagram-equation"><span>FEED-FORWARD WRITE · DENSE SWIGLU</span><div>\(U=\operatorname{RMSNorm}(Y),\quad F=\left(\operatorname{SiLU}(UW_{\mathrm{gate}})\odot UW_{\mathrm{up}}\right)W_{\mathrm{down}}\)</div></div>
-        </div>
         <div class="diagram-inspector" data-stage-detail role="region" aria-live="polite" aria-label="Selected block node details">
           <div class="inspector-heading"><p class="eyebrow">INTERACTIVE CODE TRACE</p><span class="stage-detail-index" data-stage-detail-index>overview</span></div>
           <div class="inspector-title-row"><h3 data-stage-detail-title>MiniMindBlock.forward</h3><button type="button" data-stage-reset aria-label="Close code trace" hidden>Close ×</button></div>
@@ -354,6 +351,6 @@ return hidden_states, present_key_value</code></pre></details>
     <nav class="lesson-nav"><a href="0022-swiglu-feed-forward.html">← SwiGLU</a><a href="index.html">Return to course map →</a></nav>
   </main>
   <footer class="site-footer">Lesson 23 · Complete Transformer block capstone</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=block-atlas1"></script>
 </body>
 </html>

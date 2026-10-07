@@ -268,15 +268,35 @@ hidden_states = hidden_states + self.mlp(
 )`
       },
       input: {
-        title: 'Input state', index: 'step 0 · residual stream',
+        title: 'Input state', index: 'residual stream',
         summary: 'The block receives one hidden vector per token. Every later operation must preserve the batch, token, and model axes.',
         equation: '\\(X^{(\\ell)}\\in\\mathbb{R}^{B\\times T\\times D}\\)',
         source: 'MiniMind · model/model_minimind.py · MiniMindModel', href: '../reference/transformer-model-code.html',
         code: `hidden_states = self.embed_tokens(input_ids)
 # shape: [batch, tokens, hidden_size]`
       },
+      norm1: {
+        title: 'Read a normalized copy', index: 'input_layernorm',
+        summary: 'RMSNorm rescales the features of each token independently. The original hidden_states continue along the residual stream; attention receives the normalized copy.',
+        equation: '\\(\\bar X=\\operatorname{RMSNorm}(X),\\qquad O_{\\mathrm{attn}}=\\operatorname{Attention}(\\bar X)\\)',
+        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '../reference/transformer-model-code.html#block',
+        code: `residual = hidden_states
+hidden_states, present_key_value = self.self_attn(
+    self.input_layernorm(hidden_states), position_embeddings,
+    past_key_value, use_cache, attention_mask
+)`
+      },
+      norm2: {
+        title: 'Normalize the updated state', index: 'post_attention_layernorm',
+        summary: 'The second RMSNorm reads Y, after the attention residual addition. Its parameters are separate from input_layernorm. The MLP still processes every token independently.',
+        equation: '\\(U=\\operatorname{RMSNorm}(Y),\\qquad F=\\operatorname{MLP}(U)\\)',
+        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '../reference/transformer-model-code.html#block',
+        code: `hidden_states = hidden_states + self.mlp(
+    self.post_attention_layernorm(hidden_states)
+)`
+      },
       attention: {
-        title: 'Attention write', index: 'step 1 · mix tokens',
+        title: 'Attention write', index: 'self_attn · mix tokens',
         summary: 'Attention is the cross-token branch: normalize each row, compare queries with keys, blend values, then project the joined heads back to D features.',
         equation: '\\(O_{\\mathrm{attn}}=\\operatorname{Concat}(O_1,\\ldots,O_H)W_O\\)',
         source: 'MiniMind · model/model_minimind.py · Attention.forward', href: '../reference/transformer-model-code.html#attention',
@@ -285,9 +305,9 @@ output = self.o_proj(attn_output)
 # returns [batch, tokens, hidden_size]`
       },
       rope: {
-        title: 'RoPE on Q and K', index: 'step 2 · encode position',
+        title: 'RoPE on Q and K', index: 'encode position',
         summary: 'Rotary position embeddings rotate query and key pairs by token position. Values keep their content coordinates; only comparisons acquire relative position information.',
-        equation: '\\(Q\\prime=\\operatorname{RoPE}(Q),\\qquad K\\prime=\\operatorname{RoPE}(K)\\)',
+        equation: '\\(Q^{\\prime}=\\operatorname{RoPE}(Q),\\qquad K^{\\prime}=\\operatorname{RoPE}(K)\\)',
         source: 'MiniMind · model/model_minimind.py · rotary embedding', href: '../reference/transformer-model-code.html#rope',
         code: `xq, xk = apply_rotary_pos_emb(
     xq, xk, cos, sin
@@ -295,16 +315,16 @@ output = self.o_proj(attn_output)
 # xv is unchanged by RoPE`
       },
       mask: {
-        title: 'Causal mask', index: 'step 3 · compare and mask',
+        title: 'Causal mask', index: 'compare and mask',
         summary: 'Scaled query-key scores become probabilities only after the future-token entries are set to −∞. The triangular pattern is the causal contract.',
-        equation: '\\(P=\\operatorname{softmax}\\!\\left(\\frac{Q\\prime K\\prime^{\\mathsf T}}{\\sqrt{d_h}}+M_{\\mathrm{causal}}\\right)\\)',
+        equation: '\\(P=\\operatorname{softmax}\\!\\left(\\frac{Q^{\\prime}(K^{\\prime})^{\\mathsf T}}{\\sqrt{d_h}}+M_{\\mathrm{causal}}\\right)\\)',
         source: 'MiniMind · model/model_minimind.py · score path', href: '../reference/transformer-model-code.html#attention',
         code: `scores = torch.matmul(xq, xk.transpose(-2, -1)) * scale
 scores = scores + causal_mask
 probs = F.softmax(scores, dim=-1, dtype=torch.float32).type_as(xq)`
       },
       residual1: {
-        title: 'First residual write', index: 'step 4 · preserve the stream',
+        title: 'First residual write', index: 'preserve the stream',
         summary: 'The attention result is an update, not a replacement. Adding it to the original stream keeps an identity route for optimization and information flow.',
         equation: '\\(Y=X^{(\\ell)}+O_{\\mathrm{attn}}\\)',
         source: 'MiniMind · model/model_minimind.py · residual path', href: '../reference/transformer-model-code.html#block',
@@ -314,9 +334,9 @@ hidden_states += residual
 # shape remains [B, T, D]`
       },
       ffn: {
-        title: 'SwiGLU write', index: 'step 5 · mix features per token',
+        title: 'SwiGLU write', index: 'self.mlp · mix features per token',
         summary: 'The feed-forward branch works independently on each token row. Its gated expansion mixes features, contracts back to D, and writes a second correction.',
-        equation: '\\(F=W_{\\mathrm{down}}\\!\\left(\\operatorname{SiLU}(W_{\\mathrm{gate}}Y)\\odot W_{\\mathrm{up}}Y\\right)\\)',
+        equation: '\\(U=\\operatorname{RMSNorm}(Y)\\)<br>\\(F=\\left(\\operatorname{SiLU}(UW_g)\\odot UW_u\\right)W_d\\)',
         source: 'MiniMind · model/model_minimind.py · MLP path', href: '../reference/transformer-model-code.html#mlp',
         code: `hidden_states = hidden_states + self.mlp(
     self.post_attention_layernorm(hidden_states)
@@ -324,7 +344,7 @@ hidden_states += residual
 # dense SwiGLU or optional MoEFeedForward`
       },
       residual2: {
-        title: 'Second residual write', index: 'step 6 · block output',
+        title: 'Second residual write', index: 'block output',
         summary: 'The second update completes the block. The output keeps the same [B, T, D] shape and becomes the input to the next decoder block.',
         equation: '\\(X^{(\\ell+1)}=Y+F\\)',
         source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '../reference/transformer-model-code.html#block',
