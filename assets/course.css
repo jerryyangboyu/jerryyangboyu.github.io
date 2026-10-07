@@ -494,10 +494,6 @@ th { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; }
 .studio-practice > ol { margin-bottom: 0; }
 .studio-practice > ol li::marker { color: var(--coral); font-weight: 700; }
 
-.studio-reference { grid-column: 1 / -1; margin: 0 0 16px; border: 0; border-top: 1px solid var(--rule); border-radius: 0; background: transparent; }
-.studio-reference summary { padding: 16px 0 10px; color: var(--muted); font-size: .88rem; }
-.studio-reference > .studio-card { margin: 12px 0; }
-
 /* A plain, linear practice section keeps the content in reading order. */
 .learning-sequence { grid-column: 1 / -1; margin: 34px 0 12px; }
 .learning-sequence > h2 { margin: 0 0 10px; }

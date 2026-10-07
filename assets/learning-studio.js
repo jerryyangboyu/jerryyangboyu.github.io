@@ -124,15 +124,9 @@
     const sequence = document.createElement('section');
     sequence.className = 'learning-sequence';
     sequence.id = 'practice-before-moving-on';
-    sequence.innerHTML = `<h2>Practice before moving on</h2><p class="learning-purpose">Work through these questions before starting the next lesson. Keep the equations and shapes beside your code while you answer.</p><section class="learning-part"><h3>Code walkthrough</h3><p>${esc(task.bridge)}</p><div class="code-walkthrough">${walkthroughHtml}</div></section><section class="learning-part"><h3>Coding challenge</h3><p>${esc(task.task)}</p><details><summary>Reference implementation</summary><pre><code>${esc(task.solution)}</code></pre><p class="answer-note">Compare the assertions and shapes with your own implementation.</p></details></section><section class="learning-part"><h3>Exercises</h3><ol>${questions.map((item) => `<li>${esc(item)}</li>`).join('')}</ol><details><summary>Answers</summary><ol>${answers.map((item) => `<li>${esc(item)}</li>`).join('')}</ol></details></section>`;
+    sequence.innerHTML = `<h2>Practice before moving on</h2><p class="learning-purpose">Work through these questions before starting the next lesson. Keep the equations and shapes beside your code while you answer.</p><section class="learning-part"><h3>Code walkthrough</h3><p>${esc(task.bridge)}</p><div class="code-walkthrough">${walkthroughHtml}</div></section><section id="code-checkpoint" class="learning-part"><h3>Coding challenge</h3><p>${esc(task.task)}</p><details><summary>Reference implementation</summary><pre><code>${esc(task.solution)}</code></pre><p class="answer-note">Compare the assertions and shapes with your own implementation.</p></details></section><section class="learning-part"><h3>Exercises</h3><ol>${questions.map((item) => `<li>${esc(item)}</li>`).join('')}</ol><details><summary>Answers</summary><ol>${answers.map((item) => `<li>${esc(item)}</li>`).join('')}</ol></details></section>`;
     host.prepend(sequence);
     const cards = [...host.children].filter((node) => node.classList.contains('studio-card'));
-    if (cards.length) {
-      const reference = document.createElement('details');
-      reference.className = 'studio-reference';
-      reference.innerHTML = '<summary>More code and exercises from this lesson</summary>';
-      cards.forEach((card) => reference.appendChild(card));
-      host.appendChild(reference);
-    }
+    cards.forEach((card) => card.remove());
   });
 })();
