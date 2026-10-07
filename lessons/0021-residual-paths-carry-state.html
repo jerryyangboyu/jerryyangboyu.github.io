@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 21: Residual Paths Carry State</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -84,6 +84,25 @@
       <p class="code-prompt"><strong>Trace it:</strong> Point to the two identity routes and the two learned routes in these three lines.</p>
     </section>
 
+    <section class="code-checkpoint">
+      <h2>Engineering bridge · cache the attention branch</h2>
+      <p>MiniMind's residual contract has one extra return value: the present K/V cache. The hidden state keeps shape \([B,T_q,D]\), while K/V grow along the cached token axis for the next decode step. The residual additions remain ordinary elementwise adds.</p>
+      <details><summary>Show the block's cache-aware forward</summary><pre><code class="language-python">residual = hidden_states
+hidden_states, present_key_value = self.self_attn(
+    self.input_layernorm(hidden_states),
+    position_embeddings,
+    past_key_value=past_key_value,
+    use_cache=use_cache,
+    attention_mask=attention_mask,
+)
+hidden_states += residual
+hidden_states = hidden_states + self.mlp(
+    self.post_attention_layernorm(hidden_states)
+)
+return hidden_states, present_key_value</code></pre></details>
+      <p class="code-prompt"><strong>Decode test:</strong> run a full prompt once, then feed one token at a time with <code>use_cache=True</code>. The newly produced logits should match the corresponding full-prefix logits within floating-point tolerance.</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. Elementwise addition requires matching shapes." data-retry="Both branches meet at an elementwise plus sign."><h3>Retrieval check</h3><p>What shape must an attention update have before adding it to \(X\in\mathbb R^{B\times T\times d_{\text{model}}}\)?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(B\times T\times d_{\text{model}}\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(B\times h\times T\times T\)</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
     <section class="exercises">
@@ -104,6 +123,6 @@
     <nav class="lesson-nav"><a href="0020-multi-heads-split-features.html">← Multiple heads</a><a href="0022-swiglu-feed-forward.html">Next: SwiGLU →</a></nav>
   </main>
   <footer class="site-footer">Lesson 21 · Residual paths carry state</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
 </body>
 </html>

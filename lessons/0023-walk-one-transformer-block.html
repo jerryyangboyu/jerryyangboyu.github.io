@@ -4,44 +4,229 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 23: Walk One Complete Transformer Block</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
 <body data-lesson="0023">
-  <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="../reference/transformer-block-visual.html">Block walkthrough</a></header>
+  <header class="site-header"><a class="brand" href="index.html">A Short Course for Modern Large Language Models</a><a class="course-link" href="index.html">Module 3 map</a></header>
   <main>
-    <section class="hero"><p class="eyebrow">Lesson 23 of 23 · Capstone</p><h1>Walk one block without losing a dimension.</h1><p class="lede">Your win: narrate every operation in a pre-norm causal Transformer block with RoPE, including its shape and purpose.</p><div class="lesson-meta"><span>20 minutes</span><span>Needs: Lessons 1–22</span><span>Outcome: teach the complete algorithm</span></div></section>
+    <section class="hero"><p class="eyebrow">Lesson 23 of 23 · Capstone</p><h1>Walk one block without losing a dimension.</h1><p class="lede">Your win: narrate every operation in a pre-norm causal Transformer block with RoPE, then map that readable block onto MiniMind's cache-aware implementation.</p><div class="lesson-meta"><span>25 minutes</span><span>Needs: Lessons 1–22</span><span>Outcome: teach and extend the block</span></div></section>
 
     <div class="goal"><strong>Final mission:</strong> start with \(X^{(\ell)}\), finish with \(X^{(\ell+1)}\), and explain exactly where position, comparison, probability, content, and residual updates enter.</div>
 
-    <section class="diagram nn-viz" data-block-stepper>
-      <div class="viz-header"><h3>Step through the neural network block</h3><span class="small">Input → operation → output</span></div>
-      <div class="block-step-strip" data-block-steps></div>
-      <div class="block-stage-visual">
-        <div class="stage-tensor" data-stage-input></div>
-        <div class="stage-operation" data-stage-operation></div>
-        <div class="stage-tensor" data-stage-output></div>
+    <figure id="block-visual" class="course-figure course-figure-diagram flowchart-figure" data-block-explorer>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 1200 876" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="0023-walk-one-transformer-block-title 0023-walk-one-transformer-block-desc">
+          <title id="0023-walk-one-transformer-block-title">MiniMindBlock.forward · one complete pre-norm decoder block</title>
+          <desc id="0023-walk-one-transformer-block-desc">An implementation map of MiniMindBlock.forward in model/model_minimind.py. The hidden_states residual stream enters input_layernorm and self_attn, adds the attention result back into the stream, then passes through post_attention_layernorm and self.mlp before returning hidden_states and present_key_value.</desc>
+          <defs>
+            <marker id="transformer-stream-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/>
+            </marker>
+            <marker id="transformer-write-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/>
+            </marker>
+            <marker id="transformer-carry-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#7a8399"/>
+            </marker>
+          </defs>
+
+          <rect width="1200" height="876" fill="#f5f5f5"/>
+          <text x="40" y="32" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" font-weight="500" letter-spacing="0.16em">MINIMIND · MODEL/MODEL_MINIMIND.PY</text>
+          <text x="40" y="68" fill="#2d3142" font-size="24" font-family="'Instrument Serif', Georgia, serif" font-weight="400">MiniMindBlock.forward</text>
+          <text x="40" y="92" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">pre-norm decoder block · hidden_states [B, T, D] → hidden_states [B, T, D]</text>
+          <rect x="858" y="22" width="282" height="70" rx="8" fill="rgba(8,126,120,0.06)" stroke="#087e78" stroke-width="1"/>
+          <text x="878" y="43" fill="#087e78" font-size="8" font-family="'Geist Mono', monospace" font-weight="600" letter-spacing="0.12em">CODE CONTRACT</text>
+          <text x="878" y="62" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace">return hidden_states, present_key_value</text>
+          <text x="878" y="78" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace">same shape · cache-aware attention</text>
+
+          <!-- The residual stream is the visual spine. -->
+          <!-- The trunk pauses at each merge node so the circle reads as a unit, not a line crossing it. -->
+          <line x1="220" y1="196" x2="220" y2="314" stroke="#7a8399" stroke-width="3"/>
+          <line x1="220" y1="406" x2="220" y2="614" stroke="#7a8399" stroke-width="3"/>
+          <line x1="220" y1="706" x2="220" y2="744" stroke="#7a8399" stroke-width="3" marker-end="url(#transformer-stream-arrow)"/>
+          <text x="76" y="264" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" font-weight="500" letter-spacing="0.12em">hidden_states</text>
+
+          <!-- Each sublayer reads from the trunk; the trunk itself carries identity. -->
+          <path d="M220 224 H452" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
+          <circle cx="220" cy="224" r="3" fill="#4f5d75"/>
+          <path d="M220 540 H452" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
+          <circle cx="220" cy="540" r="3" fill="#4f5d75"/>
+
+          <!-- Attention reads the stream and writes the first correction. -->
+          <rect x="420" y="120" width="720" height="216" rx="16" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.16)" stroke-width="0.8"/>
+          <text x="452" y="148" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" font-weight="500" letter-spacing="0.14em">self.self_attn(...)</text>
+          <text x="452" y="168" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">input_layernorm → Q/K/V → causal attention → O_attn</text>
+
+          <!-- Attention branch connectors. -->
+          <line x1="580" y1="224" x2="616" y2="224" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
+          <line x1="792" y1="224" x2="816" y2="224" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
+          <line x1="896" y1="224" x2="932" y2="224" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
+          <path d="M1016 252 V356 H264" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#transformer-write-arrow)"/>
+          <rect x="640" y="340" width="80" height="16" rx="4" fill="#f5f5f5"/>
+          <text x="680" y="351" fill="#eb6c36" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">hidden_states += residual</text>
+
+          <g data-stage-node="attention" tabindex="0" aria-label="Attention: RMSNorm per token" role="button">
+            <rect x="452" y="196" width="128" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
+            <text x="516" y="222" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">input_layernorm</text>
+            <text x="516" y="240" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">RMSNorm(hidden_states)</text>
+          </g>
+
+          <g data-stage-node="rope" tabindex="0" aria-label="RoPE: Q K V projection and rotation" role="button">
+            <path d="M628 196 H780 L792 252 H640 Z" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
+            <text x="710" y="222" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">q_proj · k_proj · v_proj</text>
+            <text x="710" y="240" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">RoPE(Q, K) · V unchanged</text>
+          </g>
+
+          <g data-stage-node="mask" tabindex="0" aria-label="Causal mask and attention probabilities" role="button">
+            <rect x="816" y="196" width="80" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
+            <rect x="824" y="204" width="16" height="12" fill="#4f5d75" opacity="0.80"/>
+            <rect x="840" y="204" width="16" height="12" fill="#ececec"/>
+            <rect x="856" y="204" width="16" height="12" fill="#ececec"/>
+            <rect x="872" y="204" width="16" height="12" fill="#ececec"/>
+            <rect x="824" y="216" width="16" height="12" fill="#4f5d75" opacity="0.40"/>
+            <rect x="840" y="216" width="16" height="12" fill="#4f5d75" opacity="0.70"/>
+            <rect x="856" y="216" width="16" height="12" fill="#ececec"/>
+            <rect x="872" y="216" width="16" height="12" fill="#ececec"/>
+            <rect x="824" y="228" width="16" height="12" fill="#4f5d75" opacity="0.22"/>
+            <rect x="840" y="228" width="16" height="12" fill="#4f5d75" opacity="0.44"/>
+            <rect x="856" y="228" width="16" height="12" fill="#4f5d75" opacity="0.62"/>
+            <rect x="872" y="228" width="16" height="12" fill="#ececec"/>
+            <rect x="824" y="240" width="16" height="12" fill="#4f5d75" opacity="0.14"/>
+            <rect x="840" y="240" width="16" height="12" fill="#4f5d75" opacity="0.28"/>
+            <rect x="856" y="240" width="16" height="12" fill="#4f5d75" opacity="0.44"/>
+            <rect x="872" y="240" width="16" height="12" fill="#4f5d75" opacity="0.58"/>
+            <text x="856" y="272" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">scores + mask → P</text>
+          </g>
+
+          <g data-stage-node="attention" tabindex="0" aria-label="Attention: weighted values and output projection" role="button">
+            <rect x="932" y="196" width="168" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
+            <text x="1016" y="222" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">self_attn output</text>
+            <text x="1016" y="240" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">weighted V · o_proj → O_attn</text>
+          </g>
+
+          <foreignObject x="648" y="280" width="350" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="svg-math">\(O_{\mathrm{attn}}\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
+          <g aria-label="Attention token positions" role="group">
+            <rect x="452" y="276" width="32" height="20" rx="10" fill="#ececec"/><text x="468" y="290" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">t₀</text>
+            <rect x="492" y="276" width="32" height="20" rx="10" fill="#ececec"/><text x="508" y="290" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">t₁</text>
+            <rect x="532" y="276" width="32" height="20" rx="10" fill="#ececec"/><text x="548" y="290" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">t₂</text>
+            <rect x="572" y="276" width="32" height="20" rx="10" fill="#ececec"/><text x="588" y="290" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">t₃</text>
+          </g>
+
+          <!-- First residual addition on the stream. -->
+          <g data-stage-node="residual1" tabindex="0" aria-label="First residual addition" role="button">
+            <circle cx="220" cy="360" r="44" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1.2"/>
+            <text x="220" y="366" fill="#2d3142" font-size="22" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">+</text>
+            <rect x="110" y="408" width="220" height="32" fill="#f5f5f5"/>
+            <foreignObject x="110" y="408" width="220" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="svg-math" style="text-align:center">\(Y=X^{(\ell)}+O_{\mathrm{attn}}\)</div></foreignObject>
+          </g>
+
+          <!-- Feed-forward reads one token at a time and writes the second correction. -->
+          <rect x="420" y="448" width="720" height="168" rx="16" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.16)" stroke-width="0.8"/>
+          <text x="452" y="476" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" font-weight="500" letter-spacing="0.14em">self.mlp(...)</text>
+          <text x="452" y="496" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">post_attention_layernorm → SwiGLU → down_proj</text>
+
+          <line x1="580" y1="540" x2="616" y2="540" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
+          <line x1="792" y1="540" x2="828" y2="540" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
+          <path d="M1052 568 V646 H264" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#transformer-write-arrow)"/>
+          <rect x="640" y="630" width="80" height="16" rx="4" fill="#f5f5f5"/>
+          <text x="680" y="641" fill="#eb6c36" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">hidden_states += self.mlp(...)</text>
+
+          <g data-stage-node="ffn" tabindex="0" aria-label="Feed-forward: normalize the residual state" role="button">
+            <rect x="452" y="512" width="128" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
+            <text x="516" y="534" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace" font-weight="600" text-anchor="middle">post_attention_</text>
+            <text x="516" y="548" fill="#2d3142" font-size="10" font-family="'Geist Mono', monospace" font-weight="600" text-anchor="middle">layernorm</text>
+          </g>
+
+          <g data-stage-node="ffn" tabindex="0" aria-label="Feed-forward: SwiGLU transformation" role="button">
+            <rect x="616" y="512" width="176" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
+            <text x="704" y="538" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">self.mlp</text>
+            <text x="704" y="556" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">SwiGLU · gate · up · down</text>
+          </g>
+
+          <g data-stage-node="ffn" tabindex="0" aria-label="Feed-forward: per-token outputs" role="button">
+            <rect x="828" y="512" width="224" height="56" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
+            <rect x="844" y="530" width="32" height="20" rx="10" fill="#ececec"/><text x="860" y="544" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">F₀</text>
+            <rect x="888" y="530" width="32" height="20" rx="10" fill="#ececec"/><text x="904" y="544" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">F₁</text>
+            <rect x="932" y="530" width="32" height="20" rx="10" fill="#ececec"/><text x="948" y="544" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">F₂</text>
+            <rect x="976" y="530" width="32" height="20" rx="10" fill="#ececec"/><text x="992" y="544" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" text-anchor="middle">F₃</text>
+          </g>
+
+          <text x="452" y="600" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.06em">MLP UPDATE · F [B, T, D]</text>
+
+          <!-- Final state after the second residual addition. -->
+          <g data-stage-node="residual2" tabindex="0" aria-label="Second residual addition" role="button">
+            <circle cx="220" cy="660" r="44" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1.2"/>
+            <text x="220" y="666" fill="#2d3142" font-size="22" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">+</text>
+            <rect x="110" y="708" width="220" height="32" fill="#f5f5f5"/>
+            <foreignObject x="110" y="708" width="220" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="svg-math" style="text-align:center">\(X^{(\ell+1)}=Y+F\)</div></foreignObject>
+          </g>
+
+          <g data-stage-node="input" tabindex="0" aria-label="Input residual state" role="button">
+            <rect x="72" y="132" width="296" height="64" rx="32" fill="rgba(45,49,66,0.03)" stroke="#7a8399" stroke-width="1.2"/>
+            <text x="220" y="158" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" font-weight="500" text-anchor="middle" letter-spacing="0.12em">INPUT · hidden_states</text>
+            <text x="220" y="182" fill="#2d3142" font-size="16" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">[B, T, D]</text>
+          </g>
+
+          <g data-stage-node="residual2" tabindex="0" aria-label="Output residual state" role="button">
+            <rect x="72" y="760" width="296" height="64" rx="32" fill="#ffffff" stroke="#2d3142" stroke-width="1.2"/>
+            <text x="220" y="786" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" font-weight="500" text-anchor="middle" letter-spacing="0.12em">RETURN · hidden_states</text>
+            <text x="220" y="810" fill="#2d3142" font-size="14" font-family="'Geist', sans-serif" font-weight="600" text-anchor="middle">[B, T, D] · with KV cache</text>
+          </g>
+
+          <line x1="40" y1="840" x2="1140" y2="840" stroke="rgba(45,49,66,0.14)" stroke-width="0.8"/>
+          <line x1="56" y1="860" x2="96" y2="860" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
+          <text x="108" y="864" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.06em">hidden_states stream</text>
+          <line x1="300" y1="860" x2="340" y2="860" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#transformer-stream-arrow)"/>
+          <text x="352" y="864" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.06em">SUBLAYER INPUT</text>
+          <circle cx="592" cy="860" r="6" fill="#eb6c36"/>
+          <text x="608" y="864" fill="#4f5d75" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.06em">LEARNED WRITE</text>
+        </svg>
+        <div class="diagram-equations" aria-label="Math for the complete Transformer block">
+          <div class="diagram-equation"><span>ATTENTION WRITE</span><div>\(O_{\mathrm{attn}}=\operatorname{Concat}(O_1,\ldots,O_H)W_O\)</div></div>
+          <div class="diagram-equation"><span>CAUSAL PROBABILITIES</span><div>\(P=\operatorname{softmax}\!\left(\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}}+M_{\mathrm{causal}}\right)\)</div></div>
+          <div class="diagram-equation"><span>FEED-FORWARD WRITE · DENSE SWIGLU</span><div>\(U=\operatorname{RMSNorm}(Y),\quad F=\left(\operatorname{SiLU}(UW_{\mathrm{gate}})\odot UW_{\mathrm{up}}\right)W_{\mathrm{down}}\)</div></div>
+        </div>
+        <div class="diagram-inspector" data-stage-detail role="region" aria-live="polite" aria-label="Selected block node details">
+          <div class="inspector-heading"><p class="eyebrow">INTERACTIVE CODE TRACE</p><span class="stage-detail-index" data-stage-detail-index>overview</span></div>
+          <div class="inspector-title-row"><h3 data-stage-detail-title>MiniMindBlock.forward</h3><button type="button" data-stage-reset aria-label="Close code trace" hidden>Close ×</button></div>
+          <p class="stage-detail-summary" data-stage-detail-summary>Click any node in the block to connect its operation, equation, and MiniMind implementation.</p>
+          <div class="inspector-content">
+            <div class="stage-detail-equation" data-stage-detail-equation aria-label="Whole block equation">\(Y=X^{(\ell)}+O_{\mathrm{attn}},\qquad X^{(\ell+1)}=Y+F\)</div>
+            <div class="stage-detail-code-wrap" data-stage-code-panel hidden>
+              <div class="stage-detail-code-heading"><span data-stage-detail-source>MiniMind · model/model_minimind.py · MiniMindBlock.forward</span><a data-stage-detail-link href="../reference/transformer-model-code.html#block">Open code context →</a></div>
+              <pre><code class="language-python" data-stage-detail-code>residual = hidden_states
+hidden_states, present_key_value = self.self_attn(
+    self.input_layernorm(hidden_states), position_embeddings,
+    past_key_value, use_cache, attention_mask
+)
+hidden_states += residual
+hidden_states = hidden_states + self.mlp(
+    self.post_attention_layernorm(hidden_states)
+)</code></pre>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="stepper-controls"><button type="button" data-stage-previous>Previous</button><output data-stage-status></output><button type="button" data-stage-next>Next</button></div>
-    </section>
-
-    <h2>The complete pre-norm block</h2>
-    <ol class="block-pipeline">
-      <li><span class="step-no">1</span><span><strong>Normalize:</strong> \(\bar X=\operatorname{Norm}(X^{(\ell)})\)</span><span>\(B\times T\times d_{\text{model}}\)</span></li>
-      <li><span class="step-no">2</span><span><strong>Project:</strong> \(Q=\bar XW_Q,\ K=\bar XW_K,\ V=\bar XW_V\)</span><span>then split into \(h\) heads</span></li>
-      <li><span class="step-no">3</span><span><strong>Encode position:</strong> \(Q'=\operatorname{RoPE}(Q),\ K'=\operatorname{RoPE}(K)\)</span><span>\(V\) unchanged</span></li>
-      <li><span class="step-no">4</span><span><strong>Compare and mask:</strong> \(A=Q'K'^{\mathsf T}/\sqrt{d_h}+M_{\text{causal}}\)</span><span>\(B\times h\times T\times T\)</span></li>
-      <li><span class="step-no">5</span><span><strong>Blend values:</strong> \(O_r=\operatorname{softmax}(A_r)V_r\)</span><span>each head \(T\times d_h\)</span></li>
-      <li><span class="step-no">6</span><span><strong>Join heads:</strong> \(O_{\text{attn}}=\operatorname{Concat}(O_1,\ldots,O_h)W_O\)</span><span>\(B\times T\times d_{\text{model}}\)</span></li>
-      <li><span class="step-no">7</span><span><strong>Add:</strong> \(Y=X^{(\ell)}+O_{\text{attn}}\)</span><span>first residual</span></li>
-      <li><span class="step-no">8</span><span><strong>Transform and add:</strong> \(X^{(\ell+1)}=Y+\operatorname{FFN}(\operatorname{Norm}(Y))\)</span><span>second residual</span></li>
-    </ol>
-
-    <figure class="course-figure">
-      <img loading="lazy" src="../assets/course-visuals/transformer-block-overview.webp" width="1122" height="1402" alt="Complete decoder-only Transformer block from hidden states through attention, residual paths, normalization, and SwiGLU">
-      <figcaption>The whole block in one view. Follow the numbered path top to bottom, then use the worked example below to substitute actual matrices at the attention stages.</figcaption>
+      <figcaption>Read the exact MiniMindBlock.forward contract from top to bottom: normalize and call self_attn, add its update, normalize and call self.mlp, add the second update, then return hidden_states with the attention cache.</figcaption>
     </figure>
+
+    <h2>MiniMindBlock.forward reference</h2>
+    <div class="block-pipeline-key" aria-hidden="true"><span>FORMULA · OPERATION</span><span>MINIMIND TRACE · SHAPE</span></div>
+    <ul class="block-pipeline" role="list">
+      <li><span class="pipeline-formula"><strong>Pre-norm:</strong> \(\bar X=\operatorname{RMSNorm}(X)\)</span><span class="pipeline-example"><code>self.input_layernorm(hidden_states)</code><br>\(B\times T\times D\)</span></li>
+      <li><span class="pipeline-formula"><strong>Project:</strong> \(Q=\bar XW_Q,\ K=\bar XW_K,\ V=\bar XW_V\)</span><span class="pipeline-example"><code>q_proj · k_proj · v_proj</code><br>split into \(h\) heads</span></li>
+      <li><span class="pipeline-formula"><strong>Encode position:</strong> \(Q'=\operatorname{RoPE}(Q),\ K'=\operatorname{RoPE}(K)\)</span><span class="pipeline-example"><code>apply_rotary_pos_emb</code><br>\(V\) unchanged</span></li>
+      <li><span class="pipeline-formula"><strong>Compare and mask:</strong> \(A=Q'K'^{\mathsf T}/\sqrt{d_h}+M_{\text{causal}}\)</span><span class="pipeline-example"><code>scores + causal_mask</code><br>\(B\times h\times T\times T\)</span></li>
+      <li><span class="pipeline-formula"><strong>Blend values:</strong> \(O_r=\operatorname{softmax}(A_r)V_r\)</span><span class="pipeline-example"><code>probs @ value_states</code><br>each head \(T\times d_h\)</span></li>
+      <li><span class="pipeline-formula"><strong>Join heads:</strong> \(O_{\text{attn}}=\operatorname{Concat}(O_1,\ldots,O_h)W_O\)</span><span class="pipeline-example"><code>self.o_proj(attn_output)</code><br>\(B\times T\times D\)</span></li>
+      <li><span class="pipeline-formula"><strong>In-place residual:</strong> \(Y=X+O_{\text{attn}}\)</span><span class="pipeline-example"><code>hidden_states += residual</code><br>first residual write</span></li>
+      <li><span class="pipeline-formula"><strong>MLP and add:</strong> \(X^{(\ell+1)}=Y+\operatorname{SwiGLU}(\operatorname{Norm}(Y))\)</span><span class="pipeline-example"><code>hidden_states += self.mlp(...)</code><br>return state + cache</span></li>
+    </ul>
 
     <section class="worked-example">
       <h3>Toy walkthrough: \(B=1,T=2,d_{\text{model}}=2,h=1\)</h3>
@@ -122,6 +307,32 @@
       <p class="code-prompt"><strong>Trace it:</strong> Starting from <code>input_ids</code>, name the final axis at each of the three comments.</p>
     </section>
 
+    <section class="code-checkpoint">
+      <h2>Engineering bridge · grow this into MiniMind</h2>
+      <p>The course <code>TransformerModel</code> is intentionally readable. The full target at <code>model/model_minimind.py</code> in the MiniMind checkout keeps the same pre-norm block equation, then adds runtime contracts around it. Use the table as an implementation order; each row has a shape or numerical check that catches regressions early.</p>
+      <table><thead><tr><th>Stage</th><th>MiniMind detail to add</th><th>Check before moving on</th></tr></thead><tbody>
+        <tr><td>1 · Config</td><td><code>MiniMindConfig</code> owns \(H\), \(H_{\mathrm{kv}}\), \(D_h\), RoPE limits, optional YaRN <code>rope_scaling</code>, dropout, and the <code>use_moe</code> switch.</td><td>Reject incompatible head counts and odd \(D_h\); print a shape ledger.</td></tr>
+        <tr><td>2 · Attention</td><td>Use GQA projections, per-head <code>q_norm</code>/<code>k_norm</code>, RoPE, and <code>repeat_kv</code>. Precompute cosine/sine tables with <code>precompute_freqs_cis</code>.</td><td>Expanded K/V agree with Q on \(H\); output returns \([B,T,D]\).</td></tr>
+        <tr><td>3 · Decode</td><td>Concatenate <code>past_key_value</code> along tokens and slice RoPE tables from <code>start_pos</code>.</td><td>One-token cached logits match full-prefix logits within tolerance.</td></tr>
+        <tr><td>4 · Runtime</td><td>Select Flash Attention for eligible prefixes; otherwise apply causal and padding masks explicitly with FP32 softmax.</td><td>Test both branches with a padding mask and with a non-empty cache.</td></tr>
+        <tr><td>5 · Feed-forward</td><td>Keep dense SwiGLU; optionally swap in top-k <code>MOEFeedForward</code> and accumulate its auxiliary loss.</td><td>Every route returns \([B,T,D]\); the dense path remains the baseline.</td></tr>
+        <tr><td>6 · Model wrapper</td><td>Add final RMSNorm, tied embedding/lm-head weights, shifted label loss, and generation sampling.</td><td>Logits are \([B,T,V]\); tied weights are the same parameter object.</td></tr>
+      </tbody></table>
+      <p class="small"><strong>RoPE lifecycle:</strong> MiniMind registers the precomputed tables as non-persistent buffers so they move with the model without bloating checkpoints. Its forward path also rebuilds them on the hidden-state device if meta-device initialization left zeroed tables.</p>
+      <details><summary>Show the MiniMind block contract</summary><pre><code class="language-python">residual = hidden_states
+hidden_states, present_key_value = self.self_attn(
+    self.input_layernorm(hidden_states), position_embeddings,
+    past_key_value, use_cache, attention_mask
+)
+hidden_states += residual
+hidden_states = hidden_states + self.mlp(
+    self.post_attention_layernorm(hidden_states)
+)
+return hidden_states, present_key_value</code></pre></details>
+      <p class="code-prompt"><strong>Wrapper contract:</strong> the Hugging Face model returns logits, shifted-label loss, auxiliary MoE loss, and <code>past_key_values</code>. Its generation loop feeds only the uncached suffix, then applies temperature, top-k, and top-p sampling.</p>
+      <p class="code-prompt"><strong>Suggested build sequence:</strong> port the dense block, add GQA, add cache-aware decoding, verify Flash/fallback parity, then add MoE and the Hugging Face wrapper. Keep one small deterministic input fixed for every comparison.</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. Position modifies comparisons before masking and softmax." data-retry="Trace Q and K from projection to score formation."><h3>Retrieval check</h3><p>Where does RoPE occur in this block?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · after Q/K projection and before query-key scores</button><button type="button" data-correct="false" aria-pressed="false">B · after weighted values and both residual additions</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
     <section class="exercises">
@@ -143,6 +354,6 @@
     <nav class="lesson-nav"><a href="0022-swiglu-feed-forward.html">← SwiGLU</a><a href="index.html">Return to course map →</a></nav>
   </main>
   <footer class="site-footer">Lesson 23 · Complete Transformer block capstone</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
 </body>
 </html>

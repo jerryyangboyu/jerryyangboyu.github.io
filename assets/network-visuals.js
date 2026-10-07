@@ -12,6 +12,7 @@
     values.map((value) => '<span class="' + className + '">' + format(value) + '</span>').join('');
 
   document.querySelectorAll('[data-tensor-viz]').forEach((root) => {
+    root.classList.add('viz-tensor');
     const batches = [
       [[0.4, -0.2, 1.1, 0, 0.7, -0.5], [0.1, 0.8, -0.3, 1.2, 0.2, 0.4], [-0.6, 0.3, 0.9, -0.1, 1.4, 0.2], [0.2, -0.7, 0.5, 0.8, -0.4, 1]],
       [[-0.3, 0.6, 0.1, 1.3, -0.2, 0.8], [0.7, 0.2, -0.5, 0.4, 1.1, -0.1], [1, -0.4, 0.3, 0.6, 0.2, -0.8], [-0.2, 1.2, 0.4, -0.6, 0.9, 0.1]]
@@ -44,6 +45,7 @@
   });
 
   document.querySelectorAll('[data-norm-viz]').forEach((root) => {
+    root.classList.add('viz-normalize');
     const input = [1, 2, 3];
     const modes = [...root.querySelectorAll('[data-norm-mode]')];
     const before = root.querySelector('[data-norm-before]');
@@ -78,6 +80,7 @@
   });
 
   document.querySelectorAll('[data-projection-viz]').forEach((root) => {
+    root.classList.add('viz-projection');
     const values = { Q: [1, 2, 0, -1], K: [1, 2, -1, 0], V: [2, 2, 0, 1] };
     const modeButtons = [...root.querySelectorAll('[data-projection-mode]')];
     const rows = root.querySelector('[data-projection-rows]');
@@ -103,6 +106,7 @@
   });
 
   document.querySelectorAll('[data-head-viz]').forEach((root) => {
+    root.classList.add('viz-heads');
     const tokens = ['The', 'cat', 'sat', '.'];
     const matrices = [
       [[1, 0, 0, 0], [0.42, 0.58, 0, 0], [0.25, 0.45, 0.30, 0], [0.10, 0.20, 0.30, 0.40]],
@@ -134,6 +138,7 @@
   });
 
   document.querySelectorAll('[data-residual-viz]').forEach((root) => {
+    root.classList.add('viz-residual');
     const x = [1, -2, 0.5];
     const update = [0.2, 0.3, -0.1];
     const slider = root.querySelector('[data-update-scale]');
@@ -158,6 +163,7 @@
   });
 
   document.querySelectorAll('[data-swiglu-viz]').forEach((root) => {
+    root.classList.add('viz-swiglu');
     const x1 = root.querySelector('[data-swiglu-x1]');
     const x2 = root.querySelector('[data-swiglu-x2]');
     const inputReadout = root.querySelector('[data-swiglu-input]');
@@ -185,51 +191,213 @@
     };
     [x1, x2].forEach((input) => input.addEventListener('input', render));
     render();
-  });
 
-  document.querySelectorAll('[data-block-stepper]').forEach((root) => {
-    const stages = [
-      { name: 'Norm', input: 'X⁽ˡ⁾', operation: 'Normalize each token', output: 'X̄', shape: 'B × T × d_model → same shape' },
-      { name: 'QKV', input: 'X̄', operation: 'Multiply by WQ, WK, WV', output: 'Q · K · V', shape: 'Three learned views; then split features into heads' },
-      { name: 'RoPE', input: 'Q · K', operation: 'Rotate feature pairs', output: 'Q′ · K′', shape: 'Position changes phase; V is unchanged' },
-      { name: 'Score', input: 'Q′ · K′', operation: 'Q′K′ᵀ / √dₕ + mask', output: 'A', shape: 'B × h × T × T query-key scores' },
-      { name: 'Blend', input: 'softmax(A) · V', operation: 'Weighted value sum', output: 'O₁ … Oₕ', shape: 'Each head returns T × dₕ' },
-      { name: 'Join', input: 'O₁ … Oₕ', operation: 'Concat, then Wₒ', output: 'O_attn', shape: 'Back to B × T × d_model' },
-      { name: 'Add', input: 'X⁽ˡ⁾ + O_attn', operation: 'First residual', output: 'Y', shape: 'Identity state plus attention update' },
-      { name: 'FFN', input: 'Y', operation: 'Norm → SwiGLU → add', output: 'X⁽ˡ⁺¹⁾', shape: 'Feature update; outer tensor shape preserved' }
-    ];
-    const strip = root.querySelector('[data-block-steps]');
-    const input = root.querySelector('[data-stage-input]');
-    const operation = root.querySelector('[data-stage-operation]');
-    const output = root.querySelector('[data-stage-output]');
-    const status = root.querySelector('[data-stage-status]');
-    const previous = root.querySelector('[data-stage-previous]');
-    const next = root.querySelector('[data-stage-next]');
-    let stage = 0;
-
-    strip.innerHTML = stages.map((item, index) =>
-      '<button type="button" data-stage="' + index + '" aria-label="Stage ' + (index + 1) + ': ' + item.name + '">' + (index + 1) + '</button>'
-    ).join('');
-
-    const render = () => {
-      const item = stages[stage];
-      strip.querySelectorAll('[data-stage]').forEach((button, index) => {
-        if (index === stage) button.setAttribute('aria-current', 'step');
-        else button.removeAttribute('aria-current');
-      });
-      input.innerHTML = '<div><strong>' + item.input + '</strong><span>stage input</span></div>';
-      operation.textContent = item.operation;
-      output.innerHTML = '<div><strong>' + item.output + '</strong><span>stage output</span></div>';
-      status.textContent = 'Stage ' + (stage + 1) + ' of ' + stages.length + ' · ' + item.shape;
-      previous.disabled = stage === 0;
-      next.disabled = stage === stages.length - 1;
+    // Connect the actual rendered nodes so branches remain attached when the
+    // diagram reflows or MathJax/fonts change its dimensions.
+    const graph = root.querySelector('.swiglu-graph');
+    const wires = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    wires.classList.add('swiglu-wires');
+    wires.setAttribute('aria-hidden', 'true');
+    graph.prepend(wires);
+    const drawWires = () => {
+      const bounds = graph.getBoundingClientRect();
+      const compact = matchMedia('(max-width: 900px)').matches;
+      const anchor = (element, side) => {
+        const r = element.getBoundingClientRect();
+        return { x: (side === 'left' ? r.left : side === 'right' ? r.right : r.left + r.width / 2) - bounds.left,
+          y: (side === 'top' ? r.top : side === 'bottom' ? r.bottom : r.top + r.height / 2) - bounds.top };
+      };
+      const input = root.querySelector('.swiglu-input-node');
+      const gate = gateNode.closest('.swiglu-node');
+      const silu = siluNode.closest('.swiglu-node');
+      const up = upNode.closest('.swiglu-node');
+      const merge = root.querySelector('.swiglu-merge span');
+      const product = productNode.closest('.swiglu-node');
+      const output = outputNode.closest('.swiglu-node');
+      const paths = [];
+      const connect = (a, b, route = 'horizontal') => {
+        const middle = (a.x + b.x) / 2;
+        const y = (a.y + b.y) / 2;
+        paths.push(route === 'vertical' ? `M${a.x},${a.y} V${y} H${b.x} V${b.y}`
+          : route === 'outside' ? `M${a.x},${a.y} H${a.x - 12} V${b.y} H${b.x}`
+          : `M${a.x},${a.y} H${middle} V${b.y} H${b.x}`);
+      };
+      connect(anchor(input, 'right'), anchor(gate, 'left'));
+      connect(anchor(input, 'right'), anchor(up, 'left'));
+      connect(anchor(gate, 'bottom'), anchor(silu, 'top'), 'vertical');
+      if (compact) {
+        connect(anchor(silu, 'left'), anchor(merge, 'left'), 'outside');
+        connect(anchor(up, 'bottom'), anchor(merge, 'top'), 'vertical');
+        // Leave the product label beneath the circle unobstructed.
+        connect(anchor(root.querySelector('.swiglu-merge'), 'bottom'), anchor(product, 'top'), 'vertical');
+        connect(anchor(product, 'bottom'), anchor(output, 'top'), 'vertical');
+      } else {
+        connect(anchor(silu, 'right'), anchor(merge, 'left'));
+        connect(anchor(up, 'right'), anchor(merge, 'left'));
+        connect(anchor(merge, 'right'), anchor(product, 'left'));
+        connect(anchor(product, 'right'), anchor(output, 'left'));
+      }
+      wires.setAttribute('viewBox', `0 0 ${bounds.width} ${bounds.height}`);
+      wires.innerHTML = '<defs><marker id="swiglu-direction" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><polygon points="0,0 5,2.5 0,5" fill="var(--muted)"/></marker></defs>' +
+        paths.map(d => `<path d="${d}" marker-end="url(#swiglu-direction)"/>`).join('');
     };
-    strip.querySelectorAll('[data-stage]').forEach((button) => button.addEventListener('click', () => {
-      stage = Number(button.dataset.stage);
-      render();
-    }));
-    previous.addEventListener('click', () => { if (stage > 0) stage -= 1; render(); });
-    next.addEventListener('click', () => { if (stage < stages.length - 1) stage += 1; render(); });
-    render();
+    const wireObserver = new ResizeObserver(drawWires);
+    wireObserver.observe(graph);
+    graph.querySelectorAll('.swiglu-node, .swiglu-input-node, .swiglu-merge').forEach(node => wireObserver.observe(node));
+    document.fonts.ready.then(drawWires);
   });
+
+  document.querySelectorAll('[data-block-explorer]').forEach((figure) => {
+    const explorer = figure.querySelector('[data-stage-detail]');
+    if (!explorer) return;
+
+    const stages = {
+      whole: {
+        title: 'MiniMindBlock.forward', index: 'model/model_minimind.py · block',
+        summary: 'The exact MiniMind execution order: save residual, call self_attn on input_layernorm(hidden_states), add it back, call self.mlp on post_attention_layernorm, add the second update, and return the state with present_key_value.',
+        equation: '\\(Y=X^{(\\ell)}+O_{\\mathrm{attn}},\\qquad X^{(\\ell+1)}=Y+\\operatorname{SwiGLU}(\\operatorname{Norm}(Y))\\)',
+        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '../reference/transformer-model-code.html',
+        code: `residual = hidden_states
+hidden_states, present_key_value = self.self_attn(
+    self.input_layernorm(hidden_states), position_embeddings,
+    past_key_value, use_cache, attention_mask
+)
+hidden_states += residual
+hidden_states = hidden_states + self.mlp(
+    self.post_attention_layernorm(hidden_states)
+)`
+      },
+      input: {
+        title: 'Input state', index: 'step 0 · residual stream',
+        summary: 'The block receives one hidden vector per token. Every later operation must preserve the batch, token, and model axes.',
+        equation: '\\(X^{(\\ell)}\\in\\mathbb{R}^{B\\times T\\times D}\\)',
+        source: 'MiniMind · model/model_minimind.py · MiniMindModel', href: '../reference/transformer-model-code.html',
+        code: `hidden_states = self.embed_tokens(input_ids)
+# shape: [batch, tokens, hidden_size]`
+      },
+      attention: {
+        title: 'Attention write', index: 'step 1 · mix tokens',
+        summary: 'Attention is the cross-token branch: normalize each row, compare queries with keys, blend values, then project the joined heads back to D features.',
+        equation: '\\(O_{\\mathrm{attn}}=\\operatorname{Concat}(O_1,\\ldots,O_H)W_O\\)',
+        source: 'MiniMind · model/model_minimind.py · Attention.forward', href: '../reference/transformer-model-code.html#attention',
+        code: `xq, xk, xv = self.q_proj(x), self.k_proj(x), self.v_proj(x)
+output = self.o_proj(attn_output)
+# returns [batch, tokens, hidden_size]`
+      },
+      rope: {
+        title: 'RoPE on Q and K', index: 'step 2 · encode position',
+        summary: 'Rotary position embeddings rotate query and key pairs by token position. Values keep their content coordinates; only comparisons acquire relative position information.',
+        equation: '\\(Q\\prime=\\operatorname{RoPE}(Q),\\qquad K\\prime=\\operatorname{RoPE}(K)\\)',
+        source: 'MiniMind · model/model_minimind.py · rotary embedding', href: '../reference/transformer-model-code.html#rope',
+        code: `xq, xk = apply_rotary_pos_emb(
+    xq, xk, cos, sin
+)
+# xv is unchanged by RoPE`
+      },
+      mask: {
+        title: 'Causal mask', index: 'step 3 · compare and mask',
+        summary: 'Scaled query-key scores become probabilities only after the future-token entries are set to −∞. The triangular pattern is the causal contract.',
+        equation: '\\(P=\\operatorname{softmax}\\!\\left(\\frac{Q\\prime K\\prime^{\\mathsf T}}{\\sqrt{d_h}}+M_{\\mathrm{causal}}\\right)\\)',
+        source: 'MiniMind · model/model_minimind.py · score path', href: '../reference/transformer-model-code.html#attention',
+        code: `scores = torch.matmul(xq, xk.transpose(-2, -1)) * scale
+scores = scores + causal_mask
+probs = F.softmax(scores, dim=-1, dtype=torch.float32).type_as(xq)`
+      },
+      residual1: {
+        title: 'First residual write', index: 'step 4 · preserve the stream',
+        summary: 'The attention result is an update, not a replacement. Adding it to the original stream keeps an identity route for optimization and information flow.',
+        equation: '\\(Y=X^{(\\ell)}+O_{\\mathrm{attn}}\\)',
+        source: 'MiniMind · model/model_minimind.py · residual path', href: '../reference/transformer-model-code.html#block',
+        code: `residual = hidden_states
+hidden_states = self.self_attn(normed_states, ...)[0]
+hidden_states += residual
+# shape remains [B, T, D]`
+      },
+      ffn: {
+        title: 'SwiGLU write', index: 'step 5 · mix features per token',
+        summary: 'The feed-forward branch works independently on each token row. Its gated expansion mixes features, contracts back to D, and writes a second correction.',
+        equation: '\\(F=W_{\\mathrm{down}}\\!\\left(\\operatorname{SiLU}(W_{\\mathrm{gate}}Y)\\odot W_{\\mathrm{up}}Y\\right)\\)',
+        source: 'MiniMind · model/model_minimind.py · MLP path', href: '../reference/transformer-model-code.html#mlp',
+        code: `hidden_states = hidden_states + self.mlp(
+    self.post_attention_layernorm(hidden_states)
+)
+# dense SwiGLU or optional MoEFeedForward`
+      },
+      residual2: {
+        title: 'Second residual write', index: 'step 6 · block output',
+        summary: 'The second update completes the block. The output keeps the same [B, T, D] shape and becomes the input to the next decoder block.',
+        equation: '\\(X^{(\\ell+1)}=Y+F\\)',
+        source: 'MiniMind · model/model_minimind.py · MiniMindBlock.forward', href: '../reference/transformer-model-code.html#block',
+        code: `hidden_states = hidden_states + self.mlp(
+    self.post_attention_layernorm(hidden_states)
+)
+return hidden_states, present_key_value`
+      }
+    };
+
+    const nodes = [...figure.querySelectorAll('[data-stage-node]')];
+    const reset = explorer.querySelector('[data-stage-reset]');
+    const title = explorer.querySelector('[data-stage-detail-title]');
+    const index = explorer.querySelector('[data-stage-detail-index]');
+    const summary = explorer.querySelector('[data-stage-detail-summary]');
+    const equation = explorer.querySelector('[data-stage-detail-equation]');
+    const source = explorer.querySelector('[data-stage-detail-source]');
+    const sourceLink = explorer.querySelector('[data-stage-detail-link]');
+    const code = explorer.querySelector('[data-stage-detail-code]');
+    const codePanel = explorer.querySelector('[data-stage-code-panel]');
+    let selectedNode = null;
+    explorer.id = 'block-code-trace';
+
+    const renderStage = (stageId) => {
+      const stage = stages[stageId] || stages.whole;
+      nodes.forEach((node) => {
+        node.classList.toggle('is-active', stageId !== 'whole' && node.dataset.stageNode === stageId);
+        node.setAttribute('aria-expanded', String(stageId !== 'whole' && node.dataset.stageNode === stageId));
+        node.setAttribute('aria-controls', explorer.id);
+      });
+      figure.classList.toggle('has-stage-selection', stageId !== 'whole');
+      if (reset) reset.hidden = stageId === 'whole';
+      if (codePanel) codePanel.hidden = stageId === 'whole';
+      title.textContent = stage.title;
+      index.textContent = stage.index;
+      summary.textContent = stage.summary;
+      if (window.MathJax?.typesetClear) window.MathJax.typesetClear([equation]);
+      equation.innerHTML = stage.equation;
+      source.textContent = stage.source;
+      sourceLink.href = stage.href;
+      code.textContent = stage.code;
+      code.removeAttribute('data-highlighted');
+      if (window.hljs) window.hljs.highlightElement(code);
+      if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise([equation]).catch(() => {});
+    };
+
+    const closeTrace = () => {
+      renderStage('whole');
+      selectedNode?.focus({ preventScroll: true });
+    };
+    if (reset) reset.addEventListener('click', closeTrace);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && figure.classList.contains('has-stage-selection')) {
+        event.preventDefault();
+        closeTrace();
+      }
+    });
+    nodes.forEach((node) => {
+      const openTrace = () => {
+        selectedNode = node;
+        renderStage(node.dataset.stageNode);
+        reset?.focus({ preventScroll: true });
+        if (window.matchMedia('(max-width: 720px)').matches) explorer.scrollIntoView({ block: 'nearest' });
+      };
+      node.addEventListener('click', openTrace);
+      node.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openTrace();
+        }
+      });
+    });
+    renderStage('whole');
+  });
+
 })();

@@ -117,7 +117,18 @@
   const id = document.body.dataset.lesson;
   const map = maps[id];
   const goal = document.querySelector('.goal');
-  if (!map || !goal) return;
+  if (!map || !goal || id === '0023') return;
+  // Module 3 already has subject-specific, interactive diagrams. Generic
+  // schematics here mislabeled operations (e.g. Q/K/V for down projection).
+  // Put the real visualization first instead of adding a second diagram.
+  if (Number(id) >= 15 && Number(id) <= 22) {
+    const diagram = document.querySelector('main > .diagram');
+    if (diagram) {
+      diagram.id ||= 'lesson-visual';
+      goal.insertAdjacentElement('afterend', diagram);
+    }
+    return;
+  }
   const colors = ['var(--blue)', 'var(--teal)', 'var(--coral)'];
   const section = document.createElement('section');
   section.className = 'lesson-map';

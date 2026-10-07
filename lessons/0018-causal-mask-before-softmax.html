@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 18: Mask the Future Before Softmax</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css">
+  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14">
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
@@ -74,6 +74,27 @@ scores = scores.masked_fill(future, float("-inf"))</code></pre></details>
       <p class="code-prompt"><strong>Trace it:</strong> In row 2 of a \(4\times4\) mask, which column receives \(-\infty\)?</p>
     </section>
 
+    <section class="code-checkpoint">
+      <h2>Engineering bridge · fast path and explicit fallback</h2>
+      <p>MiniMind uses PyTorch's scaled dot-product attention when the inputs are a plain training prefix. It keeps an explicit score path for cached decoding and padded or otherwise masked batches, where the key length can exceed the current query length.</p>
+      <details><summary>Show the runtime decision</summary><pre><code class="language-python">if self.flash and seq_len &gt; 1 and past_key_value is None \
+        and (attention_mask is None or torch.all(attention_mask == 1)):
+    output = F.scaled_dot_product_attention(
+        q, k, v, dropout_p=self.dropout if self.training else 0.0,
+        is_causal=True,
+    )
+else:
+    scores = (q @ k.transpose(-2, -1)) / math.sqrt(self.head_dim)
+    # Only the newest query rows need a new causal triangle.
+    scores[:, :, :, -seq_len:] += torch.full(
+        (seq_len, seq_len), float("-inf"), device=scores.device
+    ).triu(1)
+    if attention_mask is not None:
+        scores += (1.0 - attention_mask[:, None, None, :]) * -1e9
+    output = F.softmax(scores.float(), dim=-1).to(q.dtype) @ v</code></pre></details>
+      <p class="code-prompt"><strong>Shape check:</strong> with a cached prefix, \(T_q=\) the new token count but \(T_k=T_{\mathrm{past}}+T_q\). The output still returns only \(T_q\) rows.</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. A query at position 2 may use keys 1 and 2 only." data-retry="Causal attention permits the present and past: j ≤ i.">
       <h3>Retrieval check</h3><p>Which keys are visible to query position \(i=2\)?</p>
       <div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(j=1,2\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(j=2,3,4\)</button></div><p class="feedback" data-feedback aria-live="polite"></p>
@@ -97,6 +118,6 @@ scores = scores.masked_fill(future, float("-inf"))</code></pre></details>
     <nav class="lesson-nav"><a href="0017-project-qkv-and-split-heads.html">← Q, K, V</a><a href="0019-softmax-and-weighted-values.html">Next: Softmax and values →</a></nav>
   </main>
   <footer class="site-footer">Lesson 18 · Mask the future before softmax</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/attention-lab.js"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/attention-lab.js?v=diagram4"></script>
 </body>
 </html>

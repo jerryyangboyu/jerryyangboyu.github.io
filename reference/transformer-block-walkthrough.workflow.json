@@ -4,7 +4,7 @@
   "meta": {
     "title": "Walk Through a Transformer Block",
     "quality_profile": "showcase",
-    "output": "reference/transformer-block-visual.html",
+    "output": "lessons/0023-walk-one-transformer-block.html",
     "viewBox": [820, 466],
     "legend": { "mode": "hidden" }
   },

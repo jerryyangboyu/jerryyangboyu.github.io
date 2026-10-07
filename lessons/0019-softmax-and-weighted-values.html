@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 19: Softmax and Weighted Values</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -25,7 +25,7 @@
     </div>
 
     <section class="worked-example">
-      <h3>Numbers substituted: correct the supplied diagram</h3>
+      <h3>Numbers substituted: a rounded softmax check</h3>
       <p>For masked scores \((0.7,1.1,0.2,-\infty)\):</p>
       <div class="equation">
         \[
@@ -41,7 +41,7 @@
         =(0.323,0.482,0.196,0).
         \]
       </div>
-      <p>The image lists \((0.26,0.41,0.33,0)\), but that vector is not the softmax of the displayed scores. This course uses the calculated values above.</p>
+      <p>The calculated values above are the reference distribution for this lesson. The displayed weights are rounded to three decimals, so use the unrounded exponentials when checking that they sum to exactly one.</p>
     </section>
 
     <h2>The probabilities blend value vectors</h2>
@@ -78,6 +78,18 @@ context = weights @ v
       <p class="code-prompt"><strong>Trace it:</strong> Why does the final dimension of <code>context</code> equal <code>Dh</code> rather than <code>T</code>?</p>
     </section>
 
+    <section class="code-checkpoint">
+      <h2>Engineering bridge · dtype-safe attention output</h2>
+      <p>MiniMind keeps the probability calculation in float32 for numerical stability, casts the weights back to the query dtype, optionally drops attention links during training, then projects and drops the residual update.</p>
+      <details><summary>Show the explicit attention path</summary><pre><code class="language-python">scores = (xq @ xk.transpose(-2, -1)) / math.sqrt(self.head_dim)
+weights = self.attn_dropout(
+    F.softmax(scores.float(), dim=-1).type_as(xq)
+)
+context = weights @ xv                       # [B, H, Tq, Dh]
+context = context.transpose(1, 2).reshape(bsz, seq_len, -1)
+output = self.resid_dropout(self.o_proj(context))  # [B, Tq, D]</code></pre></details>
+      <p class="code-prompt"><strong>Runtime check:</strong> dropout probabilities are zero in evaluation mode, so the same shape contract holds for training and inference.</p>
+    </section>
     <section class="quiz" data-quiz data-success="Correct. Every softmax row is a probability distribution." data-retry="Softmax divides every positive exponential by their shared sum."><h3>Retrieval check</h3><p>What must the weights in one attention row sum to?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · \(1\)</button><button type="button" data-correct="false" aria-pressed="false">B · \(d_h\)</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
     <section class="exercises">
@@ -98,6 +110,6 @@ context = weights @ v
     <nav class="lesson-nav"><a href="0018-causal-mask-before-softmax.html">← Causal mask</a><a href="0020-multi-heads-split-features.html">Next: Multiple heads →</a></nav>
   </main>
   <footer class="site-footer">Lesson 19 · Softmax and weighted values</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/attention-lab.js"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/attention-lab.js?v=diagram4"></script>
 </body>
 </html>

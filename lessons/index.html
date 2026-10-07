@@ -57,7 +57,7 @@
 
     <section>
       <h2>Module 3 · One Transformer decoder block</h2>
-      <p>Begin when you can trace a prompt from text to next-token logits and explain \(R_m^{\mathsf T}R_n=R_{n-m}\). Keep a shape ledger beside every calculation. Use the <a href="../reference/transformer-block-visual.html">transformer block walkthrough</a> to review how the stages connect, and build toward the runnable <a href="../reference/transformer-model-code.html"><code>TransformerModel</code> reference implementation</a>.</p>
+      <p>Begin when you can trace a prompt from text to next-token logits and explain \(R_m^{\mathsf T}R_n=R_{n-m}\). Keep a shape ledger beside every calculation. Use the <a href="0023-walk-one-transformer-block.html#block-visual">inline Transformer block walkthrough in Lesson 23</a> to review how the stages connect, build toward the runnable <a href="../reference/transformer-model-code.html"><code>TransformerModel</code> reference implementation</a>, then use Lesson 23's engineering bridge to extend it toward MiniMind's GQA, KV cache, Flash Attention fallback, MoE, and generation wrapper.</p>
       <table class="course-table">
         <thead><tr><th>#</th><th>Lesson and tangible win</th><th>Time</th></tr></thead>
         <tbody>
@@ -69,7 +69,7 @@
           <tr><td>20</td><td><a href="0020-multi-heads-split-features.html">Multi-head attention splits features</a><br><span class="small">Reject the “one token per head” misconception.</span></td><td>12 min</td></tr>
           <tr><td>21</td><td><a href="0021-residual-paths-carry-state.html">Residual paths carry state</a><br><span class="small">Read \(X+F(\operatorname{Norm}(X))\) as a learned update.</span></td><td>12 min</td></tr>
           <tr><td>22</td><td><a href="0022-swiglu-feed-forward.html">SwiGLU feed-forward sublayer</a><br><span class="small">Calculate gate, value branch, product, and projection back.</span></td><td>15 min</td></tr>
-          <tr><td>23</td><td><a href="0023-walk-one-transformer-block.html">Walk one complete block</a><br><span class="small">Narrate every operation, tensor shape, and residual path.</span></td><td>20 min</td></tr>
+          <tr><td>23</td><td><a href="0023-walk-one-transformer-block.html">Walk one complete block</a><br><span class="small">Narrate every operation, then stage GQA, KV cache, attention runtime paths, MoE, and the model wrapper.</span></td><td>25 min</td></tr>
         </tbody>
       </table>
     </section>
@@ -92,8 +92,8 @@
           <span>Transformer block sheet</span>
           <small>Block equations, tensor shapes, masking, softmax, and SwiGLU</small>
         </a>
-        <a href="../reference/transformer-block-visual.html">
-          <span>Transformer block walkthrough</span>
+        <a href="0023-walk-one-transformer-block.html#block-visual">
+          <span>Transformer block walkthrough · Lesson 23</span>
           <small>Attention, residual paths, and the feed-forward network</small>
         </a>
       </nav>

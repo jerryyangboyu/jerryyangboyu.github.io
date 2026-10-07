@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 20: Multi-Head Attention Splits Features</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -85,6 +85,22 @@ attention_output = out_proj(context)  # [B, T, D]</code></pre></details>
       <p class="code-prompt"><strong>Trace it:</strong> Why must the output projection return width \(D\) before the residual addition?</p>
     </section>
 
+    <section class="code-checkpoint">
+      <h2>Engineering bridge · GQA still returns model width</h2>
+      <p>MiniMind's grouped-query attention stores K/V with H_kv heads, repeats them to match H query heads, and only then transposes into attention-major order. The output projection restores D, regardless of the K/V compression.</p>
+      <details><summary>Show the layout around <code>repeat_kv</code></summary><pre><code class="language-python">xq = xq.view(bsz, seq_len, self.n_local_heads, self.head_dim)
+xk = xk.view(bsz, seq_len, self.n_local_kv_heads, self.head_dim)
+xv = xv.view(bsz, seq_len, self.n_local_kv_heads, self.head_dim)
+xq, xk, xv = (
+    xq.transpose(1, 2),
+    repeat_kv(xk, self.n_rep).transpose(1, 2),
+    repeat_kv(xv, self.n_rep).transpose(1, 2),
+)
+# after attention: [B, H, T, Dh] -> [B, T, H*Dh] -> [B, T, D]
+output = output.transpose(1, 2).reshape(bsz, seq_len, -1)
+output = self.resid_dropout(self.o_proj(output))</code></pre></details>
+      <p class="code-prompt"><strong>Invariant:</strong> H = H_kv * n_rep, and H * D_h = D before the residual addition.</p>
+    </section>
     <section class="quiz" data-quiz data-success="Correct. The split is along feature width; all heads retain every token." data-retry="Track T separately from d_model."><h3>Retrieval check</h3><p>With \(T=5,d_{\text{model}}=12,h=3\), what does one head receive?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · all 5 tokens with 4 features each</button><button type="button" data-correct="false" aria-pressed="false">B · one or two tokens with all 12 features</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
     <section class="exercises">
@@ -105,6 +121,6 @@ attention_output = out_proj(context)  # [B, T, D]</code></pre></details>
     <nav class="lesson-nav"><a href="0019-softmax-and-weighted-values.html">← Softmax and values</a><a href="0021-residual-paths-carry-state.html">Next: Residual paths →</a></nav>
   </main>
   <footer class="site-footer">Lesson 20 · Multi-head attention splits features</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 17: Project Q, K, V and Split Heads</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css">
+  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14">
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
@@ -94,6 +94,24 @@ k = apply_rope(k, rope_cos, rope_sin)</code></pre></details>
       <p class="code-prompt"><strong>Trace it:</strong> If <code>x</code> is <code>[2, 5, 12]</code> and there are 3 heads, what is each projected tensor's shape after <code>split_heads</code>?</p>
     </section>
 
+    <section class="code-checkpoint">
+      <h2>Engineering bridge · grouped-query attention</h2>
+      <p>The teaching block gives Q, K, and V the same head count. MiniMind keeps more query heads than key/value heads, then repeats each K/V head so it can serve a small group of queries. This reduces the cached memory footprint without changing the residual width.</p>
+      <div class="shape-line"><span class="shape-chip">Q: \(B\times T\times H\times D_h\)</span><span class="shape-arrow">→</span><span class="shape-chip">K/V: \(B\times T\times H_{\mathrm{kv}}\times D_h\)</span><span class="shape-arrow">→ repeat</span><span class="shape-chip">\(B\times T\times H\times D_h\)</span></div>
+      <details><summary>Show MiniMind's head-count contract</summary><pre><code class="language-python">self.n_local_heads = config.num_attention_heads
+self.n_local_kv_heads = config.num_key_value_heads
+self.n_rep = self.n_local_heads // self.n_local_kv_heads
+
+q = self.q_proj(x).view(bsz, seq_len, self.n_local_heads, self.head_dim)
+k = self.k_proj(x).view(bsz, seq_len, self.n_local_kv_heads, self.head_dim)
+v = self.v_proj(x).view(bsz, seq_len, self.n_local_kv_heads, self.head_dim)
+q = self.q_norm(q)
+k = self.k_norm(k)
+k = repeat_kv(k, self.n_rep).transpose(1, 2)
+v = repeat_kv(v, self.n_rep).transpose(1, 2)</code></pre></details>
+      <p class="code-prompt"><strong>Invariant:</strong> \(H\) must be divisible by \(H_{\mathrm{kv}}\). After repetition, Q, K, and V agree on the head axis before score formation.</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. Heads partition feature width; every head keeps the token axis." data-retry="The reshape replaces one feature axis by head and head-feature axes.">
       <h3>Retrieval check</h3>
       <p>What does \(d_{\text{model}}=8,h=2\) imply for \(d_h\)?</p>
@@ -120,6 +138,6 @@ k = apply_rope(k, rope_cos, rope_sin)</code></pre></details>
     <nav class="lesson-nav"><a href="0016-normalize-each-token.html">← Normalization</a><a href="0018-causal-mask-before-softmax.html">Next: Causal mask →</a></nav>
   </main>
   <footer class="site-footer">Lesson 17 · Project Q, K, V and split heads</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
 </body>
 </html>

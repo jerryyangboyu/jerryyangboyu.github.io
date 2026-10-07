@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lesson 22: SwiGLU Feed-Forward Sublayer</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=diagram-audit14"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -57,11 +57,24 @@
         <label>\(x_2\)<input type="range" min="-2" max="2" step="0.1" value="-1" data-swiglu-x2></label>
       </div>
       <div class="viz-body swiglu-flow">
-        <div class="swiglu-stage gate"><strong>Gate \(xW_g\)</strong><div class="pair-values" data-swiglu-gate></div></div>
-        <div class="swiglu-stage gate"><strong>SiLU(gate)</strong><div class="pair-values" data-swiglu-silu></div></div>
-        <div class="swiglu-stage"><strong>Up \(xW_u\)</strong><div class="pair-values" data-swiglu-up></div></div>
-        <div class="swiglu-stage product"><strong>Elementwise product</strong><div class="pair-values" data-swiglu-product></div></div>
-        <div class="swiglu-stage"><strong>Down \(W_d\)</strong><div class="pair-values" data-swiglu-output></div></div>
+        <div class="swiglu-graph" aria-label="SwiGLU branch and merge flow">
+          <div class="swiglu-input-node"><span>INPUT</span><strong>\(x\)</strong><small>one token row</small></div>
+          <div class="swiglu-split" aria-hidden="true"><span></span><i>split</i><span></span></div>
+          <div class="swiglu-branch swiglu-gate-branch">
+            <p class="swiglu-branch-label">GATE PATH</p>
+            <div class="swiglu-node"><strong>Gate projection</strong><span class="swiglu-formula">\(xW_g\)</span><div class="pair-values" data-swiglu-gate></div></div>
+            <div class="swiglu-arrow" aria-hidden="true">↓</div>
+            <div class="swiglu-node"><strong>SiLU</strong><span class="swiglu-formula">\(\operatorname{SiLU}(g)\)</span><div class="pair-values" data-swiglu-silu></div></div>
+          </div>
+          <div class="swiglu-branch swiglu-up-branch">
+            <p class="swiglu-branch-label">UP PATH</p>
+            <div class="swiglu-node"><strong>Up projection</strong><span class="swiglu-formula">\(xW_u\)</span><div class="pair-values" data-swiglu-up></div></div>
+          </div>
+          <div class="swiglu-merge" aria-hidden="true"><span>⊙</span><small>coordinate-wise product</small></div>
+          <div class="swiglu-node swiglu-product-node"><strong>Gated hidden state</strong><span class="swiglu-formula">\(\operatorname{SiLU}(g)\odot u\)</span><div class="pair-values" data-swiglu-product></div></div>
+          <div class="swiglu-arrow swiglu-output-arrow" aria-hidden="true">↓</div>
+          <div class="swiglu-node swiglu-output-node"><strong>Down projection</strong><span class="swiglu-formula">\(zW_d\)</span><div class="pair-values" data-swiglu-output></div></div>
+        </div>
       </div>
       <p class="viz-caption">The two middle branches have matching widths so their coordinates can multiply one by one.</p>
     </section>
@@ -85,6 +98,20 @@
       <p class="code-prompt"><strong>Trace it:</strong> Which line restores the width required by the second residual addition?</p>
     </section>
 
+    <section class="code-checkpoint">
+      <h2>Engineering bridge · dense FFN first, MoE second</h2>
+      <p>MiniMind keeps the dense SwiGLU as the default path. With <code>use_moe=True</code>, a router scores every flattened token, selects the top \(k\) experts, combines their dense FFN outputs, and records an auxiliary load-balancing loss. The selected experts still return one \(d_{\text{model}}\)-wide update per token.</p>
+      <details><summary>Show the router's core contract</summary><pre><code class="language-python">self.mlp = FeedForward(config) if not config.use_moe else MOEFeedForward(config)
+
+x_flat = x.view(-1, hidden_dim)  # [B*T, D]
+scores = F.softmax(self.gate(x_flat), dim=-1)  # [B*T, E]
+topk_weight, topk_idx = torch.topk(
+    scores, k=self.config.num_experts_per_tok, dim=-1
+)
+# Dispatch selected rows to expert FFNs, then weighted-sum them back to [B*T, D].</code></pre></details>
+      <p class="code-prompt"><strong>Engineering order:</strong> verify dense SwiGLU and residual shape invariants first; add routing only after a non-MoE block passes the full-versus-cached decode test.</p>
+    </section>
+
     <section class="quiz" data-quiz data-success="Correct. The two branches must align coordinate by coordinate for the Hadamard product." data-retry="The symbol ⊙ means elementwise multiplication."><h3>Retrieval check</h3><p>What must match before \(\operatorname{SiLU}(\mathbf g)\odot\mathbf u\)?</p><div class="choices"><button type="button" data-correct="true" aria-pressed="false">A · their \(d_{\text{ff}}\) widths</button><button type="button" data-correct="false" aria-pressed="false">B · their token scores</button></div><p class="feedback" data-feedback aria-live="polite"></p></section>
 
     <section class="exercises">
@@ -105,6 +132,6 @@
     <nav class="lesson-nav"><a href="0021-residual-paths-carry-state.html">← Residual paths</a><a href="0023-walk-one-transformer-block.html">Next: Complete block →</a></nav>
   </main>
   <footer class="site-footer">Lesson 22 · SwiGLU feed-forward sublayer</footer>
-  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js"></script><script src="../assets/network-visuals.js"></script>
+  <script src="../assets/course.js"></script><script src="../assets/lesson-maps.js?v=diagram-audit11"></script><script src="../assets/network-visuals.js?v=diagram-audit13"></script>
 </body>
 </html>

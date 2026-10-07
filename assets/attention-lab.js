@@ -1,6 +1,7 @@
 (() => {
   const root = document.querySelector('[data-attention-lab]');
   if (!root) return;
+  root.classList.add('viz-attention');
 
   const positionInput = root.querySelector('[data-query-position]');
   const positionReadout = root.querySelector('[data-position-readout]');
