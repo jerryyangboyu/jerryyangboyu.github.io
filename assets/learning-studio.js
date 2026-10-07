@@ -101,14 +101,30 @@
       solutions: ['In masked attention’s weighted sum over earlier values.', 'In Q/K/V and output projections, and in the MLP, one token at a time.', 'The cache’s key/value token axis; the returned hidden state keeps the requested query length.']
     }
   };
+  const walkthrough = {
+    '0015': ['Create a small batch of integer token IDs.', 'Look up one D-dimensional vector for each token.', 'Check the complete [B,T,D] contract.'],
+    '0016': ['Define the normalization module and its forward method.', 'Reduce only across features, keeping the axis for broadcasting.', 'Scale the original features; the outer shape is unchanged.'],
+    '0017': ['Project the model state and expose H heads with Dh features.', 'Apply the same ledger to keys.', 'Apply it to values; these carry content rather than position.', 'Rotate Q and K before forming their dot products.'],
+    '0018': ['Form scaled query-key comparisons.', 'Replace future scores before probabilities are computed.', 'Softmax each legal score row in a stable dtype.'],
+    '0019': ['Compute probabilities in float32, then return to the model dtype.', 'Check the probability invariant explicitly.', 'Use the probabilities to average value vectors.'],
+    '0020': ['Define a helper for expanding grouped K/V heads.', 'Document the compact K/V shape.', 'Insert a repeat axis without copying values.', 'Flatten the repeat axis into the full query-head axis.'],
+    '0021': ['Keep a copy of the state that will receive the attention update.', 'Normalize before attention; the sublayer returns an update.', 'Write the update into the state without changing its shape.', 'Normalize the new state, then write the MLP update.'],
+    '0022': ['The gate branch learns a feature-wise control signal.', 'The up branch produces a matching expanded representation.', 'Combine the two branches coordinate by coordinate.', 'Project the expanded result back to model width.'],
+    '0023': ['Keep the incoming state for the first residual addition.', 'Call attention on the normalized state and receive its cache.', 'Pass positions and the decoding context into attention.', 'Supply the previous cache, cache flag, and mask.', 'Close the attention call.', 'Restore the residual state after the attention update.', 'Normalize that state before the MLP.', 'The MLP writes a second [B,T,D] update.', 'Close the MLP call.', 'Return the state and the new K/V cache.']
+  };
   const task = lessons[lessonId];
   if (!task) return;
   const esc = (value) => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+  const lines = task.code.split('\n');
+  const notes = walkthrough[lessonId] || [];
+  const questions = [task.retrieval, ...task.practice];
+  const answers = [task.answer, ...task.solutions];
+  const walkthroughHtml = lines.map((line, index) => `<div class="code-line"><code>${esc(line || ' ')}</code><span>${esc(notes[index] || '')}</span></div>`).join('');
   document.querySelectorAll('.practice-studio').forEach((host) => {
     const sequence = document.createElement('section');
     sequence.className = 'learning-sequence';
     sequence.id = 'practice-before-moving-on';
-    sequence.innerHTML = `<h2>Practice before moving on</h2><p class="learning-purpose">Work through these questions before starting the next lesson. Keep the equations and shapes beside your code while you answer.</p><section class="learning-part"><h3>Check your understanding</h3><p>${esc(task.retrieval)}</p><details><summary>Answer</summary><p>${esc(task.answer)}</p></details></section><section class="learning-part"><h3>From the idea to MiniMind</h3><p>${esc(task.bridge)}</p><pre><code>${esc(task.code)}</code></pre></section><section class="learning-part"><h3>Code checkpoint</h3><p>${esc(task.task)}</p><details><summary>Reference implementation</summary><pre><code>${esc(task.solution)}</code></pre><p class="answer-note">Compare the assertions and shapes with your own implementation.</p></details></section><section class="learning-part"><h3>Exercises</h3><ol>${task.practice.map((item) => `<li>${esc(item)}</li>`).join('')}</ol><details><summary>Answers</summary><ol>${task.solutions.map((item) => `<li>${esc(item)}</li>`).join('')}</ol></details></section>`;
+    sequence.innerHTML = `<h2>Practice before moving on</h2><p class="learning-purpose">Work through these questions before starting the next lesson. Keep the equations and shapes beside your code while you answer.</p><section class="learning-part"><h3>Code walkthrough</h3><p>${esc(task.bridge)}</p><div class="code-walkthrough">${walkthroughHtml}</div></section><section class="learning-part"><h3>Coding challenge</h3><p>${esc(task.task)}</p><details><summary>Reference implementation</summary><pre><code>${esc(task.solution)}</code></pre><p class="answer-note">Compare the assertions and shapes with your own implementation.</p></details></section><section class="learning-part"><h3>Exercises</h3><ol>${questions.map((item) => `<li>${esc(item)}</li>`).join('')}</ol><details><summary>Answers</summary><ol>${answers.map((item) => `<li>${esc(item)}</li>`).join('')}</ol></details></section>`;
     host.prepend(sequence);
     const cards = [...host.children].filter((node) => node.classList.contains('studio-card'));
     if (cards.length) {
