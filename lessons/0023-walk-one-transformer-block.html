@@ -91,9 +91,10 @@
         <g>
         <text x="728" y="198" class="atlas-headline" text-anchor="start">Give each token</text>
         <text x="728" y="224" class="atlas-headline" text-anchor="start">context.</text>
-        <text x="728" y="250" class="atlas-note" text-anchor="start">Read itself and earlier tokens,</text>
-        <text x="728" y="270" class="atlas-note" text-anchor="start">then write a context-aware update.</text>
+        <text x="728" y="250" class="atlas-note" text-anchor="start">Read itself and earlier tokens.</text>
+        <text x="728" y="270" class="atlas-note" text-anchor="start">Write one context update.</text>
         </g>
+        <path d="M728 278 H1008" class="atlas-rule" />
         <foreignObject x="728" y="282" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q,K,V=\bar XW_{Q,K,V}\)</div></foreignObject>
         <foreignObject x="728" y="304" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q',K'=\operatorname{RoPE}(Q,K)\)</div></foreignObject>
         <foreignObject x="728" y="326" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\([B,T,D]\to[B,H,T,d_h]\)</div></foreignObject>
@@ -158,8 +159,9 @@
         <g>
         <text x="728" y="510" class="atlas-headline" text-anchor="start">Improve each token's</text>
         <text x="728" y="536" class="atlas-headline" text-anchor="start">representation.</text>
-        <text x="728" y="562" class="atlas-note" text-anchor="start">Adjust features within one token.</text>
-        <text x="728" y="582" class="atlas-note" text-anchor="start">Positions stay independent.</text>
+        <text x="728" y="562" class="atlas-note" text-anchor="start">Transform features within each token.</text>
+        <text x="728" y="582" class="atlas-note" text-anchor="start">Do not mix token positions.</text>
+        <path d="M728 590 H1008" class="atlas-rule" />
         <foreignObject x="728" y="596" width="280" height="74"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(U=\operatorname{RMSNorm}(Y)\)<br>\(F=\bigl(\operatorname{SiLU}(UW_g)\odot UW_u\bigr)W_d\)<br>\(F\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
         </g>
         <g>
