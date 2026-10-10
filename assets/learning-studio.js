@@ -76,7 +76,7 @@
     '0021': {
       title: 'Treat the residual stream as the state contract',
       exerciseContext: 'The residual stream is the model’s running draft of the meaning of the text. Attention and the MLP each propose a correction, but the shared state keeps the same shape \\(X\\in\\mathbb{R}^{B\\times T\\times D}\\) from one update to the next.',
-      retrieval: 'A residual block keeps a running state. What does each sublayer add to that state?',
+      retrieval: 'Complete these two equations: \(Y=\ ?\) and \(X^{(\ell+1)}=\ ?\). Which update comes from attention, and which comes from the MLP?',
       answer: 'The correction must also have shape \\(\\mathbb{R}^{B\\times T\\times D}\\). It changes the running draft; it does not replace the draft or alter which word positions exist.',
       bridge: 'Think of the identity path as a stable document being revised. Attention writes a context correction, producing \\(Y=X+O_{\\mathrm{attn}}\\); the MLP writes a feature correction, producing \\(X^{(\\ell+1)}=Y+F\\). Both edits return to the same \\(B\\times T\\times D\\) contract.',
       code: `residual = hidden_states\nhidden_states = self.self_attn(self.input_layernorm(hidden_states), ...)\nhidden_states = hidden_states + residual\nhidden_states = hidden_states + self.mlp(self.post_attention_layernorm(hidden_states))`,
