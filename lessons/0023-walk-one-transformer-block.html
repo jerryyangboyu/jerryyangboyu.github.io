@@ -94,9 +94,11 @@
         <text x="728" y="250" class="atlas-note" text-anchor="start">Read itself and earlier tokens,</text>
         <text x="728" y="270" class="atlas-note" text-anchor="start">then write a context-aware update.</text>
         </g>
-        <foreignObject x="728" y="282" width="280" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q,K,V:\ [B,T,D]\to[B,H,T,d_h]\)</div></foreignObject>
-        <foreignObject x="728" y="310" width="280" height="42"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(A=\operatorname{softmax}\!\left(\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}}+M_{\mathrm{causal}}\right)\)</div></foreignObject>
-        <foreignObject x="728" y="344" width="280" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(O_{\mathrm{attn}}=A V\)</div></foreignObject>
+        <foreignObject x="728" y="282" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q,K,V=\bar XW_{Q,K,V}\)</div></foreignObject>
+        <foreignObject x="728" y="304" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q',K'=\operatorname{RoPE}(Q,K)\)</div></foreignObject>
+        <foreignObject x="728" y="326" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\([B,T,D]\to[B,H,T,d_h]\)</div></foreignObject>
+        <foreignObject x="728" y="348" width="280" height="42"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(A=\operatorname{softmax}\!\left(\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}}+M_{\mathrm{causal}}\right)\)</div></foreignObject>
+        <foreignObject x="728" y="382" width="280" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(O_{\mathrm{attn}}=A V\)</div></foreignObject>
         <g>
         <path d="M330 436 V484" class="atlas-wire atlas-quiet" />
         <path d="M330 504 C330 532 302 524 302 552 V572 C302 600 330 596 330 614" class="atlas-feature" />
@@ -173,27 +175,10 @@
         <text x="140" y="744" class="atlas-op" text-anchor="start">Same shape. Richer state.</text>
         <text x="728" y="708" class="atlas-note" text-anchor="start">Output state + decoding memory</text>
         <foreignObject x="728" y="718" width="280" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(X^{(\ell+1)},\;K_{\mathrm{cache}},V_{\mathrm{cache}}\)</div></foreignObject>
-        <path d="M28 764 H1012" class="atlas-rule" />
-        <text x="28" y="788" class="atlas-code" text-anchor="start">Read top → bottom</text>
-        <text x="300" y="788" class="atlas-code" text-anchor="start">Curves show information mixing</text>
-        <text x="728" y="788" class="atlas-code" text-anchor="start">Same state shape in · richer state out</text>
         </svg>
       </div>
       <figcaption>Read the exact MiniMindBlock.forward contract from top to bottom: normalize and call self_attn, add its update, normalize and call self.mlp, add the second update, then return hidden_states with the attention cache.</figcaption>
     </figure>
-
-    <h2>MiniMindBlock.forward reference</h2>
-    <div class="block-pipeline-key" aria-hidden="true"><span>FORMULA · OPERATION</span><span>MINIMIND TRACE · SHAPE</span></div>
-    <ul class="block-pipeline" role="list">
-      <li><span class="pipeline-formula"><strong>Pre-norm:</strong> \(\bar X=\operatorname{RMSNorm}(X)\)</span><span class="pipeline-example"><code>self.input_layernorm(hidden_states)</code><br>\(B\times T\times D\)</span></li>
-      <li><span class="pipeline-formula"><strong>Project:</strong> \(Q=\bar XW_Q,\ K=\bar XW_K,\ V=\bar XW_V\)</span><span class="pipeline-example"><code>q_proj · k_proj · v_proj</code><br>split into \(h\) heads</span></li>
-      <li><span class="pipeline-formula"><strong>Encode position:</strong> \(Q'=\operatorname{RoPE}(Q),\ K'=\operatorname{RoPE}(K)\)</span><span class="pipeline-example"><code>apply_rotary_pos_emb</code><br>\(V\) unchanged</span></li>
-      <li><span class="pipeline-formula"><strong>Compare and mask:</strong> \(A=Q'K'^{\mathsf T}/\sqrt{d_h}+M_{\text{causal}}\)</span><span class="pipeline-example"><code>scores + causal_mask</code><br>\(B\times h\times T\times T\)</span></li>
-      <li><span class="pipeline-formula"><strong>Blend values:</strong> \(O_r=\operatorname{softmax}(A_r)V_r\)</span><span class="pipeline-example"><code>probs @ value_states</code><br>each head \(T\times d_h\)</span></li>
-      <li><span class="pipeline-formula"><strong>Join heads:</strong> \(O_{\text{attn}}=\operatorname{Concat}(O_1,\ldots,O_h)W_O\)</span><span class="pipeline-example"><code>self.o_proj(attn_output)</code><br>\(B\times T\times D\)</span></li>
-      <li><span class="pipeline-formula"><strong>In-place residual:</strong> \(Y=X+O_{\text{attn}}\)</span><span class="pipeline-example"><code>hidden_states += residual</code><br>first residual write</span></li>
-      <li><span class="pipeline-formula"><strong>MLP and add:</strong> \(X^{(\ell+1)}=Y+\operatorname{SwiGLU}(\operatorname{Norm}(Y))\)</span><span class="pipeline-example"><code>hidden_states += self.mlp(...)</code><br>return state + cache</span></li>
-    </ul>
 
     <section class="worked-example">
       <h3>Toy walkthrough: \(B=1,T=2,d_{\text{model}}=2,h=1\)</h3>
