@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/course.css?v=atlas-series1"><link rel="stylesheet" href="../assets/diagram-atlas.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
+  <link rel="stylesheet" href="../assets/course.css?v=atlas-series2"><link rel="stylesheet" href="../assets/diagram-atlas.css?v=2"><script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
   <script defer src="../assets/code-highlight.js"></script>
 </head>
@@ -18,7 +18,7 @@
 
     <div class="goal"><strong>Final mission:</strong> start with \(X^{(\ell)}\), finish with \(X^{(\ell+1)}\), and explain exactly where position, comparison, probability, content, and residual updates enter.</div>
 
-    <figure id="block-visual" class="course-figure course-figure-diagram flowchart-figure block-atlas" data-block-explorer>
+    <figure id="block-visual" class="course-figure course-figure-diagram flowchart-figure block-atlas">
       <header class="atlas-heading">
         <p class="eyebrow">MINIMINDBLOCK.FORWARD · THE BIG PICTURE</p>
         <h2>Two updates. One continuous state.</h2>
@@ -43,25 +43,21 @@
         <path d="M480 640 V660 Q480 668 472 668 H120" class="atlas-return" marker-end="url(#atlas-write)"/>
         <text x="128" y="228" class="atlas-note" text-anchor="start">Carry X</text>
         <text x="128" y="540" class="atlas-note" text-anchor="start">Carry Y</text>
-        <g data-stage-node="input" tabindex="0" role="button" aria-label="Inspect block input">
-        <rect class="atlas-hit" x="20" y="44" width="220" height="64"/>
+        <g>
         <text x="28" y="62" class="atlas-code" text-anchor="start">hidden_states</text>
         <foreignObject x="28" y="70" width="224" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math">\(X^{(\ell)}\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
         </g>
-        <g data-stage-node="norm1" tabindex="0" role="button" aria-label="Inspect input RMSNorm">
-        <rect class="atlas-hit" x="288" y="84" width="384" height="60"/>
+        <g>
         <text x="300" y="112" class="atlas-op" text-anchor="start">RMSNorm</text>
-        <text x="428" y="112" class="atlas-code" text-anchor="start">input_layernorm ↗</text>
+        <text x="428" y="112" class="atlas-code" text-anchor="start">self.input_layernorm</text>
         <path d="M300 128 H660" class="atlas-norm" />
         </g>
-        <g data-stage-node="norm2" tabindex="0" role="button" aria-label="Inspect post-attention RMSNorm">
-        <rect class="atlas-hit" x="288" y="392" width="384" height="60"/>
+        <g>
         <text x="300" y="420" class="atlas-op" text-anchor="start">RMSNorm</text>
-        <text x="428" y="420" class="atlas-code" text-anchor="start">post_attention_layernorm ↗</text>
+        <text x="428" y="420" class="atlas-code" text-anchor="start">self.post_attention_layernorm</text>
         <path d="M300 436 H660" class="atlas-norm" />
         </g>
-        <g data-stage-node="attention" tabindex="0" role="button" aria-label="Inspect cross-token attention">
-        <rect class="atlas-hit" x="296" y="148" width="380" height="172"/>
+        <g>
         <path d="M330 128 V142 M330 169 V174" class="atlas-wire atlas-quiet" />
         <path d="M330 194 C330 226 330 232 330 266" class="atlas-affinity" stroke-width="1"/>
         <path d="M430 128 V142 M430 169 V174" class="atlas-wire atlas-quiet" />
@@ -92,22 +88,15 @@
         <path d="M320 304 V308 Q320 312 324 312 H636 Q640 312 640 308 V304" class="atlas-bracket" />
         </g>
         <text x="264" y="332" class="atlas-code" text-anchor="start">join heads · o_proj</text>
-        <g data-stage-node="attention" tabindex="0" role="button" aria-label="Inspect attention implementation">
-        <rect class="atlas-hit" x="716" y="168" width="300" height="96"/>
-        <text x="728" y="204" class="atlas-headline" text-anchor="start">Mix tokens.</text>
-        <text x="728" y="234" class="atlas-note" text-anchor="start">Read earlier positions and itself.</text>
-        <text x="728" y="256" class="atlas-note" text-anchor="start">Shown: one head, four tokens.</text>
+        <g>
+        <text x="728" y="198" class="atlas-headline" text-anchor="start">Give each token</text>
+        <text x="728" y="224" class="atlas-headline" text-anchor="start">context.</text>
+        <text x="728" y="250" class="atlas-note" text-anchor="start">Read itself and earlier tokens,</text>
+        <text x="728" y="270" class="atlas-note" text-anchor="start">then write a context-aware update.</text>
         </g>
-        <g data-stage-node="rope" tabindex="0" role="button" aria-label="Inspect Q/K projections + RoPE">
-        <rect class="atlas-hit" x="716" y="274" width="284" height="32"/>
-        <text x="728" y="296" class="atlas-link" text-anchor="start">Q/K projections + RoPE ↗</text>
-        </g>
-        <g data-stage-node="mask" tabindex="0" role="button" aria-label="Inspect Why no future connections?">
-        <rect class="atlas-hit" x="716" y="310" width="284" height="32"/>
-        <text x="728" y="332" class="atlas-link" text-anchor="start">Why no future connections? ↗</text>
-        </g>
-        <g data-stage-node="ffn" tabindex="0" role="button" aria-label="Inspect independent per-token feed-forward transformations">
-        <rect class="atlas-hit" x="288" y="456" width="388" height="190"/>
+        <foreignObject x="728" y="282" width="280" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q,K,V:\ [B,T,D]\to[B,H,T,d_h]\)</div></foreignObject>
+        <foreignObject x="728" y="310" width="280" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(A=\operatorname{softmax}\!\left(\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}}+M_{\mathrm{causal}}\right)\)</div></foreignObject>
+        <g>
         <path d="M330 436 V484" class="atlas-wire atlas-quiet" />
         <path d="M330 504 C330 532 302 524 302 552 V572 C302 600 330 596 330 614" class="atlas-feature" />
         <circle cx="302" cy="562" r="3" class="atlas-feature-dot"/>
@@ -163,51 +152,31 @@
         <path d="M320 636 V640 H640 V636" class="atlas-bracket" />
         </g>
         <text x="274" y="656" class="atlas-code" text-anchor="start">expand · gate · project back</text>
-        <g data-stage-node="ffn" tabindex="0" role="button" aria-label="Inspect feed-forward implementation">
-        <rect class="atlas-hit" x="716" y="480" width="300" height="144"/>
-        <text x="728" y="516" class="atlas-headline" text-anchor="start">Mix features.</text>
-        <text x="728" y="548" class="atlas-note" text-anchor="start">Each token stays in its own lane.</text>
-        <text x="728" y="570" class="atlas-note" text-anchor="start">The same MLP acts on every row.</text>
-        <text x="728" y="608" class="atlas-link" text-anchor="start">SwiGLU · self.mlp ↗</text>
+        <g>
+        <text x="728" y="510" class="atlas-headline" text-anchor="start">Improve each token's</text>
+        <text x="728" y="536" class="atlas-headline" text-anchor="start">representation.</text>
+        <text x="728" y="562" class="atlas-note" text-anchor="start">Adjust features within one token.</text>
+        <text x="728" y="582" class="atlas-note" text-anchor="start">Positions stay independent.</text>
+        <foreignObject x="728" y="596" width="280" height="54"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(F=\bigl(\operatorname{SiLU}(YW_g)\odot YW_u\bigr)W_d\)<br>\(F\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
         </g>
-        <g data-stage-node="residual1" tabindex="0" role="button" aria-label="Inspect first residual addition">
+        <g>
         <circle cx="100" cy="344" r="20" class="atlas-merge"/>
         <text x="100" y="351" class="atlas-plus" text-anchor="middle">+</text>
         <foreignObject x="140" y="352" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math">\(Y=X^{(\ell)}+O_{\mathrm{attn}}\)</div></foreignObject>
         </g>
-        <g data-stage-node="residual2" tabindex="0" role="button" aria-label="Inspect second residual addition and return">
+        <g>
         <circle cx="100" cy="668" r="20" class="atlas-merge"/>
         <text x="100" y="675" class="atlas-plus" text-anchor="middle">+</text>
         <foreignObject x="140" y="676" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math">\(X^{(\ell+1)}=Y+F\)</div></foreignObject>
         </g>
         <text x="140" y="744" class="atlas-op" text-anchor="start">Same shape. Richer state.</text>
-        <text x="728" y="708" class="atlas-code" text-anchor="start">return hidden_states,</text>
-        <text x="728" y="726" class="atlas-code" text-anchor="start">present_key_value</text>
+        <text x="728" y="708" class="atlas-code" text-anchor="start">Pass forward: updated token states</text>
+        <text x="728" y="726" class="atlas-code" text-anchor="start">plus the attention cache for decoding</text>
         <path d="M28 764 H1012" class="atlas-rule" />
         <text x="28" y="788" class="atlas-code" text-anchor="start">Read top → bottom</text>
         <text x="300" y="788" class="atlas-code" text-anchor="start">Curves show information mixing</text>
-        <text x="728" y="788" class="atlas-code" text-anchor="start">Click a part to inspect its code ↗</text>
+        <text x="728" y="788" class="atlas-code" text-anchor="start">Same state shape in · richer state out</text>
         </svg>
-        <div class="diagram-inspector" data-stage-detail role="region" aria-live="polite" aria-label="Selected block node details">
-          <div class="inspector-heading"><p class="eyebrow">CODE CONNECTION</p><span class="stage-detail-index" data-stage-detail-index>overview</span></div>
-          <div class="inspector-title-row"><h3 data-stage-detail-title>MiniMindBlock.forward</h3><button type="button" data-stage-reset aria-label="Close code trace" hidden>×</button></div>
-          <p class="stage-detail-summary" data-stage-detail-summary>Click any node in the block to connect its operation, equation, and MiniMind implementation.</p>
-          <div class="inspector-content">
-            <div class="stage-detail-equation" data-stage-detail-equation aria-label="Whole block equation">\(Y=X^{(\ell)}+O_{\mathrm{attn}},\qquad X^{(\ell+1)}=Y+F\)</div>
-            <div class="stage-detail-code-wrap" data-stage-code-panel hidden>
-              <div class="stage-detail-code-heading"><span data-stage-detail-source>MiniMind · model/model_minimind.py · MiniMindBlock.forward</span><a data-stage-detail-link href="#minimind-contract">Jump to code below ↓</a></div>
-              <pre><code class="language-python" data-stage-detail-code>residual = hidden_states
-hidden_states, present_key_value = self.self_attn(
-    self.input_layernorm(hidden_states), position_embeddings,
-    past_key_value, use_cache, attention_mask
-)
-hidden_states += residual
-hidden_states = hidden_states + self.mlp(
-    self.post_attention_layernorm(hidden_states)
-)</code></pre>
-            </div>
-          </div>
-        </div>
       </div>
       <figcaption>Read the exact MiniMindBlock.forward contract from top to bottom: normalize and call self_attn, add its update, normalize and call self.mlp, add the second update, then return hidden_states with the attention cache.</figcaption>
     </figure>

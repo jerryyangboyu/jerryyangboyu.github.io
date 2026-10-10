@@ -43,11 +43,11 @@
 .study-footer p { color: var(--muted); font-size: .85rem; margin: 0; max-width: 70ch; }
 .study-footer a { flex: 0 0 180px; color: var(--ink); font-size: .8rem; text-underline-offset: 5px; }
 
-/* A marginal note, not nested cards. Remains a right-hand overlay on mobile. */
-.block-atlas.has-stage-selection .diagram-inspector {
-  position: fixed; top: 20px; right: 20px; bottom: 20px; width: min(480px, calc(100vw - 40px));
-  max-height: none; margin: 0; padding: 32px; border: 1px solid var(--rule);
-  background: var(--paper); display: block; overflow-y: auto; box-sizing: border-box;
+/* Node details remain in the document below the graph; selecting a node updates this section in place. */
+.block-atlas .diagram-inspector {
+  position: static; width: auto; max-height: none; margin: 16px 0 0; padding: 24px;
+  border: 1px solid var(--rule); border-left: 3px solid var(--teal);
+  background: var(--paper); display: block; overflow: visible; box-sizing: border-box;
 }
 .block-atlas .diagram-inspector .inspector-heading { display: block; padding-right: 36px; }
 .block-atlas .inspector-heading .eyebrow { color: var(--muted); font: 500 .65rem/1.4 'Geist Mono', monospace; letter-spacing: .1em; }
@@ -72,5 +72,5 @@
   .study-hint { width: 100%; margin: 0; }
   .study-footer { flex-direction: column; padding: 16px 20px; gap: 14px; }
   .study-footer a { flex: none; }
-  .block-atlas.has-stage-selection .diagram-inspector { padding: 24px; right: 10px; top: 10px; bottom: 10px; width: min(440px, calc(100vw - 20px)); }
+  .block-atlas .diagram-inspector { padding: 20px; }
 }

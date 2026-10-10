@@ -406,8 +406,6 @@ return hidden_states, present_key_value`
       const openTrace = () => {
         selectedNode = node;
         renderStage(node.dataset.stageNode);
-        reset?.focus({ preventScroll: true });
-        if (window.matchMedia('(max-width: 720px)').matches) explorer.scrollIntoView({ block: 'nearest' });
       };
       node.addEventListener('click', openTrace);
       node.addEventListener('keydown', (event) => {
