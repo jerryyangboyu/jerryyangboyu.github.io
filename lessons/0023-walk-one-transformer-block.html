@@ -173,8 +173,11 @@
         <foreignObject x="140" y="676" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math">\(X^{(\ell+1)}=Y+F\)</div></foreignObject>
         </g>
         <text x="140" y="744" class="atlas-op" text-anchor="start">Same shape. Richer state.</text>
-        <text x="728" y="708" class="atlas-note" text-anchor="start">Output state + decoding memory</text>
-        <foreignObject x="728" y="718" width="280" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(X^{(\ell+1)},\;K_{\mathrm{cache}},V_{\mathrm{cache}}\)</div></foreignObject>
+        <text x="728" y="704" class="atlas-kicker" text-anchor="start">RETURN</text>
+        <foreignObject x="728" y="710" width="280" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(X^{(\ell+1)}\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
+        <path d="M728 744 H1008" class="atlas-rule" />
+        <text x="728" y="758" class="atlas-note" text-anchor="start">cache for the next token</text>
+        <foreignObject x="728" y="762" width="280" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(\operatorname{cache}=(K_{\le t},V_{\le t})\)</div></foreignObject>
         </svg>
       </div>
       <figcaption>Read the exact MiniMindBlock.forward contract from top to bottom: normalize and call self_attn, add its update, normalize and call self.mlp, add the second update, then return hidden_states with the attention cache.</figcaption>
