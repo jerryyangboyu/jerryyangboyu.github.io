@@ -76,14 +76,14 @@
     '0021': {
       title: 'Treat the residual stream as the state contract',
       exerciseContext: 'The residual stream is the model’s running draft of the meaning of the text. Attention and the MLP each propose a correction, but the shared state keeps the same shape \\(X\\in\\mathbb{R}^{B\\times T\\times D}\\) from one update to the next.',
-      retrieval: 'Complete these two equations: \(Y=\ ?\) and \(X^{(\ell+1)}=\ ?\). Which update comes from attention, and which comes from the MLP?',
-      answer: 'The correction must also have shape \\(\\mathbb{R}^{B\\times T\\times D}\\). It changes the running draft; it does not replace the draft or alter which word positions exist.',
+      retrieval: 'The residual stream carries \\(X\\in\\mathbb{R}^{B\\times T\\times D}\\). Self-attention performs token mixing; the MLP performs feature mixing. Why must both updates return to the same \\(B\\times T\\times D\\) shape before the residual stream can continue?',
+      answer: 'Token mixing may change one position using other positions, and feature mixing may use a wider hidden dimension. The shape contract keeps every batch item, token position, and model feature aligned for elementwise residual addition.',
       bridge: 'Think of the identity path as a stable document being revised. Attention writes a context correction, producing \\(Y=X+O_{\\mathrm{attn}}\\); the MLP writes a feature correction, producing \\(X^{(\\ell+1)}=Y+F\\). Both edits return to the same \\(B\\times T\\times D\\) contract.',
       code: `residual = hidden_states\nhidden_states = self.self_attn(self.input_layernorm(hidden_states), ...)\nhidden_states = hidden_states + residual\nhidden_states = hidden_states + self.mlp(self.post_attention_layernorm(hidden_states))`,
       task: 'Write a complete residual_block(x, attention_update, mlp_update) function. Check that \\(x\\), both corrections, and the final state share shape \\(\\mathbb{R}^{B\\times T\\times D}\\) before adding them.',
       solution: `def residual_block(x, attention_update, mlp_update):\n    assert attention_update.shape == x.shape\n    state = x + attention_update\n    assert mlp_update.shape == state.shape\n    return state + mlp_update`,
-      practice: ['Write the first update: \\(Y=\\ ?\\).', 'If \\(X\\) and \\(O_{\\mathrm{attn}}\\) both have shape \\(\\mathbb{R}^{B\\times T\\times D}\\), why is \\(X+O_{\\mathrm{attn}}\\) legal?', 'Which update mixes word positions? Which update changes features inside one word? Use the two residual equations.'],
-      solutions: ['\\(Y=X+O_{\\mathrm{attn}}\\).', 'Every position and feature has a matching value, so addition is elementwise.', 'Attention mixes positions in \\(O_{\\mathrm{attn}}\\). The MLP changes features within each row in \\(F\\).']
+      practice: ['Self-attention lets “sat” read “cat”. Which axis is token mixing, and which dimensions must still match at the residual merge?', 'SwiGLU expands \\(D\\) to \\(D_{\\mathrm{ff}}\\). What does the wider space buy the MLP, and why must the down projection restore \\(D\\) before the residual merge?', 'If the attention update is zero, what does \\(Y=X+O_{\\mathrm{attn}}\\) say about the identity path and the residual stream?'],
+      solutions: ['Token mixing acts across \\(T\\). The batch axis, token axis, and final model width must match for the residual add.', 'The wider space lets the MLP build richer feature combinations. The down projection restores \\(D\\) so the update matches the residual stream.', 'If \\(O_{\\mathrm{attn}}=0\\), then \\(Y=X\\). The identity path carries the state forward unchanged through that sublayer.']
     },
     '0022': {
       title: 'Make the SwiGLU width changes explicit',
