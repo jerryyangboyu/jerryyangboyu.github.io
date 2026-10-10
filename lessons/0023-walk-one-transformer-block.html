@@ -44,17 +44,17 @@
         <text x="128" y="228" class="atlas-note" text-anchor="start">Carry X</text>
         <text x="128" y="540" class="atlas-note" text-anchor="start">Carry Y</text>
         <g>
-        <text x="28" y="62" class="atlas-code" text-anchor="start">hidden_states</text>
+        <text x="28" y="62" class="atlas-code" text-anchor="start">input state</text>
         <foreignObject x="28" y="70" width="224" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math">\(X^{(\ell)}\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
         </g>
         <g>
         <text x="300" y="112" class="atlas-op" text-anchor="start">RMSNorm</text>
-        <text x="428" y="112" class="atlas-code" text-anchor="start">self.input_layernorm</text>
+        <foreignObject x="428" y="88" width="230" height="34"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(\bar X=\operatorname{RMSNorm}(X)\)</div></foreignObject>
         <path d="M300 128 H660" class="atlas-norm" />
         </g>
         <g>
         <text x="300" y="420" class="atlas-op" text-anchor="start">RMSNorm</text>
-        <text x="428" y="420" class="atlas-code" text-anchor="start">self.post_attention_layernorm</text>
+        <foreignObject x="428" y="396" width="230" height="34"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(U=\operatorname{RMSNorm}(Y)\)</div></foreignObject>
         <path d="M300 436 H660" class="atlas-norm" />
         </g>
         <g>
@@ -87,7 +87,7 @@
         <text x="530" y="302" class="atlas-code" text-anchor="middle">query: sat</text>
         <path d="M320 304 V308 Q320 312 324 312 H636 Q640 312 640 308 V304" class="atlas-bracket" />
         </g>
-        <text x="264" y="332" class="atlas-code" text-anchor="start">join heads · o_proj</text>
+        <foreignObject x="264" y="316" width="220" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(O_{\mathrm{attn}}=\operatorname{Concat}(O_1,\ldots,O_H)W_O\)</div></foreignObject>
         <g>
         <text x="728" y="198" class="atlas-headline" text-anchor="start">Give each token</text>
         <text x="728" y="224" class="atlas-headline" text-anchor="start">context.</text>
@@ -95,7 +95,8 @@
         <text x="728" y="270" class="atlas-note" text-anchor="start">then write a context-aware update.</text>
         </g>
         <foreignObject x="728" y="282" width="280" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q,K,V:\ [B,T,D]\to[B,H,T,d_h]\)</div></foreignObject>
-        <foreignObject x="728" y="310" width="280" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(A=\operatorname{softmax}\!\left(\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}}+M_{\mathrm{causal}}\right)\)</div></foreignObject>
+        <foreignObject x="728" y="310" width="280" height="42"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(A=\operatorname{softmax}\!\left(\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}}+M_{\mathrm{causal}}\right)\)</div></foreignObject>
+        <foreignObject x="728" y="344" width="280" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(O_{\mathrm{attn}}=A V\)</div></foreignObject>
         <g>
         <path d="M330 436 V484" class="atlas-wire atlas-quiet" />
         <path d="M330 504 C330 532 302 524 302 552 V572 C302 600 330 596 330 614" class="atlas-feature" />
@@ -151,13 +152,13 @@
         <circle cx="630" cy="624" r="10" class="atlas-token-dot"/>
         <path d="M320 636 V640 H640 V636" class="atlas-bracket" />
         </g>
-        <text x="274" y="656" class="atlas-code" text-anchor="start">expand · gate · project back</text>
+        <foreignObject x="274" y="646" width="230" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(F=\operatorname{SwiGLU}(U)\)</div></foreignObject>
         <g>
         <text x="728" y="510" class="atlas-headline" text-anchor="start">Improve each token's</text>
         <text x="728" y="536" class="atlas-headline" text-anchor="start">representation.</text>
         <text x="728" y="562" class="atlas-note" text-anchor="start">Adjust features within one token.</text>
         <text x="728" y="582" class="atlas-note" text-anchor="start">Positions stay independent.</text>
-        <foreignObject x="728" y="596" width="280" height="54"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(F=\bigl(\operatorname{SiLU}(YW_g)\odot YW_u\bigr)W_d\)<br>\(F\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
+        <foreignObject x="728" y="596" width="280" height="74"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(U=\operatorname{RMSNorm}(Y)\)<br>\(F=\bigl(\operatorname{SiLU}(UW_g)\odot UW_u\bigr)W_d\)<br>\(F\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
         </g>
         <g>
         <circle cx="100" cy="344" r="20" class="atlas-merge"/>
@@ -170,8 +171,8 @@
         <foreignObject x="140" y="676" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math">\(X^{(\ell+1)}=Y+F\)</div></foreignObject>
         </g>
         <text x="140" y="744" class="atlas-op" text-anchor="start">Same shape. Richer state.</text>
-        <text x="728" y="708" class="atlas-code" text-anchor="start">Pass forward: updated token states</text>
-        <text x="728" y="726" class="atlas-code" text-anchor="start">plus the attention cache for decoding</text>
+        <text x="728" y="708" class="atlas-note" text-anchor="start">Output state + decoding memory</text>
+        <foreignObject x="728" y="718" width="280" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(X^{(\ell+1)},\;K_{\mathrm{cache}},V_{\mathrm{cache}}\)</div></foreignObject>
         <path d="M28 764 H1012" class="atlas-rule" />
         <text x="28" y="788" class="atlas-code" text-anchor="start">Read top → bottom</text>
         <text x="300" y="788" class="atlas-code" text-anchor="start">Curves show information mixing</text>
