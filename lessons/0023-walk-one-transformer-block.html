@@ -89,7 +89,6 @@
         </g>
         <foreignObject x="264" y="316" width="220" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(O_{\mathrm{attn}}=\operatorname{Concat}(O_1,\ldots,O_H)W_O\)</div></foreignObject>
         <g>
-        <path d="M704 176 V784" class="atlas-phase-rail" />
         <circle cx="704" cy="176" r="9" class="atlas-phase-dot" /><text x="704" y="180" class="atlas-phase-number" text-anchor="middle">1</text>
         <text x="728" y="176" class="atlas-kicker" text-anchor="start">SHARE CONTEXT</text>
         <text x="728" y="198" class="atlas-headline" text-anchor="start">Give each token</text>
@@ -97,7 +96,6 @@
         <text x="728" y="250" class="atlas-note" text-anchor="start">Read itself and earlier tokens.</text>
         <text x="728" y="270" class="atlas-note" text-anchor="start">Write one context update.</text>
         </g>
-        <path d="M728 278 H1008" class="atlas-rule" />
         <foreignObject x="728" y="282" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q,K,V=\bar XW_{Q,K,V}\)</div></foreignObject>
         <foreignObject x="728" y="304" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q',K'=\operatorname{RoPE}(Q,K)\)</div></foreignObject>
         <foreignObject x="728" y="326" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\([B,T,D]\to[B,H,T,d_h]\)</div></foreignObject>
@@ -166,7 +164,6 @@
         <text x="728" y="536" class="atlas-headline" text-anchor="start">representation.</text>
         <text x="728" y="562" class="atlas-note" text-anchor="start">Transform features within each token.</text>
         <text x="728" y="582" class="atlas-note" text-anchor="start">Do not mix token positions.</text>
-        <path d="M728 590 H1008" class="atlas-rule" />
         <foreignObject x="728" y="596" width="280" height="74"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(U=\operatorname{RMSNorm}(Y)\)<br>\(F=\bigl(\operatorname{SiLU}(UW_g)\odot UW_u\bigr)W_d\)<br>\(F\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
         </g>
         <g>
@@ -183,7 +180,6 @@
         <circle cx="704" cy="688" r="9" class="atlas-phase-dot" /><text x="704" y="692" class="atlas-phase-number" text-anchor="middle">3</text>
         <text x="728" y="688" class="atlas-kicker" text-anchor="start">RETURN STATE + MEMORY</text>
         <foreignObject x="728" y="710" width="280" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(X^{(\ell+1)}\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
-        <path d="M728 744 H1008" class="atlas-rule" />
         <text x="728" y="758" class="atlas-note" text-anchor="start">cache for the next token</text>
         <foreignObject x="728" y="762" width="280" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(\operatorname{cache}=(K_{\le t},V_{\le t})\)</div></foreignObject>
         </svg>
