@@ -505,9 +505,9 @@ th { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; }
 .code-line { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(180px, .95fr); gap: 0; align-items: stretch; border-bottom: 1px solid color-mix(in srgb, var(--rule) 34%, transparent); }
 .code-line:last-child { border-bottom: 0; }
 .code-line code,
-.code-line code.hljs { display: block; min-width: 0; overflow-x: auto; padding: 11px 14px; border-right: 1px solid color-mix(in srgb, var(--rule) 58%, transparent); background: #172224; color: #edf6f2; font: .8rem/1.55 'Geist Mono', monospace; white-space: pre; }
+.code-line code.hljs { display: block; min-width: 0; overflow-x: hidden; padding: 11px 14px; border-right: 1px solid color-mix(in srgb, var(--rule) 58%, transparent); background: #172224; color: #edf6f2; font: .8rem/1.55 'Geist Mono', monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
 .code-line > span { display: block; padding: 11px 14px; background: color-mix(in srgb, var(--teal) 7%, var(--surface)); color: var(--muted); font-size: .88rem; line-height: 1.5; }
-.learning-part pre { max-width: 900px; margin: 18px 0 0; padding: 18px; overflow-x: auto; border-left: 3px solid var(--teal); background: var(--paper); color: var(--ink); font: .82rem/1.65 'Geist Mono', monospace; }
+.learning-part pre { max-width: 900px; margin: 18px 0 0; padding: 18px; overflow-x: hidden; overflow-wrap: anywhere; white-space: pre-wrap; border-left: 3px solid var(--teal); background: var(--paper); color: var(--ink); font: .82rem/1.65 'Geist Mono', monospace; }
 .learning-part details { max-width: 820px; margin-top: 18px; border: 0; border-top: 1px dashed var(--rule); border-radius: 0; background: transparent; }
 .learning-part summary { padding: 12px 0 4px; color: var(--teal); font-size: .9rem; }
 .learning-part details > p, .learning-part details > ol { margin-top: 0; padding-left: 0; }
