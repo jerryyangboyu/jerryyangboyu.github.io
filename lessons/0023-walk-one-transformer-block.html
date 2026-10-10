@@ -96,11 +96,16 @@
         <text x="728" y="250" class="atlas-note" text-anchor="start">Read itself and earlier tokens.</text>
         <text x="728" y="270" class="atlas-note" text-anchor="start">Write one context update.</text>
         </g>
-        <foreignObject x="728" y="282" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q,K,V=\bar XW_{Q,K,V}\)</div></foreignObject>
-        <foreignObject x="728" y="304" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q',K'=\operatorname{RoPE}(Q,K)\)</div></foreignObject>
-        <foreignObject x="728" y="326" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\([B,T,D]\to[B,H,T,d_h]\)</div></foreignObject>
-        <foreignObject x="728" y="348" width="280" height="42"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(A=\operatorname{softmax}\!\left(\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}}+M_{\mathrm{causal}}\right)\)</div></foreignObject>
-        <foreignObject x="728" y="382" width="280" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(O_{\mathrm{attn}}=A V\)</div></foreignObject>
+        <text x="728" y="286" class="atlas-kicker" text-anchor="start">PROJECT</text>
+        <foreignObject x="728" y="288" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q,K,V=\bar XW_{Q,K,V}\)</div></foreignObject>
+        <text x="728" y="320" class="atlas-kicker" text-anchor="start">POSITION</text>
+        <foreignObject x="728" y="322" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q',K'=\operatorname{RoPE}(Q,K)\)</div></foreignObject>
+        <text x="728" y="354" class="atlas-kicker" text-anchor="start">SPLIT HEADS</text>
+        <foreignObject x="728" y="356" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\([B,T,D]\to[B,H,T,d_h]\)</div></foreignObject>
+        <text x="728" y="388" class="atlas-kicker" text-anchor="start">SCORE + MASK → PROBABILITIES</text>
+        <foreignObject x="728" y="390" width="280" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(S=\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}}+M_{\mathrm{causal}}\)<br>\(A=\operatorname{softmax}(S)\)</div></foreignObject>
+        <text x="728" y="450" class="atlas-kicker" text-anchor="start">MIX CONTENT</text>
+        <foreignObject x="728" y="452" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(O_{\mathrm{attn}}=A V\)</div></foreignObject>
         <g>
         <path d="M330 436 V484" class="atlas-wire atlas-quiet" />
         <path d="M330 504 C330 532 302 524 302 552 V572 C302 600 330 596 330 614" class="atlas-feature" />
