@@ -707,15 +707,16 @@ progress { width: min(180px, 100%); height: 12px; accent-color: var(--teal); }
 .block-atlas .block-atlas-svg { min-width: 640px; background: var(--paper); }
 .block-atlas-svg text { fill: var(--ink); font-family: 'Geist', sans-serif; }
 .block-atlas-svg .atlas-kicker { font: 500 11px 'Geist Mono', monospace; fill: var(--muted); letter-spacing: 0.08em; }
-.block-atlas-svg .atlas-code { font: 400 11px 'Geist Mono', monospace; fill: var(--muted); }
-.block-atlas-svg .atlas-op, .block-atlas-svg .atlas-token { font: 600 16px 'Geist', sans-serif; }
-.block-atlas-svg .atlas-headline { font: 600 28px 'Geist', sans-serif; letter-spacing: -0.04em; }
-.block-atlas-svg .atlas-note { font: 400 14px 'Geist', sans-serif; fill: var(--muted); }
+.block-atlas-svg .atlas-code { font: 500 10px 'Geist Mono', monospace; fill: var(--muted); }
+.block-atlas-svg .atlas-op { font: 600 15px 'Geist', sans-serif; }
+.block-atlas-svg .atlas-token { font: 500 14px 'Geist', sans-serif; }
+.block-atlas-svg .atlas-headline { font: 600 22px/1.12 'Geist', sans-serif; letter-spacing: -0.035em; }
+.block-atlas-svg .atlas-note { font: 400 13px 'Geist', sans-serif; fill: var(--muted); }
 .block-atlas-svg .atlas-link { font: 500 14px 'Geist', sans-serif; text-decoration: underline; text-underline-offset: 5px; }
-.block-atlas-svg .atlas-math { color: var(--ink); font-size: 17px; line-height: 1.5; white-space: nowrap; }
+.block-atlas-svg .atlas-math { color: var(--ink); font-size: 16px; line-height: 1.45; white-space: nowrap; }
 .block-atlas-svg .atlas-math mjx-container { margin: 0 !important; }
-.block-atlas-svg .atlas-math-small { font-size: 15px; }
-.block-atlas-svg .atlas-math-meta { color: var(--muted); font-size: 13px; }
+.block-atlas-svg .atlas-math-small { font-size: 14px; }
+.block-atlas-svg .atlas-math-meta { color: var(--muted); font-size: 12px; }
 .atlas-ribbon { stroke: var(--rule); stroke-width: 20; opacity: 0.32; fill: none; }
 .atlas-spine { stroke: var(--muted); stroke-width: 2; fill: none; }
 .atlas-wire { fill: none; stroke: var(--muted); stroke-width: 1.2; }
