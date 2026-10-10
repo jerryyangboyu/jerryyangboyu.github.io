@@ -3,6 +3,7 @@
   const lessons = {
     '0015': {
       title: 'Read a hidden state as a table of token vectors',
+      exerciseContext: 'Use X with shape [B,T,D]. These questions ask what one batch/token index selects and why the feature axis must remain.',
       retrieval: 'Without looking above, explain what X[b, t, :] selects and why the feature axis is the one that remains.',
       answer: 'Fixing a batch index b and token index t leaves every feature, so X[b,t,:] has shape [D]. The batch and sequence axes identify a location; D is the representation stored at that location.',
       bridge: 'The embedding lookup introduces D while preserving B and T. The rest of the block is shape-safe only if each sublayer eventually returns to [B,T,D].',
@@ -14,6 +15,7 @@
     },
     '0016': {
       title: 'Normalize features independently for each token',
+      exerciseContext: 'Assume x has shape [B,T,D]. RMSNorm reduces the feature axis D independently for every token.',
       retrieval: 'Which axis does RMSNorm reduce, and what does it leave unchanged?',
       answer: 'It reduces the last axis, D, independently for every [batch, token] pair. It rescales feature values but keeps the outer shape [B,T,D].',
       bridge: 'MiniMind uses RMSNorm before attention and before its MLP. The choice of reduction axis is a runtime contract, not a cosmetic detail: reducing over T would mix tokens.',
@@ -25,6 +27,7 @@
     },
     '0017': {
       title: 'Split feature width into heads without splitting the sentence',
+      exerciseContext: 'Track a projected state with D=H·Dh. Splitting changes feature layout to [B,H,T,Dh] while T stays intact.',
       retrieval: 'With T=5, D=12, and H=3, what does one attention head receive?',
       answer: 'Every head sees all five token positions, but only Dh=D/H=4 features per position. Splitting is along feature width, not along the sequence axis.',
       bridge: 'Q and K receive RoPE after projection; V does not. A useful ledger is [B,T,D] → [B,H,T,Dh] before scores, then back to [B,T,D] after concatenation.',
@@ -36,6 +39,7 @@
     },
     '0018': {
       title: 'Mask future positions before probability is formed',
+      exerciseContext: 'Read row i of the score matrix as the query at position i. A causal decoder may use keys j≤i.',
       retrieval: 'For a query at position i, which keys j are legal in a causal decoder?',
       answer: 'Only j ≤ i. The current token may attend to itself and earlier tokens, never to a later token.',
       bridge: 'The mask is added to scores before softmax. A forbidden score becomes −∞, its exponential becomes zero, and the row is normalized only over legal positions.',
@@ -47,6 +51,7 @@
     },
     '0019': {
       title: 'Turn comparisons into a weighted content read',
+      exerciseContext: 'Use each probability row as weights over legal value positions. The weighted sum removes the key axis and returns context vectors.',
       retrieval: 'What invariant must every attention probability row satisfy?',
       answer: 'Each row sums to one. The weights are a distribution over allowed key/value positions, so the output is a weighted average of value vectors.',
       bridge: 'The score-key axis disappears in weights @ V. For weights [B,H,Tq,Tk] and values [B,H,Tk,Dh], context is [B,H,Tq,Dh].',
@@ -58,6 +63,7 @@
     },
     '0020': {
       title: 'Compress K/V heads while preserving Q’s comparisons',
+      exerciseContext: 'Use H query heads and Hkv K/V heads. Check the divisibility rule and how repeating K/V preserves T and Dh.',
       retrieval: 'What changes in grouped-query attention when H=8 and Hkv=2?',
       answer: 'Queries keep eight heads. Keys and values have two heads, each repeated H/Hkv=4 times so every query head has a matching K/V head.',
       bridge: 'GQA saves the cache memory used by K/V while retaining many query subspaces. The divisibility rule is a contract: H % Hkv must equal zero.',
@@ -69,6 +75,7 @@
     },
     '0021': {
       title: 'Treat the residual stream as the state contract',
+      exerciseContext: 'Follow the state X→Y→X^(ℓ+1). Attention and the MLP each write an update that must still have shape [B,T,D].',
       retrieval: 'What must be true before an update is added to the residual stream?',
       answer: 'The update must have the same [B,T,D] shape as the state. Attention and the MLP write corrections; they do not replace the state.',
       bridge: 'The identity path carries the current representation directly through each sublayer. This gives the model a stable state and gives gradients a short route.',
@@ -80,6 +87,7 @@
     },
     '0022': {
       title: 'Make the SwiGLU width changes explicit',
+      exerciseContext: 'Use gate and up branches with expanded width Dff, then the down projection returns the update to model width D.',
       retrieval: 'What must match before the Hadamard product SiLU(g) ⊙ u?',
       answer: 'The gate and up branches must have the same [B,T,Dff] shape. The down projection then returns the update to [B,T,D].',
       bridge: 'SwiGLU transforms features independently for each token. It is the second learned write in the pre-norm block; it does not mix information across token positions.',
@@ -91,6 +99,7 @@
     },
     '0023': {
       title: 'Teach one complete MiniMindBlock without skipping a contract',
+      exerciseContext: 'Trace MiniMindBlock.forward from hidden_states through attention, the first residual, MLP, second residual, and the K/V cache.',
       retrieval: 'Name the two learned writes and the state that carries between them.',
       answer: 'Attention writes a token-mixing update \\(O_{\\mathrm{attn}}\\); the MLP writes a per-token feature update \\(F\\). The residual stream carries \\(X\\to Y\\to X^{(\\ell+1)}\\), while the attention cache carries past K/V for decoding.',
       bridge: 'Read the complete MiniMindBlock.forward function as one state transition: normalize before attention, add the attention update, normalize before the MLP, add the feature update, then return the state and cache. Every state remains \\(B\\times T\\times D\\).',
@@ -124,7 +133,7 @@
     const sequence = document.createElement('section');
     sequence.className = 'learning-sequence';
     sequence.id = 'practice-before-moving-on';
-    sequence.innerHTML = `<h2>Practice before moving on</h2><section class="learning-part"><h3>Code walkthrough</h3><p>${esc(task.bridge)}</p><div class="code-walkthrough">${walkthroughHtml}</div></section><section id="code-checkpoint" class="learning-part"><h3>Coding challenge</h3><p>${esc(task.task)}</p><details><summary>Reference implementation</summary><pre><code class="language-python">${esc(task.solution)}</code></pre><p class="answer-note">Compare the assertions and shapes with your own implementation.</p></details></section><section class="learning-part"><h3>Exercises</h3><ol>${questions.map((item) => `<li>${esc(item)}</li>`).join('')}</ol><details><summary>Answers</summary><ol>${answers.map((item) => `<li>${esc(item)}</li>`).join('')}</ol></details></section>`;
+    sequence.innerHTML = `<h2>Practice before moving on</h2><section class="learning-part"><h3>Code walkthrough</h3><p>${esc(task.bridge)}</p><div class="code-walkthrough">${walkthroughHtml}</div></section><section id="code-checkpoint" class="learning-part"><h3>Coding challenge</h3><p>${esc(task.task)}</p><details><summary>Reference implementation</summary><pre><code class="language-python">${esc(task.solution)}</code></pre><p class="answer-note">Compare the assertions and shapes with your own implementation.</p></details></section><section class="learning-part"><h3>Exercises</h3><p class="exercise-context">${esc(task.exerciseContext || '')}</p><ol>${questions.map((item) => `<li>${esc(item)}</li>`).join('')}</ol><details><summary>Answers</summary><ol>${answers.map((item) => `<li>${esc(item)}</li>`).join('')}</ol></details></section>`;
     host.prepend(sequence);
     const highlight = () => {
       if (!window.hljs) return;
