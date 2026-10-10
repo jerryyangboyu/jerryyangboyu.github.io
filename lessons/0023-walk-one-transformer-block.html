@@ -91,21 +91,14 @@
         <g>
         <circle cx="704" cy="176" r="9" class="atlas-phase-dot" /><text x="704" y="180" class="atlas-phase-number" text-anchor="middle">1</text>
         <text x="728" y="176" class="atlas-kicker" text-anchor="start">SHARE CONTEXT</text>
-        <text x="728" y="198" class="atlas-headline" text-anchor="start">Give each token</text>
-        <text x="728" y="224" class="atlas-headline" text-anchor="start">context.</text>
-        <text x="728" y="250" class="atlas-note" text-anchor="start">Read itself and earlier tokens.</text>
-        <text x="728" y="270" class="atlas-note" text-anchor="start">Write one context update.</text>
+        <text x="728" y="198" class="atlas-headline" text-anchor="start">Mix token information.</text>
         </g>
-        <text x="728" y="286" class="atlas-kicker" text-anchor="start">PROJECT</text>
-        <foreignObject x="728" y="288" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q,K,V=\bar XW_{Q,K,V}\)</div></foreignObject>
-        <text x="728" y="320" class="atlas-kicker" text-anchor="start">POSITION</text>
-        <foreignObject x="728" y="322" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q',K'=\operatorname{RoPE}(Q,K)\)</div></foreignObject>
-        <text x="728" y="354" class="atlas-kicker" text-anchor="start">SPLIT HEADS</text>
-        <foreignObject x="728" y="356" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\([B,T,D]\to[B,H,T,d_h]\)</div></foreignObject>
-        <text x="728" y="388" class="atlas-kicker" text-anchor="start">SCORE + MASK → PROBABILITIES</text>
-        <foreignObject x="728" y="390" width="280" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(S=\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}}+M_{\mathrm{causal}}\)<br>\(A=\operatorname{softmax}(S)\)</div></foreignObject>
-        <text x="728" y="450" class="atlas-kicker" text-anchor="start">MIX CONTENT</text>
-        <foreignObject x="728" y="452" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(O_{\mathrm{attn}}=A V\)</div></foreignObject>
+        <text x="728" y="250" class="atlas-kicker" text-anchor="start">BUILD VIEWS</text>
+        <foreignObject x="728" y="252" width="280" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(Q,K,V=\bar XW_{Q,K,V}\)<br>\(Q',K'=\operatorname{RoPE}(Q,K)\)</div></foreignObject>
+        <text x="728" y="320" class="atlas-kicker" text-anchor="start">COMPARE POSITIONS</text>
+        <foreignObject x="728" y="322" width="280" height="74"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\([B,T,D]\to[B,H,T,d_h]\)<br>\(S=\frac{Q'K'^{\mathsf T}}{\sqrt{d_h}}+M_{\mathrm{causal}}\)<br>\(A=\operatorname{softmax}(S)\)</div></foreignObject>
+        <text x="728" y="414" class="atlas-kicker" text-anchor="start">WRITE CONTEXT</text>
+        <foreignObject x="728" y="416" width="280" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(O_{\mathrm{attn}}=A V\)</div></foreignObject>
         <g>
         <path d="M330 436 V484" class="atlas-wire atlas-quiet" />
         <path d="M330 504 C330 532 302 524 302 552 V572 C302 600 330 596 330 614" class="atlas-feature" />
@@ -165,11 +158,9 @@
         <g>
         <circle cx="704" cy="488" r="9" class="atlas-phase-dot" /><text x="704" y="492" class="atlas-phase-number" text-anchor="middle">2</text>
         <text x="728" y="488" class="atlas-kicker" text-anchor="start">REFINE FEATURES</text>
-        <text x="728" y="510" class="atlas-headline" text-anchor="start">Improve each token's</text>
-        <text x="728" y="536" class="atlas-headline" text-anchor="start">representation.</text>
-        <text x="728" y="562" class="atlas-note" text-anchor="start">Transform features within each token.</text>
-        <text x="728" y="582" class="atlas-note" text-anchor="start">Do not mix token positions.</text>
-        <foreignObject x="728" y="596" width="280" height="74"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(U=\operatorname{RMSNorm}(Y)\)<br>\(F=\bigl(\operatorname{SiLU}(UW_g)\odot UW_u\bigr)W_d\)<br>\(F\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
+        <text x="728" y="510" class="atlas-headline" text-anchor="start">Refine each token.</text>
+        <text x="728" y="536" class="atlas-note" text-anchor="start">One MLP is applied to every row.</text>
+        <foreignObject x="728" y="566" width="280" height="74"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(U=\operatorname{RMSNorm}(Y)\)<br>\(F=\bigl(\operatorname{SiLU}(UW_g)\odot UW_u\bigr)W_d\)<br>\(F\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
         </g>
         <g>
         <circle cx="100" cy="344" r="20" class="atlas-merge"/>
