@@ -89,6 +89,9 @@
         </g>
         <foreignObject x="264" y="316" width="220" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(O_{\mathrm{attn}}=\operatorname{Concat}(O_1,\ldots,O_H)W_O\)</div></foreignObject>
         <g>
+        <path d="M704 176 V784" class="atlas-phase-rail" />
+        <circle cx="704" cy="176" r="9" class="atlas-phase-dot" /><text x="704" y="180" class="atlas-phase-number" text-anchor="middle">1</text>
+        <text x="728" y="176" class="atlas-kicker" text-anchor="start">SHARE CONTEXT</text>
         <text x="728" y="198" class="atlas-headline" text-anchor="start">Give each token</text>
         <text x="728" y="224" class="atlas-headline" text-anchor="start">context.</text>
         <text x="728" y="250" class="atlas-note" text-anchor="start">Read itself and earlier tokens.</text>
@@ -157,6 +160,8 @@
         </g>
         <foreignObject x="274" y="646" width="230" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(F=\operatorname{SwiGLU}(U)\)</div></foreignObject>
         <g>
+        <circle cx="704" cy="488" r="9" class="atlas-phase-dot" /><text x="704" y="492" class="atlas-phase-number" text-anchor="middle">2</text>
+        <text x="728" y="488" class="atlas-kicker" text-anchor="start">REFINE FEATURES</text>
         <text x="728" y="510" class="atlas-headline" text-anchor="start">Improve each token's</text>
         <text x="728" y="536" class="atlas-headline" text-anchor="start">representation.</text>
         <text x="728" y="562" class="atlas-note" text-anchor="start">Transform features within each token.</text>
@@ -175,14 +180,14 @@
         <foreignObject x="140" y="676" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math">\(X^{(\ell+1)}=Y+F\)</div></foreignObject>
         </g>
         <text x="140" y="744" class="atlas-op" text-anchor="start">Same shape. Richer state.</text>
-        <text x="728" y="704" class="atlas-kicker" text-anchor="start">RETURN</text>
+        <circle cx="704" cy="688" r="9" class="atlas-phase-dot" /><text x="704" y="692" class="atlas-phase-number" text-anchor="middle">3</text>
+        <text x="728" y="688" class="atlas-kicker" text-anchor="start">RETURN STATE + MEMORY</text>
         <foreignObject x="728" y="710" width="280" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-small">\(X^{(\ell+1)}\in\mathbb{R}^{B\times T\times D}\)</div></foreignObject>
         <path d="M728 744 H1008" class="atlas-rule" />
         <text x="728" y="758" class="atlas-note" text-anchor="start">cache for the next token</text>
         <foreignObject x="728" y="762" width="280" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="atlas-math atlas-math-meta">\(\operatorname{cache}=(K_{\le t},V_{\le t})\)</div></foreignObject>
         </svg>
       </div>
-      <figcaption>Read the exact MiniMindBlock.forward contract from top to bottom: normalize and call self_attn, add its update, normalize and call self.mlp, add the second update, then return hidden_states with the attention cache.</figcaption>
     </figure>
 
     <section class="worked-example">

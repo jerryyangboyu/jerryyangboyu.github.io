@@ -732,6 +732,9 @@ progress { width: min(180px, 100%); height: 12px; accent-color: var(--teal); }
 .atlas-feature { fill: none; stroke: var(--muted); stroke-width: 1.2; opacity: 0.65; }
 .atlas-feature-dot { fill: var(--ink); }
 .atlas-bracket, .atlas-rule { fill: none; stroke: var(--rule); stroke-width: 1; }
+.atlas-phase-rail { fill: none; stroke: var(--rule); stroke-width: 1; stroke-dasharray: 2 6; }
+.block-atlas-svg .atlas-phase-dot { fill: var(--paper); stroke: var(--coral); stroke-width: 1.5; }
+.block-atlas-svg .atlas-phase-number { fill: var(--coral); font: 600 10px 'Geist Mono', monospace; }
 .atlas-merge { fill: var(--paper); stroke: var(--coral); stroke-width: 2; }
 .block-atlas-svg .atlas-plus { fill: var(--coral); font: 500 24px 'Geist', sans-serif; }
 .atlas-hit { fill: transparent; stroke: none; pointer-events: all; }
